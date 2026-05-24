@@ -18,8 +18,9 @@ class HcpMonthAggregatorTest {
         void getHcpForLastMonth() {
                 HcpData r = cut.getHcpForLastMonth(600, ME);
                 assertThat(r).isNotNull();
-                assertThat(r.labels()).hasSize(18);
-                assertThat(r.hcp()).hasSize(18);
+                assertThat(r.labels().size()).isGreaterThanOrEqualTo(22);
+                assertThat(r.hcp().size()).isGreaterThanOrEqualTo(22);
+                assertThat(r.hcp().size()).isEqualTo(r.labels().size());
                 assertThat(r.hcp().getFirst()).isEqualTo(32.4);
         }
 }

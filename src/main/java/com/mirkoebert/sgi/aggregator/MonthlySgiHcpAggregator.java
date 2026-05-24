@@ -47,8 +47,13 @@ public class MonthlySgiHcpAggregator {
                         labels.add(fmt.format(mi));
                 }
 
+                log.info("XXX " + hcps);
                 // front trim
                 while (true) {
+                        if (hcps.size() == 0) {
+                                log.info("No values");
+                                break;
+                        }
                         if (hcps.get(0) != null) {
                                 break;
                         }
