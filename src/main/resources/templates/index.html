@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Giotg: Get it on the Green</title>
+    <meta charset="UTF-8">
+    <meta content="Golf, Handicap, Short Game" name="keywords">
+    <meta content="Mirko Ebert" name="author">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hero {
+            background-color: #f8f9fa;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body class="container mt-5">
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<h1 class="text-center mb-4">Giotg: Get it on the Green</h1>
+
+<section class="py-5">
+    <div class="container">
+        <h2>Improve your Golf game</h2>
+        <p>This app helps you to improve your Golf game, it helps to break 100, 90, 80. It focussed on Short Game</p>
+    </div>
+</section>
+
+
+<section class="hero bg-primary text-white">
+    <div class="container">
+        <h1>Short Game Index</h1>
+        <p>Fastest way to lower your scores for high handicapers.</p>
+        <a class="btn btn-light btn-lg" href="/short-game-index">Start now</a>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container">
+        <h2>Some Content</h2>
+        <p>This is placeholder content between the two hero sections.</p>
+    </div>
+</section>
+
+<!-- Second Hero Section -->
+<section class="hero bg-success text-white">
+    <div class="container">
+        <h1>Putting Index</h1>
+        <p>Coming soon.</p>
+        <a class="btn btn-light btn-lg" href="#">Get Started</a>
+    </div>
+</section>
+
+<script crossorigin="anonymous"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

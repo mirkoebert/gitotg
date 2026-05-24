@@ -1,0 +1,41 @@
+server:
+  port: 80
+spring:
+  application:
+    name: giotg
+  datasource:
+    url: jdbc:h2:file:./db/giotgdb
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${CLIENT_ID}
+            client-secret: ${CLIENT_SECRET}}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"  # Default, customizable
+            scope: profile, email  # Request basic user info
+
+logging:
+  level:
+    com:
+      mirkoebert: DEBUG
+  file:
+    name: logs/${spring.application.name}.log
+  logback:
+    rollingpolicy:
+      # Daily rolling + keep 30 days
+      file-name-pattern: logs/${spring.application.name}-%d{yyyy-MM-dd}.%i.log
+      max-file-size: 10MB
+      total-size-cap: 1GB
+      max-history: 30
+      clean-history-on-start: true
+
+features:
+  load-dummy-data: false

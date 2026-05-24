@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Gitotg: About</title>
+    <meta charset="UTF-8">
+    <meta content="Mirko Ebert" name="author">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<h1 class="text-center mb-4">About Giotg</h1>
+
+<ul class="list-group">
+    <li class="list-group-item">Giotg: Get It On The Green. It's not an Italien word, yet (2025). I checked it.</li>
+    <li class="list-group-item">Helps to improve your Golf game. It tracks your handicaps. Focus on Short Game.</li>
+    <li class="list-group-item">Author: Mirko Ebert</li>
+    <li class="list-group-item">Version: <span th:text="${version}"></span></li>
+</ul>
+
+<h2 class="text-center mb-4">Do you want more? Try this:</h2>
+<ul class="list-group">
+    <li class="list-group-item">Netflix: Full Swing</li>
+    <li class="list-group-item">Manga, Anime (Netflix): Rising Impact</li>
+    <li class="list-group-item">David Pelz: Short Game Bible</li>
+    <li class="list-group-item">Phil Mickelson: Secrets of the Short Game</li>
+    <li class="list-group-item">Ben Hogan: Five Lessons: The Modern Fundamentals of Golf</li>
+    <li class="list-group-item">Youtube: Shell's Wonderful World of Golf</li>
+</ul>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Short Game Index</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Short Game Index</h1>
+
+    <ul class="list-group">
+        <li class="list-group-item">Current SGI HCP: <span th:text="${lastResult}"></span></li>
+        <li class="list-group-item">Export: <a href="/api/sgi/export">CSV</a> </li>
+    </ul>
+    <div class="list-group">
+        <a class="list-group-item list-group-item-action" href="sgi/1">Test 1: 50-yard wedge</a>
+        <a class="list-group-item list-group-item-action" href="sgi/2">Test 2: 30-yard wedge</a>
+        <a class="list-group-item list-group-item-action" href="sgi/3">Test 3: 8-yard sand shot</a>
+        <a class="list-group-item list-group-item-action" href="sgi/4">Test 4: 15-yard sand shot</a>
+        <a class="list-group-item list-group-item-action" href="sgi/5">Test 5: 10-yard chipping from the light
+            fringe</a>
+        <a class="list-group-item list-group-item-action" href="sgi/6">Test 6: 20-yard chip from the light rough</a>
+        <a class="list-group-item list-group-item-action" href="sgi/7">Test 7: 15-yard short pitch</a>
+        <a class="list-group-item list-group-item-action" href="sgi/8">Test 8: 15-yard pitch over the bunker</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>SGI Result</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="container mt-5">
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<h1 class="text-center mb-4"><span th:text="${lastResult.testType}"></span> <span th:text="${lastResult.testId}"></span>
+    Result</h1>
+<ul class="list-group">
+    <li class="list-group-item">Points:     <span th:text="${lastResult.points}"></span></li>
+    <li class="list-group-item">Date:       <span th:text="${lastResult.date}"></span></li>
+    <li class="list-group-item">HCP:        <span th:text="${lastResult.hcp}"></span></li>
+    <li class="list-group-item">Trend:      <span th:text="${trend}"></span></li>
+</ul>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <canvas height="200" id="lineChart" width="450"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fetch data from REST API and render chart
+    fetch('[[@{/api/sgi/chart-data/{id}(id=${lastResult.testId})}]]')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'HCP',
+                        data: data.hcp,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.5,
+                        fill: false,
+                        connectNulls: true,
+                        spanGaps: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'HCP Monthly' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

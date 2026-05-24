@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Gitotg: Handicap</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hero {
+            background-color: #f8f9fa;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        .hero p {
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="container mt-5">
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<h1 class="text-center mb-4">Handicap</h1>
+<ul class="list-group">
+    <li class="list-group-item">HCP: <span th:text="${lastResult.hcp}"></span></li>
+    <li class="list-group-item">Date: <span th:text="${lastResult.date}"></span></li>
+    <li class="list-group-item">Trend: <span th:text="${lastResult.trend}"></span></li>
+    <li class="list-group-item">Export: <a href="/api/handicap/export">CSV</a> </li>
+</ul>
+
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <canvas height="200" id="lineChart" width="500"></canvas>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fetch data from REST API and render chart
+    fetch('[[@{/api/handicap/chart-data}]]')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        label: 'HCP',
+                        data: data.hcp,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.5,
+                        fill: false,
+                        connectNulls: true,
+                        spanGaps: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { position: 'top' },
+                        title: { display: true, text: 'Handicap Monthly' }
+                    },
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching data:', error));
+</script>
+<!-- jQuery (required for bootstrap-datepicker) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap Datepicker JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+<!-- Initialize Datepicker -->
+<script>
+    $(document).ready(function() {
+        $('#selectedDate').datepicker({
+            format: 'yyyy-mm-dd',
+            autoclose: true,
+            todayHighlight: true
+        });
+    });
+</script>
+
+<div class="container my-5">
+    <h2>Add Handicap</h2>
+    <form method="post" th:action="@{/handicap/submit}" th:object="${hcpScore}">
+        <div class="mb-3">
+            <div class="col-auto">
+                <label class="col-form-label" for="hcp">Handicap:</label>
+            </div>
+            <div class="col-auto">
+                <input class="form-control" id="hcp" th:field="*{hcp}" type="number"/>
+            </div>
+            <div class="col-auto">
+                <label class="form-label" for="selectedDate">Choose Date</label>
+                <input autocomplete="off" class="form-control" id="selectedDate" name="selectedDate" placeholder="YYYY-MM-DD"
+                       th:field="*{selectedDate}" type="text">
+            </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+</div>
+
+</body>
+</html>

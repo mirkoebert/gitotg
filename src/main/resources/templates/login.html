@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Login</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<h1 class="text-center mb-4">Login</h1>
+
+<section class="mt-5">
+    <div class="container">
+        <h2>Warning - This is an experimetal app</h2>
+        <p>This is an experimetal app and under heavy development. Don't expect anything.</p>
+        <p>This app is for me, but you can use it for free. I try my best to make save and secure.
+            But expect nothing. The app only store data you give, no hidden tracking or whatever bs.</p>
+        <p>All data is bound to your login.</p>
+    </div>
+</section>
+
+<div class="text-center">
+    <a class="btn btn-primary" th:href="@{/oauth2/authorization/google}">Login with Google</a>
+</div>
+</body>
+</html>

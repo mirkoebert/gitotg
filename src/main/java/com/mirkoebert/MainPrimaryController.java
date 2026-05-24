@@ -1,0 +1,56 @@
+package com.mirkoebert;
+
+import com.mirkoebert.advisor.AdvisorService;
+import com.mirkoebert.handicap.HcpService;
+import com.mirkoebert.sgi.SgiHcpAggergatedService;
+import com.mirkoebert.timeline.TimelineService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+
+
+@SuppressWarnings("SameReturnValue")
+@Controller
+@RequiredArgsConstructor
+@Slf4j
+public class MainPrimaryController {
+
+        private final TimelineService timeService;
+        private final HcpService hcpService;
+        private final SgiHcpAggergatedService sgiHcpAggergatedService;
+        private final AdvisorService advisorService;
+
+        @GetMapping("/user-page")
+        public String getUser(Model model, @AuthenticationPrincipal OAuth2User principal) {
+                final String u = (String) principal.getAttributes().get("sub");
+                log.info("user page {}", u);
+                model.addAttribute("name", principal.getAttributes().get("name"));
+                model.addAttribute("email", principal.getAttributes().get("email"));
+                model.addAttribute("lastHCP", hcpService.findLatestByUserId(u).getHcp());
+                model.addAttribute("lastSGHCP", sgiHcpAggergatedService.getLatestSgiHcpAggregated(u));
+                model.addAttribute("advice", advisorService.getAdvise(u));
+                String fullUrl = (String) principal.getAttributes().get("picture");
+                String pureUrl = fullUrl.substring(0, fullUrl.lastIndexOf("="));
+                model.addAttribute("picture", pureUrl);
+                return "user";
+        }
+
+        @GetMapping("/timeline")
+        public String getTimeline(Model m, @AuthenticationPrincipal OAuth2User principal) {
+                log.info("timeline page {}", principal.getAttributes());
+                m.addAttribute("timeline", timeService.getLatestResults((String) principal.getAttributes().get("sub")));
+                return "timeline";
+        }
+
+        @GetMapping("/about")
+        public String getAbout(final Model m, @AuthenticationPrincipal final OAuth2User principal) {
+                log.info("about page");
+                m.addAttribute("version", this.getClass().getPackage().getImplementationVersion());
+                return "about";
+        }
+
+}

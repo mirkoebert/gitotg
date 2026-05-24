@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- Simple Bootstrap Navbar -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary" th:fragment="navbar">
+    <div class="container-fluid">
+        <!-- Brand/Logo -->
+        <a class="navbar-brand" href="/">Gitotg</a>
+
+        <!-- Toggler for mobile view -->
+        <button aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+                data-bs-target="#navbarNav" data-bs-toggle="collapse" type="button">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Collapsible content -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link" href="/timeline">Timeline</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/user-page">User</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/handicap/input">Handicap</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Goal
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/goal/break100">Break 100</a></li>
+                        <li><a class="dropdown-item" href="/goal/break90">Break 90</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/short-game-index">Short Game Index</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/login">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">About</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+</body>
+</html>

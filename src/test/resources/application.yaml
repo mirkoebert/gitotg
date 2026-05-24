@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: giotg
+  datasource:
+    url: jdbc:h2:mem:giotgdb
+    username: sa
+    password: password
+    driverClassName: org.h2.Driver
+  jpa:
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"  # Default, customizable
+            scope: profile, email  # Request basic user info
+
+logging:
+  level:
+    com:
+      mirkoebert: DEBUG
+
+features:
+  load-dummy-data: true
