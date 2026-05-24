@@ -43,8 +43,8 @@ class MonthlySgiHcpAggregatorTest {
 
                 final HcpData r = cut.getHcpForLastMonth(6, "userId", 1);
                 assertThat(r).isNotNull();
-                assertThat(r.labels().get(0)).hasToString(ld1.format(fmt));
-                assertThat(r.hcp().get(0)).isEqualTo(1.5);
+                assertThat(r.labels().getFirst()).hasToString(ld1.format(fmt));
+                assertThat(r.hcp().getFirst()).isEqualTo(1.5);
         }
 
         // TODO test empty list

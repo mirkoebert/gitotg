@@ -47,18 +47,17 @@ public class MonthlySgiHcpAggregator {
                         labels.add(fmt.format(mi));
                 }
 
-                log.info("XXX " + hcps);
                 // front trim
                 while (true) {
-                        if (hcps.size() == 0) {
+                        if (hcps.isEmpty()) {
                                 log.info("No values");
                                 break;
                         }
-                        if (hcps.get(0) != null) {
+                        if (hcps.getFirst() != null) {
                                 break;
                         }
-                        hcps.remove(0);
-                        labels.remove(0);
+                        hcps.removeFirst();
+                        labels.removeFirst();
                 }
 
                 return new HcpData(labels, hcps);
