@@ -10,10 +10,10 @@ import java.time.LocalDate;
 @Builder
 public class MeasurmentDTO {
 
-        private String userId;
-        private String value;
-        private LocalDate date;
-        private GolfType type;
-        private String comment;
+        String userId;
+        String value;
+        LocalDate date;
+        GolfType type;
+        String comment;
 
 }
