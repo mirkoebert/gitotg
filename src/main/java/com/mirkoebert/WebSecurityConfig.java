@@ -9,7 +9,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class WebSecurityConfig {
 
         @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) {
                 http
                         .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/", "/login**", "/error", "/about").permitAll()  // Allow public access to home and login
