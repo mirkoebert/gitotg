@@ -35,7 +35,7 @@ public class CsvExportPrimaryRestController {
                 final String userId = (String) principal.getAttributes().get("sub");
                 String csv = hcpCsvExportService.exportAllSgiDataToCsv(userId);
                 response.setContentType("text/csv");
-                response.addHeader("Content-Disposition", "attachment; filename=\"handicap.csv\"");
+                response.addHeader("Content-Disposition", "attachment; filename=\"handicap-short-game.csv\"");
                 response.getOutputStream().print(csv);
         }
 

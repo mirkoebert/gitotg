@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
-
 @Entity
 @Data
 @Builder
@@ -28,6 +27,7 @@ public class SingleTestResultEntity {
         private Integer points;
         private TestSuite testType;
         private Integer testId;
+        @CsvIgnore
         private Integer hcp;
         @CsvIgnore
         private String userId;

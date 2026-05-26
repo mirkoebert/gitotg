@@ -28,12 +28,27 @@ public class HcpCsvExportService {
                 return transform2Csv(all);
         }
 
-        String transform2Csv(final List all){
+        String transform2Csv(final List<HcpScoreEntity> all){
                 val w = new StringWriter();
                 try (CSVWriter writer = new CSVWriter(w)){
                         StatefulBeanToCsv<HcpScoreEntity> sbc = new StatefulBeanToCsvBuilder<HcpScoreEntity>(writer).build();
                         sbc.write(all);
                 } catch (Exception e) {
+                        log.error("Can't generate CSV for HcpScoreEntity", e);
+                        throw new RuntimeException(e);
+                }
+                val r = w.toString();
+                log.debug("CSV \n {}", r);
+                return r;
+        }
+
+        String transform2CsvX(final List<SingleTestResultEntity> all){
+                val w = new StringWriter();
+                try (CSVWriter writer = new CSVWriter(w)){
+                        StatefulBeanToCsv<SingleTestResultEntity> sbc = new StatefulBeanToCsvBuilder<SingleTestResultEntity>(writer).build();
+                        sbc.write(all);
+                } catch (Exception e) {
+                        log.error("Can't generate CSV for SingleTestResultEntity", e);
                         throw new RuntimeException(e);
                 }
                 val r = w.toString();
@@ -43,6 +58,6 @@ public class HcpCsvExportService {
 
         String exportAllSgiDataToCsv(final String userId){
                 final List<SingleTestResultEntity> all = sgirepo.findAllByUserId(userId);
-                return transform2Csv(all);
+                return transform2CsvX(all);
         }
 }
