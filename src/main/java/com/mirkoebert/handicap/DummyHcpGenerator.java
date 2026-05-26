@@ -3,7 +3,6 @@ package com.mirkoebert.handicap;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -43,6 +42,7 @@ class DummyHcpGenerator {
                         .date(ld1)
                         .userId(ME)
                         .build();
+                repo.save(d1);
                 ld1 = LocalDate.of(2025, 6, 9);
                 d1 = HcpScoreEntity
                         .builder()

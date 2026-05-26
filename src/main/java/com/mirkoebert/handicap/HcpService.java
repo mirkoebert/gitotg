@@ -51,9 +51,9 @@ public class HcpService {
                         .sorted(Comparator.comparing(HcpScoreEntity::getDate, Comparator.reverseOrder()))
                         .peek(x -> log.debug("X {}", x))
                         .collect(Collectors.toList());
-                final HcpScoreEntity latest = sorted.get(0);
+                final HcpScoreEntity latest = sorted.getFirst();
                 log.debug("Latest HCP: {}", latest);
-                sorted.remove(0);
+                sorted.removeFirst();
                 final DoubleSummaryStatistics stats = sorted
                         .stream()
                         .limit(3)

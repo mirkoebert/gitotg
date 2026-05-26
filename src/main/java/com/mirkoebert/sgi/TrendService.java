@@ -34,9 +34,9 @@ class TrendService {
                         .sorted(Comparator.comparing(SingleTestResultEntity::getDate, Comparator.reverseOrder()))
                         .peek(x -> log.debug("X {}", x))
                         .collect(Collectors.toList());
-                final SingleTestResultEntity latest = sorted.get(0);
+                final SingleTestResultEntity latest = sorted.getFirst();
                 log.debug("Latest HCP: {}", latest);
-                sorted.remove(0);
+                sorted.removeFirst();
                 final DoubleSummaryStatistics stats = sorted
                         .stream()
                         .limit(3)

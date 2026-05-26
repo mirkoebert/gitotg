@@ -25,10 +25,10 @@ public class HcpCsvExportService {
 
         String exportAllHcpDataToCsv(final String userId) {
                 final List<HcpScoreEntity> all = repo.findByUserId(userId);
-                return transform(all);
+                return transform2Csv(all);
         }
 
-        String transform(final List all){
+        String transform2Csv(final List all){
                 val w = new StringWriter();
                 try (CSVWriter writer = new CSVWriter(w)){
                         StatefulBeanToCsv<HcpScoreEntity> sbc = new StatefulBeanToCsvBuilder<HcpScoreEntity>(writer).build();
@@ -43,6 +43,6 @@ public class HcpCsvExportService {
 
         String exportAllSgiDataToCsv(final String userId){
                 final List<SingleTestResultEntity> all = sgirepo.findAllByUserId(userId);
-                return transform(all);
+                return transform2Csv(all);
         }
 }
