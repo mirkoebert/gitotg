@@ -1,7 +1,5 @@
-package com.mirkoebert.sgi;
+package com.mirkoebert.sgi.chart;
 
-import com.mirkoebert.sgi.aggregator.HcpData;
-import com.mirkoebert.sgi.aggregator.MonthlySgiHcpAggregator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +19,7 @@ public class SgiPrimaryRestController {
         @GetMapping("/api/sgi/chart-data/{testId}")
         public ResponseEntity<HcpData> getLineChartData(@AuthenticationPrincipal OAuth2User principal, @PathVariable String testId) {
                 log.info("getLineChartData testId {}", testId);
-                String userId = (String) principal.getAttributes().get("sub");
+                final String userId = (String) principal.getAttributes().get("sub");
                 log.info("for user {}", userId);
                 return ResponseEntity.ok(monthlySgiHcpAggregator.getHcpForLastMonth(12, userId, Integer.parseInt(testId)));
         }

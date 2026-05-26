@@ -1,6 +1,6 @@
 package com.mirkoebert.handicap;
 
-import com.mirkoebert.sgi.aggregator.HcpData;
+import com.mirkoebert.sgi.chart.HcpData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

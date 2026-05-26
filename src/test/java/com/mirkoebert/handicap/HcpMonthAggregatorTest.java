@@ -1,6 +1,6 @@
 package com.mirkoebert.handicap;
 
-import com.mirkoebert.sgi.aggregator.HcpData;
+import com.mirkoebert.sgi.chart.HcpData;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

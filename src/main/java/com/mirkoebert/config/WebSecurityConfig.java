@@ -1,4 +1,4 @@
-package com.mirkoebert;
+package com.mirkoebert.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

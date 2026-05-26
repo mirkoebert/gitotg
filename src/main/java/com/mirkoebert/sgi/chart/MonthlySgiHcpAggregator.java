@@ -1,4 +1,4 @@
-package com.mirkoebert.sgi.aggregator;
+package com.mirkoebert.sgi.chart;
 
 import com.mirkoebert.sgi.SingleTestResultEntity;
 import com.mirkoebert.sgi.SingleTestResultRepository;
