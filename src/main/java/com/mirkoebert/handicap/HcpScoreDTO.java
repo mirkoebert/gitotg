@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,9 +15,7 @@ import lombok.NoArgsConstructor;
 public class HcpScoreDTO {
 
         @NotNull
-        @NotBlank
-        @NotEmpty
-        private String selectedDate;
+        private LocalDate selectedDate;
 
         @Min(-20)
         @Max(56)

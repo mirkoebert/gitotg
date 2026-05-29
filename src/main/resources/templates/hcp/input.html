@@ -77,40 +77,22 @@
         })
         .catch(error => console.error('Error fetching data:', error));
 </script>
-<!-- jQuery (required for bootstrap-datepicker) -->
-<script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Bootstrap Datepicker JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@latest/dist/js/bootstrap-datepicker.min.js"></script>
-<!-- Initialize Datepicker -->
-<script>
-    $(document).ready(function() {
-        $('#selectedDate').datepicker({
-            format: 'yyyy-mm-dd',
-            autoclose: true,
-            todayHighlight: true
-        });
-    });
-</script>
-
 <div class="container my-5">
     <h2>Add Handicap</h2>
     <form method="post" th:action="@{/handicap/submit}" th:object="${hcpScore}">
-        <div class="mb-3">
-            <div class="col-auto">
-                <label class="col-form-label" for="hcp">Handicap:</label>
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label" for="hcp">Handicap</label>
+                <input class="form-control" id="hcp" th:field="*{hcp}" type="number" step="0.1" placeholder="e.g. 18.4" required>
             </div>
-            <div class="col-auto">
-                <input class="form-control" id="hcp" th:field="*{hcp}" type="number" step="0.1"/>
+            <div class="col-md-4">
+                <label class="form-label" for="selectedDate">Date</label>
+                <input class="form-control" id="selectedDate" th:field="*{selectedDate}" type="date" required>
             </div>
-            <div class="col-auto">
-                <label class="form-label" for="selectedDate">Choose Date</label>
-                <input autocomplete="off" class="form-control" id="selectedDate" name="selectedDate" placeholder="YYYY-MM-DD"
-                       th:field="*{selectedDate}" type="text">
+            <div class="col-md-4">
+                <button class="btn btn-primary" type="submit">Add Score</button>
             </div>
         </div>
-        <button class="btn btn-primary" type="submit">Submit</button>
     </form>
 </div>
 

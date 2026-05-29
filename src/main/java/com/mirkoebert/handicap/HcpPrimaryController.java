@@ -11,9 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
-import java.time.LocalDate;
-
-
 @SuppressWarnings("SameReturnValue")
 @Controller
 @RequiredArgsConstructor
@@ -45,7 +42,7 @@ public class HcpPrimaryController {
                         val he = HcpScoreEntity
                                 .builder()
                                 .hcp(score.getHcp())
-                                .date(LocalDate.parse(score.getSelectedDate()))
+                                .date(score.getSelectedDate())
                                 .userId((String) principal.getAttributes().get("sub"))
                                 .build();
                         repo.save(he);
