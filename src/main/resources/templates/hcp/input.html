@@ -20,7 +20,6 @@
             margin-bottom: 2rem;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
 </head>
 <body class="container mt-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
@@ -42,6 +41,27 @@
     </div>
 </div>
 
+<div class="container my-5">
+    <h2>Add Handicap</h2>
+    <form method="post" th:action="@{/handicap/submit}" th:object="${hcpScore}">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label" for="hcp">Handicap</label>
+                <input class="form-control" id="hcp" th:field="*{hcp}" type="number" step="0.1" placeholder="e.g. 18.4" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label" for="selectedDate">Date</label>
+                <input class="form-control" id="selectedDate" th:field="*{selectedDate}" type="date" required>
+            </div>
+            <div class="col-md-4">
+                <button class="btn btn-primary" type="submit">Add Score</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Chart.js for handicap trend -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js" defer></script>
 <script>
     // Fetch data from REST API and render chart
     fetch('[[@{/api/handicap/chart-data}]]')
@@ -77,24 +97,9 @@
         })
         .catch(error => console.error('Error fetching data:', error));
 </script>
-<div class="container my-5">
-    <h2>Add Handicap</h2>
-    <form method="post" th:action="@{/handicap/submit}" th:object="${hcpScore}">
-        <div class="row g-3 align-items-end">
-            <div class="col-md-4">
-                <label class="form-label" for="hcp">Handicap</label>
-                <input class="form-control" id="hcp" th:field="*{hcp}" type="number" step="0.1" placeholder="e.g. 18.4" required>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label" for="selectedDate">Date</label>
-                <input class="form-control" id="selectedDate" th:field="*{selectedDate}" type="date" required>
-            </div>
-            <div class="col-md-4">
-                <button class="btn btn-primary" type="submit">Add Score</button>
-            </div>
-        </div>
-    </form>
-</div>
+
+<!-- Common scripts (Bootstrap) -->
+<div th:insert="~{fragments/scripts :: scripts}"></div>
 
 </body>
 </html>
