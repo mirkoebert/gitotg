@@ -31,7 +31,7 @@ public class Break100Controller {
                 MyForm form = new MyForm();
                 // form.setSelectedOptions(Arrays.asList("option2")); // pre-select some
 
-                final List<GolfCheckListItem> allOptions = goalRepository.findByGoal(GoalEnum.BREAT100.name());
+                final List<GolfCheckListItem> allOptions = goalRepository.findByGoal(GoalEnum.BREAK100.name());
 
 
                 model.addAttribute("myForm", form);

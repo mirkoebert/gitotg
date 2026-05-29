@@ -16,8 +16,8 @@ public class ChecklistService {
 
         List<GolfCheckListItem> getForGoal(final GoalEnum gola) {
                 return switch (gola) {
-                        case BREAT100 -> golfCheckListItemRepository.findByGoal(GoalEnum.BREAT100.name());
-                        case BREAT90 -> golfCheckListItemRepository.findByGoal(GoalEnum.BREAT90.name());
+                        case BREAK100 -> golfCheckListItemRepository.findByGoal(GoalEnum.BREAK100.name());
+                        case BREAK90 -> golfCheckListItemRepository.findByGoal(GoalEnum.BREAK90.name());
                 };
         }
 
