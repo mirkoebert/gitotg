@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
 </head>
@@ -44,10 +44,26 @@
                     <a class="nav-link" href="/short-game-index">Short Game Index</a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link" href="/about">About</a>
+                </li>
+            </ul>
+
+            <!-- Auth actions on the right -->
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item" sec:authorize="isAnonymous()">
                     <a class="nav-link" href="/login">Login</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/about">About</a>
+
+                <li sec:authorize="isAuthenticated()" class="nav-item d-flex align-items-center">
+                    <span class="navbar-text me-2 small text-muted"
+                          sec:authentication="principal.attributes['name']">
+                    </span>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit"
+                                class="nav-link btn btn-link p-0 text-decoration-none">
+                            Logout
+                        </button>
+                    </form>
                 </li>
             </ul>
         </div>
