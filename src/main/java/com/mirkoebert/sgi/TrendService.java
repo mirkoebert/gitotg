@@ -20,7 +20,7 @@ class TrendService {
         private final SingleTestResultRepository resultRepository;
 
         public String getTrend(final Integer testId, final String userId) {
-                log.debug("get Trend for user {} abd testId {}", userId, testId);
+                log.debug("get Trend for user {} and testId {}", userId, testId);
                 List<SingleTestResultEntity> a = resultRepository.findByUserIdAndTestId(userId, testId);
                 if (a.size() > 3) {
                         return getTrendFromList(a);
