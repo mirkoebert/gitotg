@@ -46,16 +46,24 @@ class HcpMonthAggregator {
                         labels.add(fmt.format(mi));
                 }
 
-                // front trim
-                while (true) {
-                        if (hcps.get(0) != null) {
-                                break;
+                if (isNotEmpty(hcps)) {
+                        // front trim
+                        while (true) {
+                                if (hcps.get(0) != null) {
+                                        break;
+                                }
+                                hcps.remove(0);
+                                labels.remove(0);
                         }
-                        hcps.remove(0);
-                        labels.remove(0);
                 }
 
                 return new HcpData(labels, hcps);
+        }
+
+        private boolean isNotEmpty(List<Double> hcps) {
+                boolean result = false;
+                result = hcps.stream().anyMatch(hcp -> hcp != null);
+                return result;
         }
 
 }
