@@ -1,6 +1,7 @@
 package com.mirkoebert.handicap;
 
 import com.mirkoebert.sgi.chart.HcpData;
+import com.mirkoebert.user.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class HcpPrimaryRestController {
 
         private final HcpMonthAggregator monthlyHcpAggregator;
+        private final CurrentUserService currentUserService;
 
         @GetMapping("/api/handicap/chart-data")
         public ResponseEntity<HcpData> getLineChartData(@AuthenticationPrincipal final OAuth2User principal) {
                 log.info("hcp getLineChartData");
-                String userId = (String) principal.getAttributes().get("sub");
+                String userId = currentUserService.getUserId(principal);
                 log.info("for user {}", userId);
                 return ResponseEntity.ok(monthlyHcpAggregator.getHcpForLastMonth(36, userId));
         }

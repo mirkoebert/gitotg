@@ -1,5 +1,6 @@
 package com.mirkoebert.export;
 
+import com.mirkoebert.user.CurrentUserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -15,12 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class CsvExportPrimaryRestController {
 
         private final HcpCsvExportService hcpCsvExportService;
+        private final CurrentUserService currentUserService;
 
         @SneakyThrows
         @GetMapping("/api/handicap/export")
         public void getHcpCsv(@AuthenticationPrincipal final OAuth2User principal, final HttpServletResponse response){
                 log.info("hcp export as csv");
-                final String userId = (String) principal.getAttributes().get("sub");
+                final String userId = currentUserService.getUserId(principal);
                 String csv = hcpCsvExportService.exportAllHcpDataToCsv(userId);
                 response.setContentType("text/csv");
                 response.addHeader("Content-Disposition", "attachment; filename=\"handicap.csv\"");
@@ -32,7 +34,7 @@ public class CsvExportPrimaryRestController {
         @GetMapping("/api/sgi/export")
         public void getSgiCsv(@AuthenticationPrincipal final OAuth2User principal, final HttpServletResponse response){
                 log.info("sgi export as csv");
-                final String userId = (String) principal.getAttributes().get("sub");
+                final String userId = currentUserService.getUserId(principal);
                 String csv = hcpCsvExportService.exportAllSgiDataToCsv(userId);
                 response.setContentType("text/csv");
                 response.addHeader("Content-Disposition", "attachment; filename=\"handicap-short-game.csv\"");

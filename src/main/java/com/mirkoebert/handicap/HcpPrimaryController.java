@@ -1,5 +1,6 @@
 package com.mirkoebert.handicap;
 
+import com.mirkoebert.user.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -19,6 +20,7 @@ public class HcpPrimaryController {
 
         private final HcpRepository repo;
         private final HcpService hcpService;
+        private final CurrentUserService currentUserService;
 
         @GetMapping({"/handicap/input"})
         public String getInputPage(
@@ -26,7 +28,7 @@ public class HcpPrimaryController {
                 @AuthenticationPrincipal final OAuth2User principal
         ) {
                 log.info("Get hcp page");
-                model.addAttribute("lastResult", hcpService.findLatestByUserId((String) principal.getAttributes().get("sub")));
+                model.addAttribute("lastResult", hcpService.findLatestByUserId(currentUserService.getUserId(principal)));
                 model.addAttribute("hcpScore", new HcpScoreDTO());
                 return "hcp/input";
         }
@@ -43,13 +45,13 @@ public class HcpPrimaryController {
                                 .builder()
                                 .hcp(score.getHcp())
                                 .date(score.getSelectedDate())
-                                .userId((String) principal.getAttributes().get("sub"))
+                                .userId(currentUserService.getUserId(principal))
                                 .build();
                         repo.save(he);
                 } catch (Exception e) {
                         log.warn("Can't process hcp {}", score, e);
                 }
-                model.addAttribute("lastResult", hcpService.findLatestByUserId((String) principal.getAttributes().get("sub")));
+                model.addAttribute("lastResult", hcpService.findLatestByUserId(currentUserService.getUserId(principal)));
                 model.addAttribute("hcpScore", new HcpScoreDTO());
                 return "hcp/input";
         }
