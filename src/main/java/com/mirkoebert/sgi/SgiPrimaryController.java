@@ -28,12 +28,12 @@ public class SgiPrimaryController {
         private final PointsToSgiHcpFunction pointsToSgiHcpFunction;
         private final SgiTestRepo sgiTestRepo;
         private final TrendService trendService;
-        private final SgiHcpAggergatedService sgiHcpAggergatedService;
+        private final SgiHcpAggregatedService sgiHcpAggregatedService;
 
         @GetMapping("/short-game-index")
         public String getShortGameIndex(Model m, @AuthenticationPrincipal OAuth2User principal) {
                 log.info("short-game-index  page {}", principal.getAttributes());
-                m.addAttribute("lastResult", sgiHcpAggergatedService.getLatestSgiHcpAggregated((String) principal.getAttributes().get("sub")));
+                m.addAttribute("lastResult", sgiHcpAggregatedService.getLatestSgiHcpAggregated((String) principal.getAttributes().get("sub")));
                 return "sgi/index";
         }
 

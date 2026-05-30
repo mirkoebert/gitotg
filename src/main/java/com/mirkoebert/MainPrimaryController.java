@@ -2,7 +2,7 @@ package com.mirkoebert;
 
 import com.mirkoebert.advisor.AdvisorService;
 import com.mirkoebert.handicap.HcpService;
-import com.mirkoebert.sgi.SgiHcpAggergatedService;
+import com.mirkoebert.sgi.SgiHcpAggregatedService;
 import com.mirkoebert.timeline.TimelineService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class MainPrimaryController {
 
         private final TimelineService timeService;
         private final HcpService hcpService;
-        private final SgiHcpAggergatedService sgiHcpAggergatedService;
+        private final SgiHcpAggregatedService sgiHcpAggregatedService;
         private final AdvisorService advisorService;
 
         @GetMapping("/user-page")
@@ -31,7 +31,7 @@ public class MainPrimaryController {
                 model.addAttribute("name", principal.getAttributes().get("name"));
                 model.addAttribute("email", principal.getAttributes().get("email"));
                 model.addAttribute("lastHCP", hcpService.findLatestByUserId(u).getHcp());
-                model.addAttribute("lastSGHCP", sgiHcpAggergatedService.getLatestSgiHcpAggregated(u));
+                model.addAttribute("lastSGHCP", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u));
                 model.addAttribute("advice", advisorService.getAdvise(u));
                 String fullUrl = (String) principal.getAttributes().get("picture");
                 String pureUrl = fullUrl.substring(0, fullUrl.lastIndexOf("="));
