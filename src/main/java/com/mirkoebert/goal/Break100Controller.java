@@ -2,6 +2,7 @@ package com.mirkoebert.goal;
 
 import com.mirkoebert.checklist.GolfCheckListItem;
 import com.mirkoebert.checklist.GolfCheckListItemRepository;
+import com.mirkoebert.user.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,11 +21,12 @@ import java.util.List;
 public class Break100Controller {
 
         private final GolfCheckListItemRepository goalRepository;
+        private final CurrentUserService currentUserService;
 
         @GetMapping("/goal/break100")
         public String getBreak100(@AuthenticationPrincipal final OAuth2User principal, Model model) {
                 log.info("page getBreak100");
-                String userId = (String) principal.getAttributes().get("sub");
+                String userId = currentUserService.getUserId(principal);
                 log.info("for user {}", userId);
 
 

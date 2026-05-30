@@ -2,6 +2,7 @@ package com.mirkoebert.sgi;
 
 import com.mirkoebert.TestSuite;
 import com.mirkoebert.sgi.calc.PointsToSgiHcpFunction;
+import com.mirkoebert.user.CurrentUserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -29,11 +30,12 @@ public class SgiPrimaryController {
         private final SgiTestRepo sgiTestRepo;
         private final TrendService trendService;
         private final SgiHcpAggregatedService sgiHcpAggregatedService;
+        private final CurrentUserService currentUserService;
 
         @GetMapping("/short-game-index")
         public String getShortGameIndex(Model m, @AuthenticationPrincipal OAuth2User principal) {
                 log.info("short-game-index  page {}", principal.getAttributes());
-                m.addAttribute("lastResult", sgiHcpAggregatedService.getLatestSgiHcpAggregated((String) principal.getAttributes().get("sub")));
+                m.addAttribute("lastResult", sgiHcpAggregatedService.getLatestSgiHcpAggregated(currentUserService.getUserId(principal)));
                 return "sgi/index";
         }
 
@@ -43,7 +45,7 @@ public class SgiPrimaryController {
                 m.addAttribute("sgitest", sgiTestRepo.getTestById(testId));
                 m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(testId).build());
                 m.addAttribute("testId", testId);
-                m.addAttribute("trend", trendService.getTrend(testId, (String) principal.getAttributes().get("sub")));
+                m.addAttribute("trend", trendService.getTrend(testId, currentUserService.getUserId(principal)));
                 return "sgi/input";
         }
 
@@ -57,13 +59,13 @@ public class SgiPrimaryController {
                         .date(LocalDate.now())
                         .points(score.getPoints())
                         .hcp(pointsToSgiHcpFunction.apply(score.getTestId(), score.getPoints()))
-                        .userId((String) principal.getAttributes().get("sub"))
+                        .userId(currentUserService.getUserId(principal))
                         .build();
                 repo.save(s);
                 m.addAttribute("sgitest", sgiTestRepo.getTestById(score.getTestId()));
                 m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(score.getTestId()).build());
                 m.addAttribute("testId", score.getTestId());
-                m.addAttribute("trend", trendService.getTrend(score.getTestId(), (String) principal.getAttributes().get("sub")));
+                m.addAttribute("trend", trendService.getTrend(score.getTestId(), currentUserService.getUserId(principal)));
                 return "/sgi/input";
         }
 
