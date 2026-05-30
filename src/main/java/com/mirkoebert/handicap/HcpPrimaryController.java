@@ -1,5 +1,6 @@
 package com.mirkoebert.handicap;
 
+import com.mirkoebert.user.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -19,14 +20,13 @@ public class HcpPrimaryController {
 
         private final HcpRepository repo;
         private final HcpService hcpService;
+        private final CurrentUserService currentUserService;
 
         @GetMapping({"/handicap/input"})
-        public String getInputPage(
-                final Model model,
-                @AuthenticationPrincipal final OAuth2User principal
-        ) {
+        public String getInputPage(final Model model){
                 log.info("Get hcp page");
-                model.addAttribute("lastResult", hcpService.findLatestByUserId((String) principal.getAttributes().get("sub")));
+                val u = currentUserService.getCurrentUser();
+                model.addAttribute("lastResult", hcpService.findLatestByUserId(u.id()));
                 model.addAttribute("hcpScore", new HcpScoreDTO());
                 return "hcp/input";
         }

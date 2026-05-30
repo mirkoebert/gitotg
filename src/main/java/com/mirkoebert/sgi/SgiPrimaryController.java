@@ -34,21 +34,21 @@ public class SgiPrimaryController {
         private final CurrentUserService currentUserService;
 
         @GetMapping("/short-game-index")
-        public String getShortGameIndex(Model m, @AuthenticationPrincipal OAuth2User principal) {
-                log.info("short-game-index  page {}", principal.getAttributes());
-                m.addAttribute("lastResult", sgiHcpAggregatedService.getLatestSgiHcpAggregated((String) principal.getAttributes().get("sub")));
+        public String getShortGameIndex(Model m) {
+                log.info("short-game-index  page");
+                val u = currentUserService.getCurrentUser();
+                m.addAttribute("lastResult", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u.id()));
                 return "sgi/index";
         }
 
         @GetMapping("/sgi/{testId}")
-        public String getShortGameInput(Model m, @PathVariable @Min(1) @Max(8) int testId, @AuthenticationPrincipal OAuth2User principal) {
+        public String getShortGameInput(Model m, @PathVariable @Min(1) @Max(8) int testId) {
                 log.info("short-game-input {}", testId);
                 val u = currentUserService.getCurrentUser();
                 m.addAttribute("sgitest", sgiTestRepo.getTestById(testId));
                 m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(testId).build());
                 m.addAttribute("testId", testId);
                 m.addAttribute("trend", trendService.getTrend(testId, u.id()));
-//                m.addAttribute("trend", trendService.getTrend(testId, (String) principal.getAttributes().get("sub")));
                 return "sgi/input";
         }
 
