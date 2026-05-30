@@ -30,7 +30,4 @@ public record CurrentUser(
         return new CurrentUser(id, name, email, pictureUrl);
     }
 
-    public boolean hasPicture() {
-        return pictureUrl != null && !pictureUrl.isBlank();
-    }
 }
