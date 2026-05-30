@@ -24,9 +24,9 @@ public class Break100Controller {
         private final CurrentUserService currentUserService;
 
         @GetMapping("/goal/break100")
-        public String getBreak100(@AuthenticationPrincipal final OAuth2User principal, Model model) {
+        public String getBreak100(@AuthenticationPrincipal final OAuth2User oauth2User, Model model) {
                 log.info("page getBreak100");
-                String userId = currentUserService.getUserId(principal);
+                String userId = currentUserService.getUserId(oauth2User);
                 log.info("for user {}", userId);
 
 

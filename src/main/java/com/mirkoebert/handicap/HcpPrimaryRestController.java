@@ -19,9 +19,9 @@ public class HcpPrimaryRestController {
         private final CurrentUserService currentUserService;
 
         @GetMapping("/api/handicap/chart-data")
-        public ResponseEntity<HcpData> getLineChartData(@AuthenticationPrincipal final OAuth2User principal) {
+        public ResponseEntity<HcpData> getLineChartData(@AuthenticationPrincipal final OAuth2User oauth2User) {
                 log.info("hcp getLineChartData");
-                String userId = currentUserService.getUserId(principal);
+                String userId = currentUserService.getUserId(oauth2User);
                 log.info("for user {}", userId);
                 return ResponseEntity.ok(monthlyHcpAggregator.getHcpForLastMonth(36, userId));
         }

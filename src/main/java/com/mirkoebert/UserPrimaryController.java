@@ -13,8 +13,8 @@ import java.util.Map;
 public class UserPrimaryController {
 
         @GetMapping({"/user", "/home"})
-        public Map<String, Object> userOauth2CallBack(@AuthenticationPrincipal final OAuth2User principal) {
-                log.debug("user {}", principal.getAttributes());
-                return principal.getAttributes();  // Returns Google user info like name, email, picture
+        public Map<String, Object> userOauth2CallBack(@AuthenticationPrincipal final OAuth2User oauth2User) {
+                log.debug("user {}", oauth2User.getAttributes());
+                return oauth2User.getAttributes();  // Returns Google user info like name, email, picture
         }
 }

@@ -20,9 +20,9 @@ public class CsvExportPrimaryRestController {
 
         @SneakyThrows
         @GetMapping("/api/handicap/export")
-        public void getHcpCsv(@AuthenticationPrincipal final OAuth2User principal, final HttpServletResponse response){
+        public void getHcpCsv(@AuthenticationPrincipal final OAuth2User oauth2User, final HttpServletResponse response){
                 log.info("hcp export as csv");
-                final String userId = currentUserService.getUserId(principal);
+                final String userId = currentUserService.getUserId(oauth2User);
                 String csv = hcpCsvExportService.exportAllHcpDataToCsv(userId);
                 response.setContentType("text/csv");
                 response.addHeader("Content-Disposition", "attachment; filename=\"handicap.csv\"");
@@ -32,9 +32,9 @@ public class CsvExportPrimaryRestController {
 
         @SneakyThrows
         @GetMapping("/api/sgi/export")
-        public void getSgiCsv(@AuthenticationPrincipal final OAuth2User principal, final HttpServletResponse response){
+        public void getSgiCsv(@AuthenticationPrincipal final OAuth2User oauth2User, final HttpServletResponse response){
                 log.info("sgi export as csv");
-                final String userId = currentUserService.getUserId(principal);
+                final String userId = currentUserService.getUserId(oauth2User);
                 String csv = hcpCsvExportService.exportAllSgiDataToCsv(userId);
                 response.setContentType("text/csv");
                 response.addHeader("Content-Disposition", "attachment; filename=\"handicap-short-game.csv\"");

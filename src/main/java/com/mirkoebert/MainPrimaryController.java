@@ -27,15 +27,15 @@ public class MainPrimaryController {
         private final CurrentUserService currentUserService;
 
         @GetMapping("/user-page")
-        public String getUser(Model model, @AuthenticationPrincipal OAuth2User principal) {
-                final String u = currentUserService.getUserId(principal);
+        public String getUser(Model model, @AuthenticationPrincipal OAuth2User oauth2User) {
+                final String u = currentUserService.getUserId(oauth2User);
                 log.info("user page {}", u);
-                model.addAttribute("name", principal.getAttributes().get("name"));
-                model.addAttribute("email", principal.getAttributes().get("email"));
+                model.addAttribute("name", oauth2User.getAttributes().get("name"));
+                model.addAttribute("email", oauth2User.getAttributes().get("email"));
                 model.addAttribute("lastHCP", hcpService.findLatestByUserId(u).getHcp());
                 model.addAttribute("lastSGHCP", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u));
                 model.addAttribute("advice", advisorService.getAdvise(u));
-                String fullUrl = (String) principal.getAttributes().get("picture");
+                String fullUrl = (String) oauth2User.getAttributes().get("picture");
                 String pureUrl = fullUrl.substring(0, fullUrl.lastIndexOf("="));
                 model.addAttribute("picture", pureUrl);
                 return "user";

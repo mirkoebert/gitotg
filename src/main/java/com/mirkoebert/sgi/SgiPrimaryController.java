@@ -33,24 +33,24 @@ public class SgiPrimaryController {
         private final CurrentUserService currentUserService;
 
         @GetMapping("/short-game-index")
-        public String getShortGameIndex(Model m, @AuthenticationPrincipal OAuth2User principal) {
-                log.info("short-game-index  page {}", principal.getAttributes());
-                m.addAttribute("lastResult", sgiHcpAggregatedService.getLatestSgiHcpAggregated(currentUserService.getUserId(principal)));
+        public String getShortGameIndex(Model m, @AuthenticationPrincipal OAuth2User oauth2User) {
+                log.info("short-game-index  page {}", oauth2User.getAttributes());
+                m.addAttribute("lastResult", sgiHcpAggregatedService.getLatestSgiHcpAggregated(currentUserService.getUserId(oauth2User)));
                 return "sgi/index";
         }
 
         @GetMapping("/sgi/{testId}")
-        public String getShortGameInput(Model m, @PathVariable @Min(1) @Max(8) int testId, @AuthenticationPrincipal OAuth2User principal) {
+        public String getShortGameInput(Model m, @PathVariable @Min(1) @Max(8) int testId, @AuthenticationPrincipal OAuth2User oauth2User) {
                 log.info("short-game-input {}", testId);
                 m.addAttribute("sgitest", sgiTestRepo.getTestById(testId));
                 m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(testId).build());
                 m.addAttribute("testId", testId);
-                m.addAttribute("trend", trendService.getTrend(testId, currentUserService.getUserId(principal)));
+                m.addAttribute("trend", trendService.getTrend(testId, currentUserService.getUserId(oauth2User)));
                 return "sgi/input";
         }
 
         @PostMapping("/submit")
-        public String submitForm(@ModelAttribute @Valid final SgiTestScoreDTO score, Model m, @AuthenticationPrincipal OAuth2User principal) {
+        public String submitForm(@ModelAttribute @Valid final SgiTestScoreDTO score, Model m, @AuthenticationPrincipal OAuth2User oauth2User) {
                 log.info("Submit {}", score);
                 var s = SingleTestResultEntity
                         .builder()
@@ -59,13 +59,13 @@ public class SgiPrimaryController {
                         .date(LocalDate.now())
                         .points(score.getPoints())
                         .hcp(pointsToSgiHcpFunction.apply(score.getTestId(), score.getPoints()))
-                        .userId(currentUserService.getUserId(principal))
+                        .userId(currentUserService.getUserId(oauth2User))
                         .build();
                 repo.save(s);
                 m.addAttribute("sgitest", sgiTestRepo.getTestById(score.getTestId()));
                 m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(score.getTestId()).build());
                 m.addAttribute("testId", score.getTestId());
-                m.addAttribute("trend", trendService.getTrend(score.getTestId(), currentUserService.getUserId(principal)));
+                m.addAttribute("trend", trendService.getTrend(score.getTestId(), currentUserService.getUserId(oauth2User)));
                 return "/sgi/input";
         }
 

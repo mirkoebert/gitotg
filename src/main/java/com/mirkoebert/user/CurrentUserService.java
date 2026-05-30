@@ -10,7 +10,7 @@ public class CurrentUserService {
 
     /**
      * Returns the current user's Google "sub" ID from the security context.
-     * Use this when you don't have the principal injected as a parameter.
+     * Use this when you don't have the oauth2User injected as a parameter.
      */
     public String getUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -19,19 +19,19 @@ public class CurrentUserService {
             throw new IllegalStateException("No authenticated OAuth2 user found in security context");
         }
 
-        OAuth2User principal = (OAuth2User) authentication.getPrincipal();
-        return getUserId(principal);
+        OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+        return getUserId(oauth2User);
     }
 
     /**
      * Returns the user's Google "sub" ID from a provided OAuth2User.
-     * Useful when the principal is already injected as a method parameter.
+     * Useful when the oauth2User is already injected as a method parameter.
      */
-    public String getUserId(OAuth2User principal) {
-        if (principal == null) {
-            throw new IllegalArgumentException("OAuth2User principal cannot be null");
+    public String getUserId(OAuth2User oauth2User) {
+        if (oauth2User == null) {
+            throw new IllegalArgumentException("OAuth2User cannot be null");
         }
-        Object sub = principal.getAttributes().get("sub");
+        Object sub = oauth2User.getAttributes().get("sub");
         if (sub == null) {
             throw new IllegalStateException("Could not extract 'sub' from OAuth2User attributes");
         }
@@ -41,16 +41,16 @@ public class CurrentUserService {
     /**
      * Returns the user's display name (if available).
      */
-    public String getName(OAuth2User principal) {
-        if (principal == null) return null;
-        return (String) principal.getAttributes().get("name");
+    public String getName(OAuth2User oauth2User) {
+        if (oauth2User == null) return null;
+        return (String) oauth2User.getAttributes().get("name");
     }
 
     /**
      * Returns the user's email (if available).
      */
-    public String getEmail(OAuth2User principal) {
-        if (principal == null) return null;
-        return (String) principal.getAttributes().get("email");
+    public String getEmail(OAuth2User oauth2User) {
+        if (oauth2User == null) return null;
+        return (String) oauth2User.getAttributes().get("email");
     }
 }

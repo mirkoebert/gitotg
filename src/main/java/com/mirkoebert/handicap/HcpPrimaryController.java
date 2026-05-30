@@ -25,10 +25,10 @@ public class HcpPrimaryController {
         @GetMapping({"/handicap/input"})
         public String getInputPage(
                 final Model model,
-                @AuthenticationPrincipal final OAuth2User principal
+                @AuthenticationPrincipal final OAuth2User oauth2User
         ) {
                 log.info("Get hcp page");
-                model.addAttribute("lastResult", hcpService.findLatestByUserId(currentUserService.getUserId(principal)));
+                model.addAttribute("lastResult", hcpService.findLatestByUserId(currentUserService.getUserId(oauth2User)));
                 model.addAttribute("hcpScore", new HcpScoreDTO());
                 return "hcp/input";
         }
@@ -37,7 +37,7 @@ public class HcpPrimaryController {
         public String submitForm(
                 @ModelAttribute("hcpScore") final HcpScoreDTO score,
                 final Model model,
-                @AuthenticationPrincipal final OAuth2User principal
+                @AuthenticationPrincipal final OAuth2User oauth2User
         ) {
                 try {
                         log.info("Input processing: date {}, hcp {}", score.getSelectedDate(), score.getHcp());
@@ -45,13 +45,13 @@ public class HcpPrimaryController {
                                 .builder()
                                 .hcp(score.getHcp())
                                 .date(score.getSelectedDate())
-                                .userId(currentUserService.getUserId(principal))
+                                .userId(currentUserService.getUserId(oauth2User))
                                 .build();
                         repo.save(he);
                 } catch (Exception e) {
                         log.warn("Can't process hcp {}", score, e);
                 }
-                model.addAttribute("lastResult", hcpService.findLatestByUserId(currentUserService.getUserId(principal)));
+                model.addAttribute("lastResult", hcpService.findLatestByUserId(currentUserService.getUserId(oauth2User)));
                 model.addAttribute("hcpScore", new HcpScoreDTO());
                 return "hcp/input";
         }
