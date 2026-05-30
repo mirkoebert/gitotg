@@ -9,8 +9,6 @@ import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,8 +51,9 @@ public class SgiPrimaryController {
         }
 
         @PostMapping("/submit")
-        public String submitForm(@ModelAttribute @Valid final SgiTestScoreDTO score, Model m, @AuthenticationPrincipal OAuth2User principal) {
+        public String submitForm(@ModelAttribute @Valid final SgiTestScoreDTO score, Model m) {
                 log.info("Submit {}", score);
+                val u = currentUserService.getCurrentUser();
                 var s = SingleTestResultEntity
                         .builder()
                         .testType(score.getType())
@@ -62,13 +61,13 @@ public class SgiPrimaryController {
                         .date(LocalDate.now())
                         .points(score.getPoints())
                         .hcp(pointsToSgiHcpFunction.apply(score.getTestId(), score.getPoints()))
-                        .userId((String) principal.getAttributes().get("sub"))
+                        .userId(u.id())
                         .build();
                 repo.save(s);
                 m.addAttribute("sgitest", sgiTestRepo.getTestById(score.getTestId()));
                 m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(score.getTestId()).build());
                 m.addAttribute("testId", score.getTestId());
-                m.addAttribute("trend", trendService.getTrend(score.getTestId(), (String) principal.getAttributes().get("sub")));
+                m.addAttribute("trend", trendService.getTrend(score.getTestId(), u.id()));
                 return "/sgi/input";
         }
 

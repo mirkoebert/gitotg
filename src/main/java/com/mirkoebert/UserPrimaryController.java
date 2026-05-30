@@ -1,8 +1,9 @@
 package com.mirkoebert;
 
+import com.mirkoebert.user.CurrentUserService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.core.user.OAuth2User;
+import lombok.val;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -10,11 +11,16 @@ import java.util.Map;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 public class UserPrimaryController {
 
+        private final CurrentUserService currentUserService;
+
         @GetMapping({"/user", "/home"})
-        public Map<String, Object> userOauth2CallBack(@AuthenticationPrincipal final OAuth2User principal) {
-                log.debug("user {}", principal.getAttributes());
-                return principal.getAttributes();  // Returns Google user info like name, email, picture
+        public Map<String, String> userOauth2CallBack() {
+                log.debug("user");
+                val u = currentUserService.getCurrentUser();
+                val m = Map.of("name", u.name(), "email", u.email(), "pictureUrl", u.pictureUrl());
+                return m;
         }
 }
