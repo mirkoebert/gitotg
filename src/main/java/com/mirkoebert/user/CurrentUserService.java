@@ -27,7 +27,7 @@ public class CurrentUserService {
      * Returns the user's Google "sub" ID from a provided OAuth2User.
      * Useful when the oauth2User is already injected as a method parameter.
      */
-    public String getUserId(OAuth2User oauth2User) {
+    public String getUserId(final OAuth2User oauth2User) {
         if (oauth2User == null) {
             throw new IllegalArgumentException("OAuth2User cannot be null");
         }
@@ -41,7 +41,7 @@ public class CurrentUserService {
     /**
      * Returns the user's display name (if available).
      */
-    public String getName(OAuth2User oauth2User) {
+    public String getName(final OAuth2User oauth2User) {
         if (oauth2User == null) return null;
         return (String) oauth2User.getAttributes().get("name");
     }
@@ -49,7 +49,7 @@ public class CurrentUserService {
     /**
      * Returns the user's email (if available).
      */
-    public String getEmail(OAuth2User oauth2User) {
+    public String getEmail(final OAuth2User oauth2User) {
         if (oauth2User == null) return null;
         return (String) oauth2User.getAttributes().get("email");
     }
