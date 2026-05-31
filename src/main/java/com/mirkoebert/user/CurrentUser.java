@@ -38,4 +38,9 @@ public record CurrentUser(
         return url;
     }
 
+    @Override
+    public String toString() {
+        return "CurrentUser[id=" + id + "]";
+    }
+
 }
