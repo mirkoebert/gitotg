@@ -16,6 +16,7 @@ public class CsvExportPrimaryRestController {
 
         private final HcpCsvExportService hcpCsvExportService;
         private final CurrentUserService currentUserService;
+        private final CsvFileNameService csvFileNameService;
 
         @SneakyThrows
         @GetMapping("/api/handicap/export")
@@ -25,7 +26,8 @@ public class CsvExportPrimaryRestController {
                 final String userId = u.id();
                 String csv = hcpCsvExportService.exportAllHcpDataToCsv(userId);
                 response.setContentType("text/csv");
-                response.addHeader("Content-Disposition", "attachment; filename=\"handicap.csv\"");
+                String filename = csvFileNameService.generateHcpExportFileName();
+                response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
                 response.getOutputStream().print(csv);
         }
 
@@ -38,7 +40,8 @@ public class CsvExportPrimaryRestController {
                 final String userId = u.id();
                 String csv = hcpCsvExportService.exportAllSgiDataToCsv(userId);
                 response.setContentType("text/csv");
-                response.addHeader("Content-Disposition", "attachment; filename=\"handicap-short-game.csv\"");
+                String filename = csvFileNameService.generateSgiExportFileName();
+                response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
                 response.getOutputStream().print(csv);
         }
 
