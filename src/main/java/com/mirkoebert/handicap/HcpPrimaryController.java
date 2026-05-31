@@ -4,8 +4,10 @@ import com.mirkoebert.user.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,10 +33,17 @@ public class HcpPrimaryController {
 
         @PostMapping("/handicap/submit")
         public String submitForm(
-                @ModelAttribute("hcpScore") final HcpScoreDTO score,
+                @ModelAttribute("hcpScore") @Valid final HcpScoreDTO score,
+                BindingResult bindingResult,
                 final Model model
         ) {
                 val u = currentUserService.getCurrentUser();
+
+                if (bindingResult.hasErrors()) {
+                        model.addAttribute("lastResult", hcpService.findLatestByUserId(u.id()));
+                        return "hcp/input";
+                }
+
                 try {
                         log.info("Input processing: date {}, hcp {}", score.getSelectedDate(), score.getHcp());
                         val he = HcpScoreEntity
