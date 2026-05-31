@@ -1,8 +1,8 @@
 spring:
   application:
-    name: giotg
+    name: gitotg
   datasource:
-    url: jdbc:h2:mem:giotgdb
+    url: jdbc:h2:mem:gitotgdb
     username: sa
     password: password
     driverClassName: org.h2.Driver
