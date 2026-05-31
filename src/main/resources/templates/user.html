@@ -28,7 +28,12 @@
 
 <h1 class="text-center mb-4">Gitotg: User details</h1>
 <ol class="list-group">
-    <li class="list-group-item"><img alt="user avatar" class="img-fluid rounded" th:src="@{${picture}}"></li>
+    <li class="list-group-item" th:if="${picture != null}">
+        <img alt="user avatar" class="img-fluid rounded" th:src="${picture}">
+    </li>
+    <li class="list-group-item" th:unless="${picture != null}">
+        (no profile picture)
+    </li>
     <li class="list-group-item">Name:           <span th:text="${name}"></span></li>
     <li class="list-group-item">Email:          <span th:text="${email}"></span></li>
     <li class="list-group-item">HCP:            <span th:text="${lastHCP}"></span></li>

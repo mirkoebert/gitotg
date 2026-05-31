@@ -34,9 +34,7 @@ public class MainPrimaryController {
                 model.addAttribute("lastHCP", hcpService.findLatestByUserId(u.id()).getHcp());
                 model.addAttribute("lastSGHCP", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u.id()));
                 model.addAttribute("advice", advisorService.getAdvise(u.id()));
-                String fullUrl = u.pictureUrl();
-                String pureUrl = fullUrl.substring(0, fullUrl.lastIndexOf("="));
-                model.addAttribute("picture", pureUrl);
+                model.addAttribute("picture", u.pictureUrl());
                 return "user";
         }
 

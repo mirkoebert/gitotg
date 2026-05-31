@@ -22,12 +22,20 @@ public record CurrentUser(
         String name = (String) attributes.get("name");
         String email = (String) attributes.get("email");
 
-        String pictureUrl = (String) attributes.get("picture");
-        if (pictureUrl != null && pictureUrl.contains("=")) {
-            pictureUrl = pictureUrl.substring(0, pictureUrl.lastIndexOf("="));
-        }
+        String pictureUrl = cleanGooglePictureUrl((String) attributes.get("picture"));
 
         return new CurrentUser(id, name, email, pictureUrl);
+    }
+
+    /**
+     * Google profile picture URLs often end with size/crop parameters like "=s96-c".
+     * Stripping everything after the last '=' gives us the full-size image.
+     */
+    private static String cleanGooglePictureUrl(String url) {
+        if (url != null && url.contains("=")) {
+            return url.substring(0, url.lastIndexOf("="));
+        }
+        return url;
     }
 
 }
