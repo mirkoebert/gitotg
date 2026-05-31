@@ -28,7 +28,7 @@ public class MainPrimaryController {
         @GetMapping("/user-page")
         public String getUser(Model model) {
                 val u = currentUserService.getCurrentUser();
-                log.info("user page {}", u);
+                log.debug("Rendering user page for {}", u);
                 model.addAttribute("name", u.name());
                 model.addAttribute("email", u.email());
                 model.addAttribute("lastHCP", hcpService.findLatestByUserId(u.id()).getHcp());
