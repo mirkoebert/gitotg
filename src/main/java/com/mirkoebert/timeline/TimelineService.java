@@ -21,11 +21,11 @@ public class TimelineService {
         private final SingleTestResultRepository singleTestResultRepository;
         private final HcpRepository hcpRepository;
 
-        public List<MeasurmentDTO> getLatestResults(final String userId) {
+        public List<MeasurementDTO> getLatestResults(final String userId) {
                 List<HcpScoreEntity> h = hcpRepository.findByUserId(userId);
-                List<MeasurmentDTO> hm = h
+                List<MeasurementDTO> hm = h
                         .stream()
-                        .map(hc -> MeasurmentDTO
+                        .map(hc -> MeasurementDTO
                                 .builder()
                                 .id(hc.getId())
                                 .value(String.format("%.1f", hc.getHcp()))
@@ -39,9 +39,9 @@ public class TimelineService {
                 List<SingleTestResultEntity> sgiTests = singleTestResultRepository.findAllByUserId(userId);
 
 
-                List<MeasurmentDTO> sgi = sgiTests
+                List<MeasurementDTO> sgi = sgiTests
                         .stream()
-                        .map(m -> MeasurmentDTO
+                        .map(m -> MeasurementDTO
                                 .builder()
                                 .id(m.getId())
                                 .value("" + m.getHcp())
@@ -53,7 +53,7 @@ public class TimelineService {
                         .toList();
 
                 return Stream.concat(hm.stream(), sgi.stream())
-                        .sorted(Comparator.comparing(MeasurmentDTO::getDate, Comparator.reverseOrder()))
+                        .sorted(Comparator.comparing(MeasurementDTO::getDate, Comparator.reverseOrder()))
                         .limit(12L)
                         .toList();
         }

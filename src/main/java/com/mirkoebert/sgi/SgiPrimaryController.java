@@ -68,7 +68,7 @@ public class SgiPrimaryController {
                 m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(score.getTestId()).build());
                 m.addAttribute("testId", score.getTestId());
                 m.addAttribute("trend", trendService.getTrend(score.getTestId(), u.id()));
-                return "/sgi/input";
+                return "sgi/input";
         }
 
 }

@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Value
 @Builder
-public class MeasurmentDTO {
+public class MeasurementDTO {
 
         Long id;
         String userId;
