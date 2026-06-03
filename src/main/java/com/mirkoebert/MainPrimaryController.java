@@ -11,6 +11,8 @@ import lombok.val;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 @SuppressWarnings("SameReturnValue")
@@ -44,6 +46,15 @@ public class MainPrimaryController {
                 val u = currentUserService.getCurrentUser();
                 m.addAttribute("timeline", timeService.getLatestResults(u.id()));
                 return "timeline";
+        }
+
+        @PostMapping("/timeline/delete")
+        public String deleteTimelineEntry(@RequestParam GolfType type,
+                                          @RequestParam Long id) {
+                log.info("Deleting timeline entry: type={}, id={}", type, id);
+                val u = currentUserService.getCurrentUser();
+                timeService.deleteEntry(type, id, u.id());
+                return "redirect:/timeline";
         }
 
         @GetMapping("/about")

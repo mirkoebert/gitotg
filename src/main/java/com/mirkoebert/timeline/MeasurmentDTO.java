@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @Builder
 public class MeasurmentDTO {
 
+        Long id;
         String userId;
         String value;
         LocalDate date;

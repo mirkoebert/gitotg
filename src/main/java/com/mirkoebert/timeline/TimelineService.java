@@ -27,6 +27,7 @@ public class TimelineService {
                         .stream()
                         .map(hc -> MeasurmentDTO
                                 .builder()
+                                .id(hc.getId())
                                 .value(String.format("%.1f", hc.getHcp()))
                                 .userId(userId)
                                 .type(GolfType.HCP)
@@ -42,6 +43,7 @@ public class TimelineService {
                         .stream()
                         .map(m -> MeasurmentDTO
                                 .builder()
+                                .id(m.getId())
                                 .value("" + m.getHcp())
                                 .type(GolfType.SGIHCP)
                                 .userId(userId)
@@ -54,5 +56,25 @@ public class TimelineService {
                         .sorted(Comparator.comparing(MeasurmentDTO::getDate, Comparator.reverseOrder()))
                         .limit(12L)
                         .toList();
+        }
+
+        public void deleteEntry(GolfType type, Long id, String currentUserId) {
+                if (id == null || type == null) {
+                        return;
+                }
+
+                if (type == GolfType.HCP) {
+                        hcpRepository.findById(id).ifPresent(entry -> {
+                                if (entry.getUserId().equals(currentUserId)) {
+                                        hcpRepository.deleteById(id);
+                                }
+                        });
+                } else if (type == GolfType.SGIHCP) {
+                        singleTestResultRepository.findById(id).ifPresent(entry -> {
+                                if (entry.getUserId().equals(currentUserId)) {
+                                        singleTestResultRepository.deleteById(id);
+                                }
+                        });
+                }
         }
 }
