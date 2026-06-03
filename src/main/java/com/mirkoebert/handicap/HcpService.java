@@ -25,7 +25,7 @@ public class HcpService {
 
         public HcpScoreOutFormatedDTO findLatestByUserId(String userId) {
                 List<HcpScoreEntity> l = repo.findByUserId(userId);
-                Optional<HcpScoreEntity> last = l.stream().max(Comparator.comparing(HcpScoreEntity::getDate));
+                Optional<HcpScoreEntity> last = repo.findFirstByUserIdOrderByDateDesc(userId);
                 if (last.isPresent()) {
                         return HcpScoreOutFormatedDTO
                                 .builder()
