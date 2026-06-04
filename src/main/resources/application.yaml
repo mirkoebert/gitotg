@@ -21,6 +21,10 @@ spring:
             client-secret: ${CLIENT_SECRET}
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"  # Default, customizable
             scope: profile, email  # Request basic user info
+  servlet:
+    multipart:
+      max-file-size: 1MB
+      max-request-size: 1MB
 
 logging:
   level:
