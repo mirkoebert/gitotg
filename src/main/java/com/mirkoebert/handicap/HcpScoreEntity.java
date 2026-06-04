@@ -1,5 +1,7 @@
 package com.mirkoebert.handicap;
 
+import com.opencsv.bean.CsvBindByName;
+import com.opencsv.bean.CsvDate;
 import com.opencsv.bean.CsvIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -24,6 +26,9 @@ public class HcpScoreEntity {
         private long id;
         @CsvIgnore
         private String userId;
+        @CsvBindByName(column = "date")
+        @CsvDate("yyyy-MM-dd")
         private LocalDate date;
+        @CsvBindByName(column = "hcp")
         private Double hcp;
 }

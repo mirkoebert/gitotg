@@ -17,6 +17,15 @@
     <ul class="list-group">
         <li class="list-group-item">Current SGI HCP: <span th:text="${lastResult}"></span></li>
         <li class="list-group-item">Export: <a href="/api/sgi/export">CSV</a> </li>
+        <li class="list-group-item">
+            Import:
+            <form id="sgi-import-form" method="post" th:action="@{/api/sgi/import}" enctype="multipart/form-data" style="display:inline;">
+                <input type="file" name="file" accept=".csv" required style="max-width:200px;">
+                <button type="submit" class="btn btn-sm btn-secondary">Upload</button>
+            </form>
+            <small>(CSV with date,points,testId,testType; appends data)</small>
+            <div id="sgi-import-status" style="display:none; margin-top:4px; font-size:0.9em;"></div>
+        </li>
     </ul>
     <div class="list-group">
         <a class="list-group-item list-group-item-action" href="sgi/1">Test 1: 50-yard wedge</a>
@@ -32,5 +41,50 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+(function() {
+  const form = document.getElementById('sgi-import-form');
+  const statusEl = document.getElementById('sgi-import-status');
+  if (!form || !statusEl) return;
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn ? btn.textContent : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Uploading...';
+    }
+    statusEl.style.display = 'none';
+    statusEl.innerHTML = '';
+
+    try {
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData
+      });
+      const text = await response.text();
+      if (response.ok) {
+        statusEl.innerHTML = '<span class="text-success">' + text + '</span>';
+        setTimeout(function() { window.location.reload(); }, 1200);
+      } else {
+        statusEl.innerHTML = '<span class="text-danger">Error: ' + text + '</span>';
+      }
+    } catch (err) {
+      statusEl.innerHTML = '<span class="text-danger">Upload failed: ' + (err.message || err) + '</span>';
+    } finally {
+      statusEl.style.display = 'block';
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+      const fileInput = form.querySelector('input[type="file"]');
+      if (fileInput) fileInput.value = '';
+    }
+  });
+})();
+</script>
 </body>
 </html>

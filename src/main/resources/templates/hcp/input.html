@@ -32,6 +32,15 @@
     <li class="list-group-item">Date: <span th:text="${lastResult.date}"></span></li>
     <li class="list-group-item">Trend: <span th:text="${lastResult.trend}"></span></li>
     <li class="list-group-item">Export: <a href="/api/handicap/export">CSV</a> </li>
+    <li class="list-group-item">
+        Import:
+        <form id="hcp-import-form" method="post" th:action="@{/api/handicap/import}" enctype="multipart/form-data" style="display:inline;">
+            <input type="file" name="file" accept=".csv" required style="max-width:200px;">
+            <button type="submit" class="btn btn-sm btn-secondary">Upload</button>
+        </form>
+        <small>(CSV with date,hcp columns; appends data)</small>
+        <div id="hcp-import-status" style="display:none; margin-top:4px; font-size:0.9em;"></div>
+    </li>
 </ul>
 
 
@@ -98,6 +107,51 @@
         </div>
     </form>
 </div>
+
+<script>
+(function() {
+  const form = document.getElementById('hcp-import-form');
+  const statusEl = document.getElementById('hcp-import-status');
+  if (!form || !statusEl) return;
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = form.querySelector('button[type="submit"]');
+    const originalText = btn ? btn.textContent : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = 'Uploading...';
+    }
+    statusEl.style.display = 'none';
+    statusEl.innerHTML = '';
+
+    try {
+      const formData = new FormData(form);
+      const response = await fetch(form.action, {
+        method: 'POST',
+        body: formData
+      });
+      const text = await response.text();
+      if (response.ok) {
+        statusEl.innerHTML = '<span class="text-success">' + text + '</span>';
+        setTimeout(function() { window.location.reload(); }, 1200);
+      } else {
+        statusEl.innerHTML = '<span class="text-danger">Error: ' + text + '</span>';
+      }
+    } catch (err) {
+      statusEl.innerHTML = '<span class="text-danger">Upload failed: ' + (err.message || err) + '</span>';
+    } finally {
+      statusEl.style.display = 'block';
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+      const fileInput = form.querySelector('input[type="file"]');
+      if (fileInput) fileInput.value = '';
+    }
+  });
+})();
+</script>
 
 </body>
 </html>
