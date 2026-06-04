@@ -62,7 +62,7 @@ public class AdvisorService {
                         return few[r.nextInt(few.length)];
                 } else if (hcp.isPresent() && (hcp.get().getHcp() > 25)) {
                         log.info("High Handicaper");
-                        return hh[r.nextInt(few.length)];
+                        return hh[r.nextInt(hh.length)];
                 }
                 // analyze hcp
                 // analyze sgi
