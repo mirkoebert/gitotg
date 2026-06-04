@@ -18,7 +18,7 @@ public class AdvisorService {
         private final HcpRepository hcpRepository;
         private final SingleTestResultRepository singleTestResultRepository;
 
-        private final static String[] fresh = {
+        static final String[] fresh = {
                 "I need more data. Please start a test.",
                 "Don't be shy, you can export all your data if you want.",
                 "Let's produce some data.",
@@ -27,7 +27,7 @@ public class AdvisorService {
                 "Monitoring your results is a cornerstone of improvement."
         };
 
-        private final static String[] few = {
+        final static String[] few = {
                 "I need more data. Please start a test.",
                 "Keep up on golfing. I need more data to give more sophisticated advices.",
                 "Keep up on golfing. You should start a Short Game test.",
@@ -35,12 +35,12 @@ public class AdvisorService {
         };
 
 
-        private final static String[] hh = {
+        final static String[] hh = {
                 "High Handicaper lower sores faster by improving the short game.",
                 "Short game is a cornerstone of improvement for High Handicapers."
         };
-        
-        private final static String[] other ={
+
+        final static String[] other ={
                 "I have to think about it. Go on.",
                 "Nice data. Keep up on golfing."
         };
