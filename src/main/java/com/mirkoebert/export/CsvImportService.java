@@ -51,6 +51,7 @@ public class CsvImportService {
             for (HcpScoreEntity bean : beans) {
                 if (bean.getDate() != null && bean.getHcp() != null) {
                     bean.setUserId(userId);
+                    hcpRepo.findByUserIdAndDate(userId, bean.getDate()).ifPresent(existing -> bean.setId(existing.getId()));
                     hcpRepo.save(bean);
                     count++;
                 }
@@ -92,6 +93,7 @@ public class CsvImportService {
                     bean.setUserId(userId);
                     Integer computedHcp = pointsToSgiHcpFunction.apply(bean.getTestId(), bean.getPoints());
                     bean.setHcp(computedHcp);
+                    sgiRepo.findByUserIdAndDateAndTestId(userId, bean.getDate(), bean.getTestId()).ifPresent(existing -> bean.setId(existing.getId()));
                     sgiRepo.save(bean);
                     count++;
                 }

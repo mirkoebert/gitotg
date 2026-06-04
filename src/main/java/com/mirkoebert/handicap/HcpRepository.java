@@ -4,6 +4,7 @@ import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +18,9 @@ public interface HcpRepository extends JpaRepository<HcpScoreEntity, Long> {
 
         @NonNull
         Optional<HcpScoreEntity> findFirstByUserIdOrderByDateDesc(@NonNull String userId);
+
+        @NonNull
+        Optional<HcpScoreEntity> findByUserIdAndDate(@NonNull String userId, @NonNull LocalDate date);
 
         @Override
         @NonNull
