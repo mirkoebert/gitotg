@@ -1,5 +1,7 @@
 package com.mirkoebert.sgi;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.function.Function;
@@ -8,7 +10,7 @@ import java.util.function.Function;
 class SgiTestSuiteHcpFunction implements Function<Integer, Integer> {
 
         @Override
-        public Integer apply(Integer points) {
+        public @NonNull Integer apply(@Nullable Integer points) {
                 if (points < 12) {
                         return 40;
                 }

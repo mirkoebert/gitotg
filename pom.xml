@@ -89,6 +89,15 @@
             <version>5.12.0</version>
         </dependency>
 
+        <!-- Explicit dependency on jspecify so we can safely use @NonNull / @Nullable
+             in our code (instead of relying on it being a transitive dep of spring-core).
+             Version matches what Spring Framework 7 / Boot 4 pulls in. -->
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>

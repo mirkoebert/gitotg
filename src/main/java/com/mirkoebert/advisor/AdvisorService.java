@@ -6,6 +6,7 @@ import com.mirkoebert.handicap.HandicapClassifier;
 import com.mirkoebert.sgi.SingleTestResultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -49,7 +50,7 @@ public class AdvisorService {
 
         private final Random r = new Random();
 
-        public String getAdvise(final String userId){
+        public String getAdvise(@NonNull final String userId){
                 int c = hcpRepository.countByUserId(userId);
                 c = c  + singleTestResultRepository.countByUserId(userId);
 

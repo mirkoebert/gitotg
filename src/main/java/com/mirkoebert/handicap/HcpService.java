@@ -2,6 +2,7 @@ package com.mirkoebert.handicap;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -23,7 +24,7 @@ public class HcpService {
         private final HcpRepository repo;
         private final DateTimeFormatter df = DateTimeFormatter.ofPattern("dd. MMMM yyyy");
 
-        public HcpScoreOutFormatedDTO findLatestByUserId(String userId) {
+        public HcpScoreOutFormatedDTO findLatestByUserId(@NonNull String userId) {
                 List<HcpScoreEntity> l = repo.findByUserId(userId);
                 Optional<HcpScoreEntity> last = repo.findFirstByUserIdOrderByDateDesc(userId);
                 if (last.isPresent()) {

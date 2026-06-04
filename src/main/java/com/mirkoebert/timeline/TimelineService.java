@@ -7,6 +7,7 @@ import com.mirkoebert.sgi.SingleTestResultEntity;
 import com.mirkoebert.sgi.SingleTestResultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -21,7 +22,7 @@ public class TimelineService {
         private final SingleTestResultRepository singleTestResultRepository;
         private final HcpRepository hcpRepository;
 
-        public List<MeasurementDTO> getLatestResults(final String userId) {
+        public List<MeasurementDTO> getLatestResults(@NonNull final String userId) {
                 List<HcpScoreEntity> h = hcpRepository.findByUserId(userId);
                 List<MeasurementDTO> hm = h
                         .stream()
@@ -58,7 +59,7 @@ public class TimelineService {
                         .toList();
         }
 
-        public void deleteEntry(GolfType type, Long id, String currentUserId) {
+        public void deleteEntry(GolfType type, Long id, @NonNull String currentUserId) {
                 if (id == null || type == null) {
                         return;
                 }

@@ -2,6 +2,7 @@ package com.mirkoebert.sgi.calc;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.function.BiFunction;
@@ -20,7 +21,7 @@ public class PointsToSgiHcpFunction implements BiFunction<Integer, Integer, Inte
         private final SgiTest8HcpFunction sgiTest8HcpFunction;
 
         @Override
-        public Integer apply(final Integer testId, final Integer points) {
+        public @NonNull Integer apply(@NonNull final Integer testId, @NonNull final Integer points) {
                 return switch (testId) {
                         case 1 -> sgiTest1HcpFunction.applyAsInt(points);
                         case 2 -> sgiTest2HcpFunction.applyAsInt(points);
