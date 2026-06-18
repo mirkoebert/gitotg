@@ -5,6 +5,7 @@ import com.mirkoebert.handicap.HcpService;
 import com.mirkoebert.sgi.SgiHcpAggregatedService;
 import com.mirkoebert.timeline.TimelineService;
 import com.mirkoebert.user.CurrentUserService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -63,5 +64,6 @@ public class MainPrimaryController {
                 m.addAttribute("version", this.getClass().getPackage().getImplementationVersion());
                 return "about";
         }
+
 
 }
