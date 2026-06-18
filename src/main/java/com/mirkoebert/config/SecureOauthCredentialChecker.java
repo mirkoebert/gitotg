@@ -17,7 +17,7 @@ public class SecureOauthCredentialChecker {
     @PostConstruct
     public void checkCredentials() {
         if (clientId == null || clientId.isBlank()) {
-            log.warn("Google client-id is missing!");
+            log.error("Google client-id is missing!");
         }
         log.info("Google OAuth2 client-id loaded successfully: {}", clientId.substring(0, Math.min(4, clientId.length())) + "...");
     }
