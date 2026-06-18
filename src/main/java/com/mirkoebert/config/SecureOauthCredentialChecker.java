@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class SecureOauthCredentialChecker {
 
     private String clientId;
+    private String redirectUri;
 
     @PostConstruct
     public void checkCredentials() {
@@ -20,5 +21,6 @@ public class SecureOauthCredentialChecker {
             log.error("Google client-id is missing!");
         }
         log.info("Google OAuth2 client-id loaded successfully: {}", clientId.substring(0, Math.min(4, clientId.length())) + "...");
+        log.info("Redirect URI: {}", redirectUri);
     }
 }
