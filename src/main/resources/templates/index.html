@@ -22,10 +22,20 @@
             font-size: 1.25rem;
             margin-bottom: 2rem;
         }
+        .made-with-ai {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            width: 60px;
+            height: auto;
+            z-index: 9999;
+        }
     </style>
 </head>
 <body class="container mt-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<img src="/images/made-with-ai.jpg" alt="Made with AI" class="made-with-ai">
 
 <h1 class="text-center mb-4">Gitotg: Get it on the Green</h1>
 
@@ -40,7 +50,7 @@
 <section class="hero bg-primary text-white">
     <div class="container">
         <h1>Short Game Index</h1>
-        <p>Fastest way to lower your scores for high handicapers.</p>
+        <p>Fastest way to lower your scores for high handicappers.</p>
         <a class="btn btn-light btn-lg" href="/short-game-index">Start now</a>
     </div>
 </section>
