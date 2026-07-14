@@ -12,13 +12,14 @@ public class WebSecurityConfig {
         public SecurityFilterChain securityFilterChain(HttpSecurity http) {
                 http
                         .authorizeHttpRequests(authorize -> authorize
-                                .requestMatchers("/", "/login**", "/error", "/about").permitAll()  // Allow public access to home and login
-                                .anyRequest().authenticated()  // Protect other routes
+                                .requestMatchers("/", "/login**", "/error", "/about").permitAll()
+                                .requestMatchers("/images/**", "/css/**", "/js/**").permitAll()
+                                .anyRequest().authenticated()
                         )
                         .oauth2Login(oauth2 -> oauth2
-                                .loginPage("/login")  // Optional custom login page
-                                .defaultSuccessUrl("/user-page", true)  // Redirect after successful login
-                                .failureUrl("/login?error=true")  // Handle failures
+                                .loginPage("/login")
+                                .defaultSuccessUrl("/user-page", true)
+                                .failureUrl("/login?error=true")
                         )
                         .logout(logout -> logout
                                 .logoutSuccessUrl("/login?logout=true")
