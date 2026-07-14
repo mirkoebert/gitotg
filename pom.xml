@@ -126,7 +126,6 @@
                             <rules>
                                 <requireMavenVersion>
                                     <version>3.8.7</version>
-                                    <!-- <version>3.9.0</version> -->
                                 </requireMavenVersion>
                                 <requireJavaVersion>
                                     <version>[25,)</version>
@@ -180,17 +179,8 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
-                    <archive>
-                        <manifest>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                        </manifest>
-                    </archive>
+                    <skip>true</skip>
                 </configuration>
             </plugin>
         </plugins>
