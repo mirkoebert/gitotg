@@ -6,13 +6,6 @@ Webapp to improve your Golf by tracking and supporting your Short Game. The app 
 **Recommended:** Use [Apache Maven Daemon (mvnd)](https://github.com/apache/maven-mvnd) for much faster builds (especially incremental ones).
 
 ```bash
-mvnd clean install
-mvnd spring-boot:run
-```
-
-Plain Maven also works:
-
-```bash
 mvn clean install
 mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8080
 ```
