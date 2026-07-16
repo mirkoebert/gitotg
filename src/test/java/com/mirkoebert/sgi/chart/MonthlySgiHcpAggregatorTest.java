@@ -42,7 +42,9 @@ class MonthlySgiHcpAggregatorTest {
                 when(repo.findByUserIdAndTestId(anyString(), eq(1))).thenReturn(List.of(d2, d1));
 
                 final HcpData r = cut.getHcpForLastMonth(6, "userId", 1);
+
                 assertThat(r).isNotNull();
+                assertThat(r.labels().size()).isLessThanOrEqualTo(6);
                 assertThat(r.labels().getFirst()).hasToString(ld1.format(fmt));
                 assertThat(r.hcp().getFirst()).isEqualTo(1.5);
         }

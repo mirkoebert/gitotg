@@ -187,18 +187,6 @@
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
                 <version>1.25.7</version>
-<!--                <configuration>-->
-<!--                    <targetClasses>-->
-<!--                        <param>com.mirkoebert.*</param>-->
-<!--                    </targetClasses>-->
-<!--                    <targetTests>-->
-<!--                        <param>com.mirkoebert.*</param>-->
-<!--                    </targetTests>-->
-<!--                    <outputFormats>-->
-<!--                        <outputFormat>HTML</outputFormat>-->
-<!--                        <outputFormat>XML</outputFormat>-->
-<!--                    </outputFormats>-->
-<!--                </configuration>-->
                 <dependencies>
                     <dependency>
                         <groupId>org.pitest</groupId>
