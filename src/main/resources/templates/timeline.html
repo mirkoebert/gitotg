@@ -81,7 +81,7 @@
                       onsubmit="return confirm('Delete this timeline entry?');">
                     <input type="hidden" name="type" th:value="${m.type}">
                     <input type="hidden" name="id" th:value="${m.id}">
-                    <button type="submit" class="btn btn-sm btn-outline-danger" style="padding: 0 6px; line-height: 1;">×</button>
+                    <button type="submit" class="btn btn-primary">×</button>
                 </form>
             </div>
             <p><span th:text="${m.comment}"></span>: <span th:text="${m.type}"></span> <span
