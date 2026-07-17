@@ -36,7 +36,7 @@
         Import:
         <form id="hcp-import-form" method="post" th:action="@{/api/handicap/import}" enctype="multipart/form-data" style="display:inline;">
             <input type="file" name="file" accept=".csv" required style="max-width:200px;">
-            <button type="submit" class="btn btn-sm btn-secondary">Upload</button>
+            <button type="submit" class="btn btn-primary">Upload</button>
         </form>
         <small>(CSV with date,hcp columns; appends data; max 1MB)</small>
         <div id="hcp-import-status" style="display:none; margin-top:4px; font-size:0.9em;"></div>
