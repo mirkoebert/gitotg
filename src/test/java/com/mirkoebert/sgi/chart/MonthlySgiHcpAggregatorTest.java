@@ -12,6 +12,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,5 +56,13 @@ class MonthlySgiHcpAggregatorTest {
                 assertThat(r).isNotNull();
         }
 
-        // TODO test empty list
+
+        @Test
+        void testWithEmptyList(){
+                when(repo.findByUserIdAndTestId(anyString(), eq(1))).thenReturn(Collections.emptyList());
+
+                final HcpData r = cut.getHcpForLastMonth(6, "userId", 1);
+
+                assertThat(r).isNotNull();
+        }
 }
