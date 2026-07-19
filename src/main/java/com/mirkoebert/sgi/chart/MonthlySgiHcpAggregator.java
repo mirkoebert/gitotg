@@ -33,33 +33,37 @@ public class MonthlySgiHcpAggregator {
         }
 
         public HcpData getHcpForLastMonth(int i, String userId, final Integer testId) {
-                Map<YearMonth, Double> ghcp = getLastOfMonth(userId, testId);
-
                 // map it
                 final LocalDate now = LocalDate.now();
-                final List<String> labels = new ArrayList<>(i);
-                final List<Double> hcps = new ArrayList<>(i);
+                final List<String> labels = new ArrayList<>();
+                final List<Double> hcps = new ArrayList<>();
+                try {
+                        Map<YearMonth, Double> ghcp = getLastOfMonth(userId, testId);
 
-                for (int j = (i - 1); j >= 0; j--) {
-                        YearMonth mi = YearMonth.from(now.minusMonths(j));
-                        Double v = ghcp.get(mi);
-                        hcps.add(v);
-                        labels.add(fmt.format(mi));
-                }
 
-                // front trim
-                while (true) {
-                        if (hcps.isEmpty()) {
-                                log.info("No values");
-                                break;
+
+                        for (int j = (i - 1); j >= 0; j--) {
+                                YearMonth mi = YearMonth.from(now.minusMonths(j));
+                                Double v = ghcp.get(mi);
+                                hcps.add(v);
+                                labels.add(fmt.format(mi));
                         }
-                        if (hcps.getFirst() != null) {
-                                break;
-                        }
-                        hcps.removeFirst();
-                        labels.removeFirst();
-                }
 
+                        // front trim
+                        while (true) {
+                                if (hcps.isEmpty()) {
+                                        log.info("No values");
+                                        break;
+                                }
+                                if (hcps.getFirst() != null) {
+                                        break;
+                                }
+                                hcps.removeFirst();
+                                labels.removeFirst();
+                        }
+                } catch (Exception e) {
+                    log.warn("Unexpected error", e);
+                }
                 return new HcpData(labels, hcps);
         }
 

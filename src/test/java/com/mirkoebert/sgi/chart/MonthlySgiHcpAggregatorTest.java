@@ -49,5 +49,11 @@ class MonthlySgiHcpAggregatorTest {
                 assertThat(r.hcp().getFirst()).isEqualTo(1.5);
         }
 
+        @Test
+        void testWithWrongCount(){
+                final HcpData r = cut.getHcpForLastMonth(-6, "userId", 1);
+                assertThat(r).isNotNull();
+        }
+
         // TODO test empty list
 }
