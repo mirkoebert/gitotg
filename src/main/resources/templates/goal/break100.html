@@ -16,6 +16,24 @@
     Checklist saved.
 </div>
 
+<div class="mb-4" th:if="${progress != null and !progress.empty}">
+    <div class="d-flex justify-content-between align-items-baseline mb-1">
+        <span class="fw-bold">Progress</span>
+        <span class="text-muted"
+              th:text="${progress.checkedCount} + ' of ' + ${progress.totalCount} + ' (' + ${progress.percentage} + '%)'">
+            0 of 0 (0%)
+        </span>
+    </div>
+    <div class="progress" role="progressbar"
+         th:attr="aria-valuenow=${progress.percentage}, aria-valuemin=0, aria-valuemax=100"
+         th:aria-label="'Checklist progress ' + ${progress.percentage} + ' percent'">
+        <div class="progress-bar"
+             th:classappend="${progress.percentage == 100} ? 'bg-success'"
+             th:style="'width: ' + ${progress.percentage} + '%'"
+             th:text="${progress.percentage} + '%'">0%</div>
+    </div>
+</div>
+
 <form th:action="@{/goal/{slug}/save(slug=${goalSlug})}" th:object="${myForm}" method="post">
 
     <div class="mb-3">

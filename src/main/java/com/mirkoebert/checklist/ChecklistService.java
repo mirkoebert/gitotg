@@ -43,6 +43,19 @@ public class ChecklistService {
         }
 
         /**
+         * Percentage of checklist items checked for the user and goal (0–100).
+         * Empty checklists report 0%.
+         */
+        public ChecklistProgress getProgress(final String userId, final GoalEnum goal) {
+                final List<Long> itemIds = itemIdsForGoal(goal);
+                if (itemIds.isEmpty()) {
+                        return ChecklistProgress.of(0, 0);
+                }
+                final int checked = getSelectedItemIds(userId, goal).size();
+                return ChecklistProgress.of(checked, itemIds.size());
+        }
+
+        /**
          * Replaces the user's checked items for the given goal with {@code selectedItemIds}.
          * Only IDs that belong to the goal are accepted.
          */

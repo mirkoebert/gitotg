@@ -1,5 +1,6 @@
 package com.mirkoebert.goal;
 
+import com.mirkoebert.checklist.ChecklistProgress;
 import com.mirkoebert.checklist.ChecklistService;
 import com.mirkoebert.checklist.GolfCheckListItem;
 import com.mirkoebert.user.CurrentUserService;
@@ -42,11 +43,15 @@ public class GoalController {
                 log.info("for user {}", userId);
 
                 final List<GolfCheckListItem> allOptions = checklistService.getForGoal(goal);
+                final List<Long> selectedIds = checklistService.getSelectedItemIds(userId, goal);
+                final ChecklistProgress progress = ChecklistProgress.of(selectedIds.size(), allOptions.size());
+
                 MyForm form = new MyForm();
-                form.setSelectedOptions(new ArrayList<>(checklistService.getSelectedItemIds(userId, goal)));
+                form.setSelectedOptions(new ArrayList<>(selectedIds));
 
                 model.addAttribute("myForm", form);
                 model.addAttribute("allOptions", allOptions);
+                model.addAttribute("progress", progress);
                 model.addAttribute("goal", goal);
                 model.addAttribute("goalTitle", goal.getFull());
                 model.addAttribute("goalSlug", goal.getSlug());

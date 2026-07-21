@@ -86,6 +86,41 @@ class ChecklistServiceTest {
         verify(golfCheckEntityRepository).saveAll(List.of());
     }
 
+    @Test
+    void getProgress_returnsPercentageOfCheckedItems() {
+        when(golfCheckListItemRepository.findByGoal(GoalEnum.BREAK100.name()))
+                .thenReturn(List.of(
+                        item(1L, "Grip"),
+                        item(2L, "Warm up"),
+                        item(3L, "Range first"),
+                        item(4L, "Short putts")
+                ));
+        when(golfCheckEntityRepository.findByUserIdAndCheckListItemIdIn(eq("user-1"), any()))
+                .thenReturn(List.of(
+                        GolfCheckEntity.builder().userId("user-1").checkListItemId(1L).checked(true).build(),
+                        GolfCheckEntity.builder().userId("user-1").checkListItemId(3L).checked(true).build()
+                ));
+
+        ChecklistProgress progress = cut.getProgress("user-1", GoalEnum.BREAK100);
+
+        assertThat(progress.checkedCount()).isEqualTo(2);
+        assertThat(progress.totalCount()).isEqualTo(4);
+        assertThat(progress.percentage()).isEqualTo(50);
+    }
+
+    @Test
+    void getProgress_returnsZeroWhenChecklistIsEmpty() {
+        when(golfCheckListItemRepository.findByGoal(GoalEnum.BREAK90.name()))
+                .thenReturn(List.of());
+
+        ChecklistProgress progress = cut.getProgress("user-1", GoalEnum.BREAK90);
+
+        assertThat(progress.checkedCount()).isZero();
+        assertThat(progress.totalCount()).isZero();
+        assertThat(progress.percentage()).isZero();
+        assertThat(progress.isEmpty()).isTrue();
+    }
+
     private static GolfCheckListItem item(Long id, String name) {
         return GolfCheckListItem.builder().id(id).name(name).goal(GoalEnum.BREAK100.name()).build();
     }
