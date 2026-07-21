@@ -22,7 +22,7 @@ public class GolfCheckEntity {
         private long id;
         private LocalDate date;
         private String userId;
-        private String name;
-        private boolean valueX;
+        private Long checkListItemId;
+        private boolean checked;
 
 }
