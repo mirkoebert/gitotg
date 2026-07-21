@@ -1,8 +1,8 @@
 package com.mirkoebert.advisor;
 
+import com.mirkoebert.handicap.HandicapClassifier;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
-import com.mirkoebert.handicap.HandicapClassifier;
 import com.mirkoebert.sgi.SingleTestResultRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +14,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 @Import({AdvisorService.class, HandicapClassifier.class})

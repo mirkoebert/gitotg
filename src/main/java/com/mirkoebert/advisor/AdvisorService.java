@@ -1,8 +1,8 @@
 package com.mirkoebert.advisor;
 
+import com.mirkoebert.handicap.HandicapClassifier;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
-import com.mirkoebert.handicap.HandicapClassifier;
 import com.mirkoebert.sgi.SingleTestResultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

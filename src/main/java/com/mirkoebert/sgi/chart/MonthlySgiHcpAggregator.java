@@ -4,6 +4,7 @@ import com.mirkoebert.sgi.SingleTestResultEntity;
 import com.mirkoebert.sgi.SingleTestResultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -32,7 +33,7 @@ public class MonthlySgiHcpAggregator {
                         ));
         }
 
-        public HcpData getHcpForLastMonth(int i, String userId, final Integer testId) {
+        public @NonNull HcpData getHcpForLastMonth(int i, String userId, final Integer testId) {
                 // map it
                 final LocalDate now = LocalDate.now();
                 final List<String> labels = new ArrayList<>();

@@ -57,7 +57,7 @@ class CsvImportServiceTest {
 
         List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
         assertThat(all).hasSize(1);
-        HcpScoreEntity saved = all.get(0);
+        HcpScoreEntity saved = all.getFirst();
         assertThat(saved.getUserId()).isEqualTo(TEST_USER);
         assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 31));
         assertThat(saved.getHcp()).isEqualTo(25.5);
@@ -80,7 +80,7 @@ class CsvImportServiceTest {
 
         List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
         assertThat(all).hasSize(1);
-        HcpScoreEntity saved = all.get(0);
+        HcpScoreEntity saved = all.getFirst();
         assertThat(saved.getHcp()).isEqualTo(25.5); // replaced
         assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
     }
@@ -126,7 +126,7 @@ class CsvImportServiceTest {
 
         List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
         assertThat(all).hasSize(1);
-        SingleTestResultEntity saved = all.get(0);
+        SingleTestResultEntity saved = all.getFirst();
         assertThat(saved.getUserId()).isEqualTo(TEST_USER);
         assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
         assertThat(saved.getPoints()).isEqualTo(5);
@@ -154,7 +154,7 @@ class CsvImportServiceTest {
 
         List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
         assertThat(all).hasSize(1);
-        SingleTestResultEntity saved = all.get(0);
+        SingleTestResultEntity saved = all.getFirst();
         assertThat(saved.getPoints()).isEqualTo(4); // replaced
         int expectedHcp = pointsToSgiHcpFunction.apply(1, 4);
         assertThat(saved.getHcp()).isEqualTo(expectedHcp);

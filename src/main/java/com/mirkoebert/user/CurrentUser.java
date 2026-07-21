@@ -1,5 +1,6 @@
 package com.mirkoebert.user;
 
+import org.jspecify.annotations.NonNull;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Map;
@@ -39,7 +40,7 @@ public record CurrentUser(
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return "CurrentUser[id=" + id + "]";
     }
 

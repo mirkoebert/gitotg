@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,10 +61,8 @@ class HcpMonthAggregator {
                 return new HcpData(labels, hcps);
         }
 
-        private boolean isNotEmpty(List<Double> hcps) {
-                boolean result = false;
-                result = hcps.stream().anyMatch(hcp -> hcp != null);
-                return result;
+        private boolean isNotEmpty(final List<Double> hcps) {
+                return hcps.stream().anyMatch(Objects::nonNull);
         }
 
 }

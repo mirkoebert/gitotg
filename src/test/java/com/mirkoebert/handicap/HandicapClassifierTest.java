@@ -1,16 +1,12 @@
 package com.mirkoebert.handicap;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class HandicapClassifierTest {
 
-    private HandicapClassifier cut = new HandicapClassifier();
+    private final HandicapClassifier cut = new HandicapClassifier();
 
     @Test
     void apply_returnsScratchPlayerForHandicapLessThan1() {
