@@ -40,6 +40,9 @@ public class CheckListGenerator {
                 l.add(new GolfCheckListItem(null, "Play mamy rounds under 90", "If you break 90 then go to break 80.", GoalEnum.BREAK90.name()));
 
 
+                l.add(new GolfCheckListItem(null, "Play mamy rounds under 80", "If you break 80, you are ready to win the club championship.", GoalEnum.BREAK80.name()));
+
+
                 if (repo.count() == l.size()) {
                         log.debug("There is data in the db. Skip loading initial data set");
                         return;
