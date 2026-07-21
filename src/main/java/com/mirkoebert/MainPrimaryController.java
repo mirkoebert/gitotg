@@ -1,6 +1,8 @@
 package com.mirkoebert;
 
 import com.mirkoebert.advisor.AdvisorService;
+import com.mirkoebert.checklist.ChecklistService;
+import com.mirkoebert.goal.GoalEnum;
 import com.mirkoebert.handicap.HcpService;
 import com.mirkoebert.sgi.SgiHcpAggregatedService;
 import com.mirkoebert.timeline.TimelineService;
@@ -26,6 +28,7 @@ public class MainPrimaryController {
         private final SgiHcpAggregatedService sgiHcpAggregatedService;
         private final AdvisorService advisorService;
         private final CurrentUserService currentUserService;
+        private final ChecklistService checklistService;
 
         @GetMapping("/user-page")
         public String getUser(Model model) {
@@ -37,6 +40,9 @@ public class MainPrimaryController {
                 model.addAttribute("lastSGHCP", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u.id()));
                 model.addAttribute("advice", advisorService.getAdvise(u.id()));
                 model.addAttribute("picture", u.pictureUrl());
+                model.addAttribute("break100Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK100).percentage());
+                model.addAttribute("break90Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK90).percentage());
+                model.addAttribute("break80Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK80).percentage());
                 return "user";
         }
 

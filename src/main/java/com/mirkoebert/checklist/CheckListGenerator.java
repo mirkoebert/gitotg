@@ -30,12 +30,14 @@ public class CheckListGenerator {
                 l.add(new GolfCheckListItem(null, "Range first", "One bucket of range balls is cheaper than losing two balls on the course", GoalEnum.BREAK100.name()));
                 l.add(new GolfCheckListItem(null, "Know your distances", "Get the carry distances for clubs from the tee.", GoalEnum.BREAK100.name()));
                 l.add(new GolfCheckListItem(null, "Learn to calc the distances", "Learn to estimate the distances for your shot.", GoalEnum.BREAK100.name()));
+                l.add(new GolfCheckListItem(null, "Play mamy rounds under 100", "If you break 100 then go to break 90.", GoalEnum.BREAK100.name()));
 
                 l.add(new GolfCheckListItem(null, "Consistent 160 yard / 150 m shot", "Carry. Whatever it is, it's enough to break 90.", GoalEnum.BREAK90.name()));
                 l.add(new GolfCheckListItem(null, "Improve your short game", "Go ahead with short game HCP.", GoalEnum.BREAK90.name()));
                 l.add(new GolfCheckListItem(null, "Consistency is king", "Start with consistency games on the range and on the greens.", GoalEnum.BREAK90.name()));
                 l.add(new GolfCheckListItem(null, "Preshot routine", "Preshot routine, every time, I said, every time. Start with a simple one.", GoalEnum.BREAK90.name()));
                 l.add(new GolfCheckListItem(null, "Collect game statistics", "Identify your weaknesses", GoalEnum.BREAK90.name()));
+                l.add(new GolfCheckListItem(null, "Play mamy rounds under 90", "If you break 90 then go to break 80.", GoalEnum.BREAK90.name()));
 
 
                 if (repo.count() == l.size()) {
