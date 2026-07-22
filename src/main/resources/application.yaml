@@ -1,19 +1,42 @@
 server:
   port: 80
+  tomcat:
+    # Personal app: avoid default 200 worker threads (~1MB stack each)
+    threads:
+      max: 20
+      min-spare: 2
+    max-connections: 50
+    accept-count: 25
+    max-http-form-post-size: 1MB
 app:
   version: @project.version@
 spring:
   application:
     name: gitotg
   datasource:
-    url: jdbc:h2:file:./db/gitotgdb
+    # CACHE_SIZE is KB of H2 page cache (default ~16MB)
+    url: jdbc:h2:file:./db/gitotgdb;CACHE_SIZE=4096;QUERY_CACHE_SIZE=8
     username: sa
     password: password
     driverClassName: org.h2.Driver
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 1
+      connection-timeout: 10000
+      idle-timeout: 300000
+      max-lifetime: 900000
+      pool-name: gitotg-pool
   jpa:
+    open-in-view: false
     defer-datasource-initialization: true
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
   security:
     oauth2:
       client:
@@ -27,11 +50,16 @@ spring:
     multipart:
       max-file-size: 1MB
       max-request-size: 1MB
+  thymeleaf:
+    cache: true
 
 logging:
   level:
+    root: INFO
     com:
       mirkoebert: DEBUG
+    org.hibernate: WARN
+    org.springframework: WARN
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{traceId}] - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{traceId}] - %msg%n"
@@ -39,11 +67,10 @@ logging:
     name: logs/${spring.application.name}.log
   logback:
     rollingpolicy:
-      # Daily rolling + keep 30 days
+      # Daily rolling + keep 14 days (was 30 / 1GB)
       file-name-pattern: logs/${spring.application.name}-%d{yyyy-MM-dd}.%i.log
-      max-file-size: 10MB
-      total-size-cap: 1GB
-      max-history: 30
+      max-file-size: 5MB
+      total-size-cap: 200MB
       clean-history-on-start: true
 
 features:

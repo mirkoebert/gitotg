@@ -176,10 +176,21 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <!-- Keep local/runtime heap modest for this small app -->
+                    <jvmArguments>
+                        -Xms32m
+                        -Xmx256m
+                        -XX:MaxMetaspaceSize=128m
+                        -XX:+UseSerialGC
+                    </jvmArguments>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
                             <artifactId>lombok</artifactId>
+                        </exclude>
+                        <exclude>
+                            <groupId>org.springframework.boot</groupId>
+                            <artifactId>spring-boot-devtools</artifactId>
                         </exclude>
                     </excludes>
                 </configuration>

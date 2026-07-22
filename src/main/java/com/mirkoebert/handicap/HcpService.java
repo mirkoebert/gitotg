@@ -25,14 +25,15 @@ public class HcpService {
         private final DateTimeFormatter df = DateTimeFormatter.ofPattern("dd. MMMM yyyy");
 
         public HcpScoreOutFormatedDTO findLatestByUserId(@NonNull String userId) {
-                List<HcpScoreEntity> l = repo.findByUserId(userId);
                 Optional<HcpScoreEntity> last = repo.findFirstByUserIdOrderByDateDesc(userId);
                 if (last.isPresent()) {
+                        // Trend only needs the latest 4 scores
+                        List<HcpScoreEntity> recent = repo.findTop4ByUserIdOrderByDateDesc(userId);
                         return HcpScoreOutFormatedDTO
                                 .builder()
                                 .hcp(String.format("%.1f", last.get().getHcp()))
                                 .date(df.format(last.get().getDate()))
-                                .trend(getTrend(l))
+                                .trend(getTrend(recent))
                                 .build();
                 }
                 return HcpScoreOutFormatedDTO

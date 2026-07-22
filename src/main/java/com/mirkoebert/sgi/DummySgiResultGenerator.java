@@ -6,14 +6,14 @@ import com.mirkoebert.sgi.calc.PointsToSgiHcpFunction;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 import static com.mirkoebert.Constants.ME;
 
-//@ConditionalOnProperty(prefix = "features", name = "load-dummy-data", havingValue = "true")
+@ConditionalOnProperty(prefix = "features", name = "load-dummy-data", havingValue = "true")
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -178,9 +178,6 @@ class DummySgiResultGenerator {
                 repo.save(d1);
 
                 repo.flush();
-
-                List<SingleTestResultEntity> a = repo.findAll();
-                a.forEach(x -> log.debug("DB {}", x));
         }
 
 }

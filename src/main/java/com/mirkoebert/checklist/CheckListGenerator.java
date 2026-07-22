@@ -41,6 +41,7 @@ public class CheckListGenerator {
 
 
                 l.add(new GolfCheckListItem(19L, "Play many rounds under 80", "If you break 80, you are ready to win the club championship.", GoalEnum.BREAK80.name()));
+                l.add(new GolfCheckListItem(20L, "Get fitted", "Play with fitted golf clubs fine tune your results.", GoalEnum.BREAK80.name()));
 
 
                 if (repo.count() == l.size()) {

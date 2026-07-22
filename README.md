@@ -9,7 +9,11 @@ Webapp to improve your Golf by tracking and supporting your Short Game. The app 
 mvn clean install
 mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8080
 ```
-
+## Deloypment
+Start app with config for reduced memory consumption.
+```bash
+java -Xms32m -Xmx256m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -jar target/gitotg-0.2.0-SNAPSHOT.jar --spring.profiles.active=local
+```
 
 ## Testing / Local run
 - Set credentials (environment variables)

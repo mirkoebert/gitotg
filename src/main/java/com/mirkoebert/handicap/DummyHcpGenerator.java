@@ -3,13 +3,14 @@ package com.mirkoebert.handicap;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
 import static com.mirkoebert.Constants.ME;
 
-//@ConditionalOnProperty(prefix = "features", name = "load-dummy-data", havingValue = "true")
+@ConditionalOnProperty(prefix = "features", name = "load-dummy-data", havingValue = "true")
 @Service
 @RequiredArgsConstructor
 @Slf4j

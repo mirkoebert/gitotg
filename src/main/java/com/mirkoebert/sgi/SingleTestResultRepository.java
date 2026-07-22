@@ -15,7 +15,16 @@ public interface SingleTestResultRepository extends JpaRepository<SingleTestResu
         List<SingleTestResultEntity> findByUserIdAndTestId(@NonNull String user, @NonNull Integer testId);
 
         @NonNull
+        List<SingleTestResultEntity> findTop4ByUserIdAndTestIdOrderByDateDesc(@NonNull String user, @NonNull Integer testId);
+
+        @NonNull
+        Optional<SingleTestResultEntity> findFirstByUserIdAndTestIdOrderByDateDesc(@NonNull String user, @NonNull Integer testId);
+
+        @NonNull
         List<SingleTestResultEntity> findAllByUserId(@NonNull String userId);
+
+        @NonNull
+        List<SingleTestResultEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);
 
         int countByUserId(@NonNull String userId);
 

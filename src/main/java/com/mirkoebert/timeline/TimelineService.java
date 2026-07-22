@@ -23,7 +23,8 @@ public class TimelineService {
         private final HcpRepository hcpRepository;
 
         public List<MeasurementDTO> getLatestResults(@NonNull final String userId) {
-                List<HcpScoreEntity> h = hcpRepository.findByUserId(userId);
+                // Cap each source so we never materialize full history for a short timeline view
+                List<HcpScoreEntity> h = hcpRepository.findTop12ByUserIdOrderByDateDesc(userId);
                 List<MeasurementDTO> hm = h
                         .stream()
                         .map(hc -> MeasurementDTO
@@ -37,8 +38,7 @@ public class TimelineService {
                                 .build()
                 ).toList();
 
-                List<SingleTestResultEntity> sgiTests = singleTestResultRepository.findAllByUserId(userId);
-
+                List<SingleTestResultEntity> sgiTests = singleTestResultRepository.findTop12ByUserIdOrderByDateDesc(userId);
 
                 List<MeasurementDTO> sgi = sgiTests
                         .stream()
