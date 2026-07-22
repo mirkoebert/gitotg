@@ -7,8 +7,16 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
     <th:block th:insert="~{fragments/head :: favicons}"></th:block>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            min-height: 220px;
+        }
+    </style>
 </head>
-<body class="container mt-5">
+<body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
 <h1 class="text-center mb-4"><span th:text="${lastResult.testType}"></span> <span th:text="${lastResult.testId}"></span>
@@ -19,10 +27,12 @@
     <li class="list-group-item">HCP:        <span th:text="${lastResult.hcp}"></span></li>
     <li class="list-group-item">Trend:      <span th:text="${trend}"></span></li>
 </ul>
-<div class="container mt-5">
+<div class="mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <canvas height="200" id="lineChart" width="450"></canvas>
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="chart-wrap">
+                <canvas id="lineChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -50,6 +60,7 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: true,
                     plugins: {
                         legend: { position: 'top' },
                         title: { display: true, text: 'HCP Monthly' }

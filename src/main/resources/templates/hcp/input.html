@@ -7,23 +7,16 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
     <th:block th:insert="~{fragments/head :: favicons}"></th:block>
     <style>
-        .hero {
-            background-color: #f8f9fa;
-            padding: 5rem 0;
-            text-align: center;
-        }
-        .hero h1 {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-        }
-        .hero p {
-            font-size: 1.25rem;
-            margin-bottom: 2rem;
+        .chart-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            min-height: 220px;
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
 </head>
-<body class="container mt-5">
+<body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
 <h1 class="text-center mb-4">Handicap</h1>
@@ -33,21 +26,27 @@
     <li class="list-group-item">Trend: <span th:text="${lastResult.trend}"></span></li>
     <li class="list-group-item">Export: <a href="/api/handicap/export">CSV</a> </li>
     <li class="list-group-item">
-        Import:
-        <form id="hcp-import-form" method="post" th:action="@{/api/handicap/import}" enctype="multipart/form-data" style="display:inline;">
-            <input type="file" name="file" accept=".csv" required style="max-width:200px;">
-            <button type="submit" class="btn btn-primary">Upload</button>
-        </form>
-        <small>(CSV with date,hcp columns; appends data; max 1MB)</small>
-        <div id="hcp-import-status" style="display:none; margin-top:4px; font-size:0.9em;"></div>
+        <div class="d-flex flex-column flex-sm-row flex-wrap align-items-sm-center gap-2">
+            <span>Import:</span>
+            <form id="hcp-import-form" method="post" th:action="@{/api/handicap/import}" enctype="multipart/form-data"
+                  class="d-flex flex-column flex-sm-row flex-wrap align-items-stretch align-items-sm-center gap-2">
+                <input class="form-control form-control-sm" type="file" name="file" accept=".csv" required
+                       style="max-width: 100%; width: min(100%, 220px);">
+                <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+            </form>
+        </div>
+        <small class="d-block mt-1 text-muted">(CSV with date,hcp columns; appends data; max 1MB)</small>
+        <div id="hcp-import-status" class="mt-1 small" style="display:none;"></div>
     </li>
 </ul>
 
 
-<div class="container mt-5">
+<div class="mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <canvas height="200" id="lineChart" width="500"></canvas>
+        <div class="col-12 col-md-10 col-lg-8">
+            <div class="chart-wrap">
+                <canvas id="lineChart"></canvas>
+            </div>
         </div>
     </div>
 </div>
@@ -75,6 +74,7 @@
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: true,
                     plugins: {
                         legend: { position: 'top' },
                         title: { display: true, text: 'Handicap Monthly' }
@@ -87,21 +87,21 @@
         })
         .catch(error => console.error('Error fetching data:', error));
 </script>
-<div class="container my-5">
+<div class="my-5">
     <h2>Add Handicap</h2>
     <form method="post" th:action="@{/handicap/submit}" th:object="${hcpScore}">
         <div class="row g-3 align-items-end">
-            <div class="col-md-4" th:classappend="${#fields.hasErrors('hcp')} ? 'is-invalid'">
+            <div class="col-12 col-md-4" th:classappend="${#fields.hasErrors('hcp')} ? 'is-invalid'">
                 <label class="form-label" for="hcp">Handicap</label>
                 <input class="form-control" id="hcp" th:field="*{hcp}" type="number" step="0.1" placeholder="e.g. 18.4" required>
                 <div class="text-danger small" th:errors="*{hcp}"></div>
             </div>
-            <div class="col-md-4" th:classappend="${#fields.hasErrors('selectedDate')} ? 'is-invalid'">
+            <div class="col-12 col-md-4" th:classappend="${#fields.hasErrors('selectedDate')} ? 'is-invalid'">
                 <label class="form-label" for="selectedDate">Date</label>
                 <input class="form-control" id="selectedDate" th:field="*{selectedDate}" type="date" required>
                 <div class="text-danger small" th:errors="*{selectedDate}"></div>
             </div>
-            <div class="col-md-4">
+            <div class="col-12 col-md-4">
                 <button class="btn btn-primary" type="submit">Add Score</button>
             </div>
         </div>
@@ -153,5 +153,6 @@
 })();
 </script>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

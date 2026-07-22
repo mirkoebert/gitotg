@@ -68,23 +68,23 @@
         }
     </style>
 </head>
-<body class="container mt-5">
+<body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
 <h2 class="text-center mb-4">Timeline</h2>
 <div class="timeline">
     <div th:each="m: ${timeline}" class="timeline-item">
         <div class="timeline-content">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h5 th:text="${#temporals.format(m.date, 'dd. MMMM yyyy')}"></h5>
-                <form th:action="@{/timeline/delete}" method="post" style="margin: 0;"
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <h5 class="mb-0 text-break" th:text="${#temporals.format(m.date, 'dd. MMMM yyyy')}"></h5>
+                <form th:action="@{/timeline/delete}" method="post" class="m-0 flex-shrink-0"
                       onsubmit="return confirm('Delete this timeline entry?');">
                     <input type="hidden" name="type" th:value="${m.type}">
                     <input type="hidden" name="id" th:value="${m.id}">
-                    <button type="submit" class="btn btn-primary">×</button>
+                    <button type="submit" class="btn btn-primary btn-sm" aria-label="Delete entry">×</button>
                 </form>
             </div>
-            <p><span th:text="${m.comment}"></span>: <span th:text="${m.type}"></span> <span
+            <p class="mb-0 mt-2 text-break"><span th:text="${m.comment}"></span>: <span th:text="${m.type}"></span> <span
                     th:text="${m.value}"></span></p>
         </div>
     </div>
