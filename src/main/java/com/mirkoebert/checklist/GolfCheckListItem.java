@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GolfCheckListItem {
 
-        @Id @GeneratedValue
+        @Id
         private Long id;
         private String name;
         private String description;
