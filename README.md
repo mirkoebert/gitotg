@@ -12,14 +12,24 @@ mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8080
 ## Deloypment
 Start app with config for reduced memory consumption.
 ```bash
-java -Xms32m -Xmx256m -XX:MaxMetaspaceSize=128m -XX:+UseSerialGC -jar target/gitotg-0.2.0-SNAPSHOT.jar --spring.profiles.active=local
+java -Xms32m -Xmx160m -Xss512k \
+  -XX:MaxMetaspaceSize=96m \
+  -XX:ReservedCodeCacheSize=48m \
+  -XX:CompressedClassSpaceSize=32m \
+  -XX:+UseSerialGC \
+  -jar target/gitotg-0.2.0-SNAPSHOT.jar --spring.profiles.active=local
 ```
+If the process OOMs under load, raise only `-Xmx` (e.g. `192m` / `256m`) first.
 
 ## Testing / Local run
 - Set credentials (environment variables)
-    - OAuth2
-        - `CLIENT_ID`
-        - `CLIENT_SECRET`
+    - Google OAuth2: `CLIENT_ID`, `CLIENT_SECRET`
+    - GitHub OAuth2: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
+- Create a GitHub OAuth App (Settings → Developer settings → OAuth Apps):
+    - Homepage URL: e.g. `http://localhost:8080`
+    - Authorization callback URL: `http://localhost:8080/login/oauth2/code/github`
+- Login paths: `/oauth2/authorization/google`, `/oauth2/authorization/github`
+- Note: Google and GitHub users are separate identities (different user ids). Data is not merged across providers.
 - Run locally: `mvnd spring-boot:run -Dspring-boot.run.arguments=--server.port=8080` (or use `mvn`)
 
 ## CSV Export / Import

@@ -1,26 +1,44 @@
 package com.mirkoebert.config;
 
 import jakarta.annotation.PostConstruct;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+/**
+ * Logs whether configured OAuth2 client registrations have a client-id at startup.
+ */
 @Service
 @Slf4j
-@ConfigurationProperties(prefix = "spring.security.oauth2.client.registration.google")
-@Setter
 public class SecureOauthCredentialChecker {
 
-    private String clientId;
-    private String redirectUri;
+    @Value("${spring.security.oauth2.client.registration.google.client-id:}")
+    private String googleClientId;
+
+    @Value("${spring.security.oauth2.client.registration.google.redirect-uri:}")
+    private String googleRedirectUri;
+
+    @Value("${spring.security.oauth2.client.registration.github.client-id:}")
+    private String githubClientId;
+
+    @Value("${spring.security.oauth2.client.registration.github.redirect-uri:}")
+    private String githubRedirectUri;
 
     @PostConstruct
     public void checkCredentials() {
+        logRegistration("google", googleClientId, googleRedirectUri);
+        logRegistration("github", githubClientId, githubRedirectUri);
+    }
+
+    private void logRegistration(String registrationId, String clientId, String redirectUri) {
         if (clientId == null || clientId.isBlank()) {
-            log.error("Google client-id is missing!");
+            log.error("OAuth2 client-id is missing for registration '{}'", registrationId);
+            return;
         }
-        log.info("Google OAuth2 client-id loaded successfully: {}", clientId.substring(0, Math.min(4, clientId.length())) + "...");
-        log.info("Redirect URI: {}", redirectUri);
+        String preview = clientId.substring(0, Math.min(4, clientId.length())) + "...";
+        log.info("OAuth2 registration '{}' client-id loaded: {}", registrationId, preview);
+        if (redirectUri != null && !redirectUri.isBlank()) {
+            log.info("OAuth2 registration '{}' redirect-uri: {}", registrationId, redirectUri);
+        }
     }
 }

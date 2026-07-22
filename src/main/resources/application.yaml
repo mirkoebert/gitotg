@@ -1,30 +1,38 @@
 server:
   port: 80
   tomcat:
-    # Personal app: avoid default 200 worker threads (~1MB stack each)
+    # Personal app: keep platform threads low (default stack ~1MB each unless -Xss is set)
     threads:
-      max: 20
-      min-spare: 2
-    max-connections: 50
-    accept-count: 25
+      max: 10
+      min-spare: 1
+    max-connections: 25
+    accept-count: 10
     max-http-form-post-size: 1MB
+    mbeanregistry:
+      enabled: false
 app:
   version: @project.version@
 spring:
   application:
     name: gitotg
+  jmx:
+    enabled: false
+  main:
+    # Defer non-web beans until first use (lower idle RSS; first request slightly slower)
+    lazy-initialization: true
+    banner-mode: "off"
   datasource:
     # CACHE_SIZE is KB of H2 page cache (default ~16MB)
-    url: jdbc:h2:file:./db/gitotgdb;CACHE_SIZE=4096;QUERY_CACHE_SIZE=8
+    url: jdbc:h2:file:./db/gitotgdb;CACHE_SIZE=2048;QUERY_CACHE_SIZE=4
     username: sa
     password: password
     driverClassName: org.h2.Driver
     hikari:
-      maximum-pool-size: 3
+      maximum-pool-size: 2
       minimum-idle: 1
       connection-timeout: 10000
-      idle-timeout: 300000
-      max-lifetime: 900000
+      idle-timeout: 120000
+      max-lifetime: 600000
       pool-name: gitotg-pool
   jpa:
     open-in-view: false
@@ -34,9 +42,11 @@ spring:
     properties:
       hibernate:
         jdbc:
-          batch_size: 25
+          batch_size: 15
         order_inserts: true
         order_updates: true
+        # Avoid extra metadata / stats work at runtime
+        generate_statistics: false
   security:
     oauth2:
       client:
@@ -44,8 +54,13 @@ spring:
           google:
             client-id: ${CLIENT_ID}
             client-secret: ${CLIENT_SECRET}
-            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"  # Default, customizable
-            scope: profile, email  # Request basic user info
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: profile, email
+          github:
+            client-id: ${GITHUB_CLIENT_ID}
+            client-secret: ${GITHUB_CLIENT_SECRET}
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope: read:user, user:email
   servlet:
     multipart:
       max-file-size: 1MB
@@ -57,7 +72,7 @@ logging:
   level:
     root: INFO
     com:
-      mirkoebert: DEBUG
+      mirkoebert: INFO
     org.hibernate: WARN
     org.springframework: WARN
   pattern:
@@ -67,10 +82,9 @@ logging:
     name: logs/${spring.application.name}.log
   logback:
     rollingpolicy:
-      # Daily rolling + keep 14 days (was 30 / 1GB)
       file-name-pattern: logs/${spring.application.name}-%d{yyyy-MM-dd}.%i.log
-      max-file-size: 5MB
-      total-size-cap: 200MB
+      max-file-size: 2MB
+      total-size-cap: 50MB
       clean-history-on-start: true
 
 features:

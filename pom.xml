@@ -15,6 +15,15 @@
             <url>https://x.com/mirkoebert</url>
         </developer>
     </developers>
+
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Packages</name>
+            <url>https://maven.pkg.github.com/mirkoebert/gitotg</url>
+        </repository>
+    </distributionManagement>
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -176,11 +185,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <!-- Keep local/runtime heap modest for this small app -->
+                    <!-- Keep local/runtime footprint modest for this personal app -->
                     <jvmArguments>
                         -Xms32m
-                        -Xmx256m
-                        -XX:MaxMetaspaceSize=128m
+                        -Xmx160m
+                        -Xss512k
+                        -XX:MaxMetaspaceSize=96m
+                        -XX:ReservedCodeCacheSize=48m
+                        -XX:CompressedClassSpaceSize=32m
                         -XX:+UseSerialGC
                     </jvmArguments>
                     <excludes>
