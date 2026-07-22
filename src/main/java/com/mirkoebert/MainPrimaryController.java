@@ -70,5 +70,10 @@ public class MainPrimaryController {
                 return "about";
         }
 
+        @GetMapping("/putting-index")
+        public String getPuttingIndex() {
+                log.info("putting-index page");
+                return "putting-index";
+        }
 
 }
