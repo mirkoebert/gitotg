@@ -10,6 +10,7 @@ import com.mirkoebert.user.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,6 +30,9 @@ public class MainPrimaryController {
         private final AdvisorService advisorService;
         private final CurrentUserService currentUserService;
         private final ChecklistService checklistService;
+
+        @Value("${app.version:unknown}")
+        private String appVersion;
 
         @GetMapping("/user-page")
         public String getUser(Model model) {
@@ -66,7 +70,7 @@ public class MainPrimaryController {
         @GetMapping("/about")
         public String getAbout(final Model m) {
                 log.info("about page");
-                m.addAttribute("version", this.getClass().getPackage().getImplementationVersion());
+                m.addAttribute("version", appVersion);
                 return "about";
         }
 

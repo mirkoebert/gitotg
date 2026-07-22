@@ -1,5 +1,7 @@
 server:
   port: 80
+app:
+  version: @project.version@
 spring:
   application:
     name: gitotg
