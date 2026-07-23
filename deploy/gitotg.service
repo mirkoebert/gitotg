@@ -1,0 +1,42 @@
+[Unit]
+Description=GITOTG Spring Boot app
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=gitotg
+Group=gitotg
+WorkingDirectory=/opt/gitotg
+
+#EnvironmentFile=/etc/gitotg.env
+
+# Same low-memory flags as your README
+ExecStart=/usr/bin/java \
+  -Xms32m -Xmx256m \
+  -XX:MaxMetaspaceSize=128m \
+  -XX:+UseSerialGC \
+  -jar /opt/gitotg/gitotg.jar --spring.profiles.active=prod
+
+# Default application.yaml uses port 80 — needs capability or a higher port
+# Option A: keep port 80 without running as root
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+
+# Option B: use a non-privileged port instead (simpler):
+# ExecStart=... -jar /opt/gitotg/gitotg.jar --server.port=8080
+# then reverse-proxy with nginx/caddy
+
+Restart=on-failure
+RestartSec=5
+SuccessExitStatus=143
+
+# Hardening (optional but useful)
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/gitotg
+
+[Install]
+WantedBy=multi-user.target
