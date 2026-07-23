@@ -6,11 +6,26 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
     <th:block th:insert="~{fragments/head :: favicons}"></th:block>
+    <style>
+        .login-image {
+            max-width: 100%;
+            height: auto;
+            max-height: 280px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+    </style>
 </head>
 <body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
-<h1 class="text-center mb-4">Login</h1>
+<div class="text-center mb-4">
+    <img src="/images/golf-glove.jpg"
+         alt="Golf glove"
+         class="login-image mb-3">
+    <h1 class="mb-0">Login</h1>
+</div>
+
 
 <section class="mt-5">
     <div class="container">
