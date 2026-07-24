@@ -27,7 +27,7 @@ public class AdvisorService {
                 "Let's produce some data.",
                 "Data is what I need. Start a test.",
                 "Data is what I need. Go to the chipping green and start a training.",
-                "Monitoring your results is a cornerstone of improvement.",
+                "Monitoring your results is a cornerstone of improvement."
         };
 
         final static String[] few = {
@@ -45,21 +45,23 @@ public class AdvisorService {
         };
 
         final static String[] hh = {
-                "High Handicaper lower sores faster by improving the short game.",
-                "Short game is a cornerstone of improvement for High Handicapers.",
+                "High Handicapper lower sores faster by improving the short game.",
+                "Short game is a cornerstone of improvement for High Handicappers.",
                 "Your clubs are not the problem.",
                 "Play your shot shape.",
                 "Don't waste your time train shots you never hit. Go with your stock shots.",
                 "Every training session should have a specific goal.",
-                "Don't look at any YouTube Golf swing chage video."
+                "Don't look at any YouTube Golf swing chage video.",
+                "Most important metric for you: count your lost balls per round."
         };
 
         final static String[] mh = {
                 "Think about club fitting. It could improve your game.",
-                "Consistend ball striking is king.",
+                "Consistent ball striking is king.",
                 "Improve aiming at long shots.",
                 "Walk before you run. On the range, start with ball contact shots before go ahead.",
-                "Improve your athletics."
+                "Improve your athletics.",
+                "Most important metric for you: count your double bogeys per round."
         };
 
         final static String[] other ={
@@ -68,9 +70,11 @@ public class AdvisorService {
                 "The Putter is never the problem.",
                 "Golf is a fun sport.",
                 "Golf is the Greatest Game",
-                "Golf jokes are the whorst kind of jokes.",
+                "Golf jokes are the worst kind of jokes.",
                 "Golf is addictive.",
-                "Alice Cooper is playing Golf."
+                "Alice Cooper is playing Golf.",
+                "Harry Kane is playing Golf.",
+                "YouTube Golf tips are ruining your game."
         };
 
         private final Random r = new Random();

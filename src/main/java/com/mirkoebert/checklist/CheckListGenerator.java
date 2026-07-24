@@ -43,6 +43,8 @@ public class CheckListGenerator {
                 l.add(new GolfCheckListItem(19L, "Play many rounds under 80", "If you break 80, you are ready to win the club championship.", GoalEnum.BREAK80.name()));
                 l.add(new GolfCheckListItem(20L, "Get fitted", "Play with fitted golf clubs fine tune your results.", GoalEnum.BREAK80.name()));
 
+                l.add(new GolfCheckListItem(21L, "Count your lost balls per round", "Lost balls or penalties are the most important metric to break 100.", GoalEnum.BREAK100.name()));
+                l.add(new GolfCheckListItem(22L, "Count your double bogeys per round", "Double bogeys per round is the most important metric to break 90.", GoalEnum.BREAK90.name()));
 
                 if (repo.count() == l.size()) {
                         log.debug("There is data in the db. Skip loading initial data set");

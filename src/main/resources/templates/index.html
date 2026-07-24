@@ -13,6 +13,13 @@
             background-color: #f8f9fa;
             padding: 3rem 1rem;
             text-align: center;
+            border-radius: 12px;
+        }
+        .hero-alt {
+            background-color: #fff;
+        }
+        .hero + .hero {
+            margin-top: 2.5rem;
         }
         .hero h1 {
             font-size: clamp(1.75rem, 5vw, 3rem);
@@ -21,6 +28,14 @@
         .hero p {
             font-size: clamp(1rem, 2.5vw, 1.25rem);
             margin-bottom: 2rem;
+        }
+        .hero-image {
+            max-width: 100%;
+            height: auto;
+            max-height: 280px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.25rem;
         }
         .made-with-ai {
             position: fixed;
@@ -53,28 +68,23 @@
 <section class="py-5">
     <div class="container">
         <h2>Improve your Golf game</h2>
-        <p>This app helps you to improve your Golf game, it helps to break 100, 90, 80. It focussed on Short Game</p>
+        <p>This app helps you to improve your Golf game, it helps to break 100, 90, 80. It focussed on Short Game and it's free.</p>
     </div>
 </section>
 
 
 <section class="hero bg-light">
     <div class="container">
+        <img src="/images/wedge.jpg"
+             alt="Golf wedge"
+             class="hero-image">
         <h1>Short Game Index</h1>
         <p>Fastest way to lower your scores for high handicappers.</p>
         <a class="btn btn-primary" href="/short-game-index">Start now</a>
     </div>
 </section>
 
-<section class="py-5">
-    <div class="container">
-        <h2>Some Content</h2>
-        <p>This is placeholder content between the two hero sections.</p>
-    </div>
-</section>
-
-<!-- Second Hero Section -->
-<section class="hero bg-light">
+<section class="hero hero-alt border">
     <div class="container">
         <h1>Putting Index</h1>
         <p>Coming soon.</p>
