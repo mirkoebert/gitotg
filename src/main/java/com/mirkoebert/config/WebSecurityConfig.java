@@ -1,12 +1,16 @@
 package com.mirkoebert.config;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@RequiredArgsConstructor
 public class WebSecurityConfig {
+
+        private final LocaleOAuth2SuccessHandler localeOAuth2SuccessHandler;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) {
@@ -18,7 +22,7 @@ public class WebSecurityConfig {
                         )
                         .oauth2Login(oauth2 -> oauth2
                                 .loginPage("/login")
-                                .defaultSuccessUrl("/user-page", true)
+                                .successHandler(localeOAuth2SuccessHandler)
                                 .failureUrl("/login?error=true")
                         )
                         .logout(logout -> logout
