@@ -6,6 +6,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +25,7 @@ public class CsvExportPrimaryRestController {
         private final CurrentUserService currentUserService;
         private final CsvFileNameService csvFileNameService;
         private final CsvImportService csvImportService;
+        private final MessageSource messageSource;
 
         @SneakyThrows
         @GetMapping("/api/handicap/export")
@@ -58,7 +61,8 @@ public class CsvExportPrimaryRestController {
                 val u = currentUserService.getCurrentUser();
                 final String userId = u.id();
                 int count = csvImportService.importHcpData(file.getInputStream(), userId);
-                return ResponseEntity.ok("Imported " + count + " handicap records");
+                return ResponseEntity.ok(messageSource.getMessage(
+                        "api.import.hcp", new Object[]{count}, LocaleContextHolder.getLocale()));
         }
 
         @SneakyThrows
@@ -68,7 +72,8 @@ public class CsvExportPrimaryRestController {
                 val u = currentUserService.getCurrentUser();
                 final String userId = u.id();
                 int count = csvImportService.importSgiData(file.getInputStream(), userId);
-                return ResponseEntity.ok("Imported " + count + " SGI records");
+                return ResponseEntity.ok(messageSource.getMessage(
+                        "api.import.sgi", new Object[]{count}, LocaleContextHolder.getLocale()));
         }
 
 }

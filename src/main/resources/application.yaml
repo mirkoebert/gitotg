@@ -67,6 +67,10 @@ spring:
       max-request-size: 1MB
   thymeleaf:
     cache: true
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
 
 logging:
   level:

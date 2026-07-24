@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Gitotg: Handicap</title>
+    <title th:text="#{hcp.title}">Gitotg: Handicap</title>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -19,23 +19,23 @@
 <body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
-<h1 class="text-center mb-4">Handicap</h1>
+<h1 class="text-center mb-4" th:text="#{hcp.heading}">Handicap</h1>
 <ul class="list-group">
-    <li class="list-group-item">HCP: <span th:text="${lastResult.hcp}"></span></li>
-    <li class="list-group-item">Date: <span th:text="${lastResult.date}"></span></li>
-    <li class="list-group-item">Trend: <span th:text="${lastResult.trend}"></span></li>
-    <li class="list-group-item">Export: <a href="/api/handicap/export">CSV</a> </li>
+    <li class="list-group-item"><span th:text="#{common.hcp}">HCP</span>: <span th:text="${lastResult.hcp}"></span></li>
+    <li class="list-group-item"><span th:text="#{common.date}">Date</span>: <span th:text="${lastResult.date}"></span></li>
+    <li class="list-group-item"><span th:text="#{common.trend}">Trend</span>: <span th:text="${lastResult.trend}"></span></li>
+    <li class="list-group-item"><span th:text="#{hcp.export}">Export:</span> <a th:href="@{/api/handicap/export}" th:text="#{common.csv}">CSV</a> </li>
     <li class="list-group-item">
         <div class="d-flex flex-column flex-sm-row flex-wrap align-items-sm-center gap-2">
-            <span>Import:</span>
+            <span th:text="#{common.import}">Import:</span>
             <form id="hcp-import-form" method="post" th:action="@{/api/handicap/import}" enctype="multipart/form-data"
                   class="d-flex flex-column flex-sm-row flex-wrap align-items-stretch align-items-sm-center gap-2">
                 <input class="form-control form-control-sm" type="file" name="file" accept=".csv" required
                        style="max-width: 100%; width: min(100%, 220px);">
-                <button type="submit" class="btn btn-primary btn-sm">Upload</button>
+                <button type="submit" class="btn btn-primary btn-sm" th:text="#{common.upload}">Upload</button>
             </form>
         </div>
-        <small class="d-block mt-1 text-muted">(CSV with date,hcp columns; appends data; max 1MB)</small>
+        <small class="d-block mt-1 text-muted" th:text="#{hcp.importHint}">(CSV with date,hcp columns; appends data; max 1MB)</small>
         <div id="hcp-import-status" class="mt-1 small" style="display:none;"></div>
     </li>
 </ul>
@@ -51,9 +51,15 @@
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
+    const hcpChartLabel = /*[[#{hcp.chartLabel}]]*/ 'HCP';
+    const hcpChartTitle = /*[[#{hcp.chartTitle}]]*/ 'Handicap Monthly';
+    const i18nUploading = /*[[#{common.uploading}]]*/ 'Uploading...';
+    const i18nErrorPrefix = /*[[#{api.import.errorPrefix}]]*/ 'Error:';
+    const i18nFailedPrefix = /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:';
+
     // Fetch data from REST API and render chart
-    fetch('[[@{/api/handicap/chart-data}]]')
+    fetch(/*[[@{/api/handicap/chart-data}]]*/ '/api/handicap/chart-data')
         .then(response => response.json())
         .then(data => {
             const ctx = document.getElementById('lineChart').getContext('2d');
@@ -62,7 +68,7 @@
                 data: {
                     labels: data.labels,
                     datasets: [{
-                        label: 'HCP',
+                        label: hcpChartLabel,
                         data: data.hcp,
                         borderColor: 'rgba(75, 192, 192, 1)',
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -77,7 +83,7 @@
                     maintainAspectRatio: true,
                     plugins: {
                         legend: { position: 'top' },
-                        title: { display: true, text: 'Handicap Monthly' }
+                        title: { display: true, text: hcpChartTitle }
                     },
                     scales: {
                         y: { beginAtZero: true }
@@ -88,21 +94,21 @@
         .catch(error => console.error('Error fetching data:', error));
 </script>
 <div class="my-5">
-    <h2>Add Handicap</h2>
+    <h2 th:text="#{hcp.addHeading}">Add Handicap</h2>
     <form method="post" th:action="@{/handicap/submit}" th:object="${hcpScore}">
         <div class="row g-3 align-items-end">
             <div class="col-12 col-md-4" th:classappend="${#fields.hasErrors('hcp')} ? 'is-invalid'">
-                <label class="form-label" for="hcp">Handicap</label>
-                <input class="form-control" id="hcp" th:field="*{hcp}" type="number" step="0.1" placeholder="e.g. 18.4" required>
+                <label class="form-label" for="hcp" th:text="#{hcp.label}">Handicap</label>
+                <input class="form-control" id="hcp" th:field="*{hcp}" type="number" step="0.1" th:placeholder="#{hcp.placeholder}" required>
                 <div class="text-danger small" th:errors="*{hcp}"></div>
             </div>
             <div class="col-12 col-md-4" th:classappend="${#fields.hasErrors('selectedDate')} ? 'is-invalid'">
-                <label class="form-label" for="selectedDate">Date</label>
+                <label class="form-label" for="selectedDate" th:text="#{common.date}">Date</label>
                 <input class="form-control" id="selectedDate" th:field="*{selectedDate}" type="date" required>
                 <div class="text-danger small" th:errors="*{selectedDate}"></div>
             </div>
             <div class="col-12 col-md-4">
-                <button class="btn btn-primary" type="submit">Add Score</button>
+                <button class="btn btn-primary" type="submit" th:text="#{hcp.addScore}">Add Score</button>
             </div>
         </div>
     </form>
@@ -120,7 +126,7 @@
     const originalText = btn ? btn.textContent : '';
     if (btn) {
       btn.disabled = true;
-      btn.textContent = 'Uploading...';
+      btn.textContent = i18nUploading;
     }
     statusEl.style.display = 'none';
     statusEl.innerHTML = '';
@@ -136,10 +142,10 @@
         statusEl.innerHTML = '<span class="text-success">' + text + '</span>';
         setTimeout(function() { window.location.reload(); }, 1200);
       } else {
-        statusEl.innerHTML = '<span class="text-danger">Error: ' + text + '</span>';
+        statusEl.innerHTML = '<span class="text-danger">' + i18nErrorPrefix + ' ' + text + '</span>';
       }
     } catch (err) {
-      statusEl.innerHTML = '<span class="text-danger">Upload failed: ' + (err.message || err) + '</span>';
+      statusEl.innerHTML = '<span class="text-danger">' + i18nFailedPrefix + ' ' + (err.message || err) + '</span>';
     } finally {
       statusEl.style.display = 'block';
       if (btn) {

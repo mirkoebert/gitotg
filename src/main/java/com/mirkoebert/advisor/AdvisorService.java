@@ -7,6 +7,8 @@ import com.mirkoebert.sgi.SingleTestResultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -20,61 +22,46 @@ public class AdvisorService {
         private final HcpRepository hcpRepository;
         private final SingleTestResultRepository singleTestResultRepository;
         private final HandicapClassifier handicapClassifier;
+        private final MessageSource messageSource;
 
-        static final String[] fresh = {
-                "I need more data. Please start a test.",
-                "Don't be shy, you can export all your data if you want.",
-                "Let's produce some data.",
-                "Data is what I need. Start a test.",
-                "Data is what I need. Go to the chipping green and start a training.",
-                "Monitoring your results is a cornerstone of improvement."
+        static final String[] FRESH_KEYS = {
+                "advisor.fresh.0",
+                "advisor.fresh.1",
+                "advisor.fresh.2",
+                "advisor.fresh.3",
+                "advisor.fresh.4",
+                "advisor.fresh.5"
         };
 
-        final static String[] few = {
-                "I need more data. Please start a test.",
-                "Keep up on golfing. I need more data to give more sophisticated advices.",
-                "Keep up on golfing. You should start a Short Game test.",
-                "Monitoring your results is a cornerstone of improvement."
+        static final String[] FEW_KEYS = {
+                "advisor.few.0",
+                "advisor.few.1",
+                "advisor.few.2",
+                "advisor.few.3"
         };
 
-
-        final static String[] beginner = {
-                "Go and train.",
-                "Play tournaments. Don't be shy. Every Golfer started at 54.",
-                "Buy only cheap balls"
+        static final String[] HH_KEYS = {
+                "advisor.hh.0",
+                "advisor.hh.1",
+                "advisor.hh.2",
+                "advisor.hh.3",
+                "advisor.hh.4",
+                "advisor.hh.5",
+                "advisor.hh.6",
+                "advisor.hh.7"
         };
 
-        final static String[] hh = {
-                "High Handicapper lower sores faster by improving the short game.",
-                "Short game is a cornerstone of improvement for High Handicappers.",
-                "Your clubs are not the problem.",
-                "Play your shot shape.",
-                "Don't waste your time train shots you never hit. Go with your stock shots.",
-                "Every training session should have a specific goal.",
-                "Don't look at any YouTube Golf swing chage video.",
-                "Most important metric for you: count your lost balls per round."
-        };
-
-        final static String[] mh = {
-                "Think about club fitting. It could improve your game.",
-                "Consistent ball striking is king.",
-                "Improve aiming at long shots.",
-                "Walk before you run. On the range, start with ball contact shots before go ahead.",
-                "Improve your athletics.",
-                "Most important metric for you: count your double bogeys per round."
-        };
-
-        final static String[] other ={
-                "I have to think about it. Go on.",
-                "Nice data. Keep up on golfing.",
-                "The Putter is never the problem.",
-                "Golf is a fun sport.",
-                "Golf is the Greatest Game",
-                "Golf jokes are the worst kind of jokes.",
-                "Golf is addictive.",
-                "Alice Cooper is playing Golf.",
-                "Harry Kane is playing Golf.",
-                "YouTube Golf tips are ruining your game."
+        static final String[] OTHER_KEYS = {
+                "advisor.other.0",
+                "advisor.other.1",
+                "advisor.other.2",
+                "advisor.other.3",
+                "advisor.other.4",
+                "advisor.other.5",
+                "advisor.other.6",
+                "advisor.other.7",
+                "advisor.other.8",
+                "advisor.other.9"
         };
 
         private final Random r = new Random();
@@ -85,20 +72,24 @@ public class AdvisorService {
 
                 Optional<HcpScoreEntity> hcp = hcpRepository.findFirstByUserIdOrderByDateDesc(userId);
                 log.info("data points {}", c);
-                
+
                 if (c < 5){
                         log.info("fresh");
-                        return fresh[r.nextInt(fresh.length)];
+                        return message(FRESH_KEYS[r.nextInt(FRESH_KEYS.length)]);
                 } else if (c < 25) {
                         log.info("newby");
-                        return few[r.nextInt(few.length)];
+                        return message(FEW_KEYS[r.nextInt(FEW_KEYS.length)]);
                 } else if (hcp.isPresent() && HandicapClassifier.HIGH_HANDICAPER.equals(handicapClassifier.apply(hcp.get().getHcp()))) {
                         log.info(HandicapClassifier.HIGH_HANDICAPER);
-                        return hh[r.nextInt(hh.length)];
+                        return message(HH_KEYS[r.nextInt(HH_KEYS.length)]);
                 }
                 // analyze hcp
                 // analyze sgi
                 log.info("other");
-                return other[r.nextInt(other.length)];
+                return message(OTHER_KEYS[r.nextInt(OTHER_KEYS.length)]);
+        }
+
+        private String message(final String key) {
+                return messageSource.getMessage(key, null, LocaleContextHolder.getLocale());
         }
 }

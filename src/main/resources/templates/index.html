@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Gitotg: Get it on the Green</title>
+    <title th:text="#{home.title}">Gitotg: Get it on the Green</title>
     <meta charset="UTF-8">
     <meta content="Golf, Handicap, Short Game" name="keywords">
     <meta content="Mirko Ebert" name="author">
@@ -61,14 +61,14 @@
 <body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
-<img src="/images/made-with-ai.jpg" alt="Made with AI" class="made-with-ai">
+<img src="/images/made-with-ai.jpg" th:alt="#{home.alt.madeWithAi}" class="made-with-ai">
 
-<h1 class="text-center mb-4">Gitotg: Get it on the Green</h1>
+<h1 class="text-center mb-4" th:text="#{home.title}">Gitotg: Get it on the Green</h1>
 
 <section class="py-5">
     <div class="container">
-        <h2>Improve your Golf game</h2>
-        <p>This app helps you to improve your Golf game, it helps to break 100, 90, 80. It focussed on Short Game and it's free.</p>
+        <h2 th:text="#{home.heading}">Improve your Golf game</h2>
+        <p th:text="#{home.intro}">This app helps you to improve your Golf game, it helps to break 100, 90, 80. It focussed on Short Game and it's free.</p>
     </div>
 </section>
 
@@ -76,19 +76,19 @@
 <section class="hero bg-light">
     <div class="container">
         <img src="/images/wedge.jpg"
-             alt="Golf wedge"
+             th:alt="#{home.alt.wedge}"
              class="hero-image">
-        <h1>Short Game Index</h1>
-        <p>Fastest way to lower your scores for high handicappers.</p>
-        <a class="btn btn-primary" href="/short-game-index">Start now</a>
+        <h1 th:text="#{home.sgi.heading}">Short Game Index</h1>
+        <p th:text="#{home.sgi.text}">Fastest way to lower your scores for high handicappers.</p>
+        <a class="btn btn-primary" th:href="@{/short-game-index}" th:text="#{home.sgi.cta}">Start now</a>
     </div>
 </section>
 
 <section class="hero hero-alt border">
     <div class="container">
-        <h1>Putting Index</h1>
-        <p>Coming soon.</p>
-        <a class="btn btn-primary" href="/putting-index">Get Started</a>
+        <h1 th:text="#{home.putting.heading}">Putting Index</h1>
+        <p th:text="#{home.putting.text}">Coming soon.</p>
+        <a class="btn btn-primary" th:href="@{/putting-index}" th:text="#{home.putting.cta}">Get Started</a>
     </div>
 </section>
 

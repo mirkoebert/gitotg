@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Short Game Input</title>
+    <title th:text="#{sgi.input.title}">Short Game Input</title>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -23,11 +23,11 @@
 <h1 class="text-center mb-4"><span th:text="${sgitest.name}"></span></h1>
 
 <ul class="list-group">
-    <li class="list-group-item">Distance: <span th:text="${sgitest.distanceMeterToCup}"></span>m</li>
-    <li class="list-group-item">Shots: 10</li>
-    <li class="list-group-item">Holed: 4 Points</li>
-    <li class="list-group-item">In 1m: 2 Points</li>
-    <li class="list-group-item">In 2m: 1 Point</li>
+    <li class="list-group-item"><span th:text="#{sgi.distance}">Distance:</span> <span th:text="${sgitest.distanceMeterToCup}"></span>m</li>
+    <li class="list-group-item" th:text="#{sgi.shots}">Shots: 10</li>
+    <li class="list-group-item" th:text="#{sgi.holed}">Holed: 4 Points</li>
+    <li class="list-group-item" th:text="#{sgi.in1m}">In 1m: 2 Points</li>
+    <li class="list-group-item" th:text="#{sgi.in2m}">In 2m: 1 Point</li>
     <li class="list-group-item">
         <form class="row g-2 align-items-center" method="post" th:action="@{/submit}"
               th:object="${sgitest1score}">
@@ -35,17 +35,17 @@
             <input th:field="*{testId}" type="hidden"/>
 
             <div class="col-12 col-sm-auto">
-                <label class="col-form-label" for="points">Points:</label>
+                <label class="col-form-label" for="points" th:text="#{sgi.pointsLabel}">Points:</label>
             </div>
             <div class="col-12 col-sm-auto">
                 <input class="form-control" id="points" th:field="*{points}" type="number"/>
             </div>
             <div class="col-12 col-sm-auto">
-                <button class="btn btn-primary" type="submit">Submit</button>
+                <button class="btn btn-primary" type="submit" th:text="#{common.submit}">Submit</button>
             </div>
         </form>
     </li>
-    <li class="list-group-item">Trend:      <span th:text="${trend}"></span></li>
+    <li class="list-group-item"><span th:text="#{common.trend}">Trend:</span>      <span th:text="${trend}"></span></li>
 
 </ul>
 <div class="mt-5">
@@ -58,9 +58,12 @@
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
+    const sgiChartLabel = /*[[#{common.hcp}]]*/ 'HCP';
+    const sgiChartTitle = /*[[#{sgi.chartTitle}]]*/ 'HCP Monthly';
+
     // Fetch data from REST API and render chart
-    fetch('[[@{/api/sgi/chart-data/{id}(id=${testId})}]]')
+    fetch(/*[[@{/api/sgi/chart-data/{id}(id=${testId})}]]*/ '/api/sgi/chart-data')
         .then(response => response.json())
         .then(data => {
             const ctx = document.getElementById('lineChart').getContext('2d');
@@ -69,7 +72,7 @@
                 data: {
                     labels: data.labels,
                     datasets: [{
-                        label: 'HCP',
+                        label: sgiChartLabel,
                         data: data.hcp,
                         borderColor: 'rgba(75, 192, 192, 1)',
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
@@ -84,7 +87,7 @@
                     maintainAspectRatio: true,
                     plugins: {
                         legend: { position: 'top' },
-                        title: { display: true, text: 'HCP Monthly' }
+                        title: { display: true, text: sgiChartTitle }
                     },
                     scales: {
                         y: { beginAtZero: true }

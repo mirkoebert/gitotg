@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Gitotg: Get it on the Green</title>
+    <title th:text="#{timeline.title}">Gitotg: Get it on the Green</title>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -71,17 +71,17 @@
 <body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
-<h2 class="text-center mb-4">Timeline</h2>
+<h2 class="text-center mb-4" th:text="#{timeline.heading}">Timeline</h2>
 <div class="timeline">
     <div th:each="m: ${timeline}" class="timeline-item">
         <div class="timeline-content">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <h5 class="mb-0 text-break" th:text="${#temporals.format(m.date, 'dd. MMMM yyyy')}"></h5>
                 <form th:action="@{/timeline/delete}" method="post" class="m-0 flex-shrink-0"
-                      onsubmit="return confirm('Delete this timeline entry?');">
+                      th:attr="onsubmit=|return confirm('#{timeline.deleteConfirm}');|">
                     <input type="hidden" name="type" th:value="${m.type}">
                     <input type="hidden" name="id" th:value="${m.id}">
-                    <button type="submit" class="btn btn-primary btn-sm" aria-label="Delete entry">×</button>
+                    <button type="submit" class="btn btn-primary btn-sm" th:aria-label="#{timeline.deleteAria}">×</button>
                 </form>
             </div>
             <p class="mb-0 mt-2 text-break"><span th:text="${m.comment}"></span>: <span th:text="${m.type}"></span> <span

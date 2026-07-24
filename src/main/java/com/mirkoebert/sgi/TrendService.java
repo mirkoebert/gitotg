@@ -2,6 +2,8 @@ package com.mirkoebert.sgi;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -10,7 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.mirkoebert.Constants.HCP_Epsilon;
-import static com.mirkoebert.Constants.NOT_ENOUGH_DATA_AVAILABLE;
 
 @Service
 @RequiredArgsConstructor
@@ -18,6 +19,7 @@ import static com.mirkoebert.Constants.NOT_ENOUGH_DATA_AVAILABLE;
 class TrendService {
 
         private final SingleTestResultRepository resultRepository;
+        private final MessageSource messageSource;
 
         public String getTrend(final Integer testId, final String userId) {
                 log.debug("get Trend for user {} and testId {}", userId, testId);
@@ -26,7 +28,7 @@ class TrendService {
                 if (a.size() > 3) {
                         return getTrendFromList(a);
                 }
-                return NOT_ENOUGH_DATA_AVAILABLE;
+                return msg("trend.notEnoughData");
         }
 
         String getTrendFromList(final List<SingleTestResultEntity> unordered){
@@ -46,10 +48,14 @@ class TrendService {
                         .summaryStatistics();
                 log.debug("HCP: {}", stats);
                 if (stats.getAverage() > (latest.getHcp() + HCP_Epsilon)) {
-                        return "improving";
+                        return msg("trend.improving");
                 } else if ((stats.getAverage() + HCP_Epsilon) < latest.getHcp()) {
-                        return "worsening";
+                        return msg("trend.worsening");
                 }
-                return "stable";
+                return msg("trend.stable");
+        }
+
+        private String msg(final String key) {
+                return messageSource.getMessage(key, null, LocaleContextHolder.getLocale());
         }
 }

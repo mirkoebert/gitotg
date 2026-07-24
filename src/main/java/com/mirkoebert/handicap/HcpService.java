@@ -3,17 +3,19 @@ package com.mirkoebert.handicap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.mirkoebert.Constants.HCP_Epsilon;
-import static com.mirkoebert.Constants.NOT_ENOUGH_DATA_AVAILABLE;
 
 @Service
 @Slf4j
@@ -22,31 +24,34 @@ public class HcpService {
 
 
         private final HcpRepository repo;
-        private final DateTimeFormatter df = DateTimeFormatter.ofPattern("dd. MMMM yyyy");
+        private final MessageSource messageSource;
 
         public HcpScoreOutFormatedDTO findLatestByUserId(@NonNull String userId) {
+                Locale locale = LocaleContextHolder.getLocale();
+                DateTimeFormatter df = DateTimeFormatter.ofPattern("dd. MMMM yyyy", locale);
                 Optional<HcpScoreEntity> last = repo.findFirstByUserIdOrderByDateDesc(userId);
                 if (last.isPresent()) {
                         // Trend only needs the latest 4 scores
                         List<HcpScoreEntity> recent = repo.findTop4ByUserIdOrderByDateDesc(userId);
                         return HcpScoreOutFormatedDTO
                                 .builder()
-                                .hcp(String.format("%.1f", last.get().getHcp()))
+                                .hcp(String.format(locale, "%.1f", last.get().getHcp()))
                                 .date(df.format(last.get().getDate()))
                                 .trend(getTrend(recent))
                                 .build();
                 }
+                String notEnough = msg("trend.notEnoughData");
                 return HcpScoreOutFormatedDTO
                         .builder()
-                        .hcp(NOT_ENOUGH_DATA_AVAILABLE)
-                        .date(NOT_ENOUGH_DATA_AVAILABLE)
-                        .trend(NOT_ENOUGH_DATA_AVAILABLE)
+                        .hcp(notEnough)
+                        .date(notEnough)
+                        .trend(notEnough)
                         .build();
         }
 
         String getTrend(final List<HcpScoreEntity> unordered) {
                 if ((unordered == null) || unordered.size() < 4) {
-                        return NOT_ENOUGH_DATA_AVAILABLE;
+                        return msg("trend.notEnoughData");
                 }
                 List<HcpScoreEntity> sorted = unordered
                         .stream()
@@ -64,10 +69,14 @@ public class HcpService {
                         .summaryStatistics();
                 log.debug("HCP: {}", stats);
                 if (stats.getAverage() > (latest.getHcp() + HCP_Epsilon)) {
-                        return "improving";
+                        return msg("trend.improving");
                 } else if ((stats.getAverage() + HCP_Epsilon) < latest.getHcp()) {
-                        return "worsening";
+                        return msg("trend.worsening");
                 }
-                return "stable";
+                return msg("trend.stable");
+        }
+
+        private String msg(final String key) {
+                return messageSource.getMessage(key, null, LocaleContextHolder.getLocale());
         }
 }

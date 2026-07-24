@@ -7,28 +7,56 @@ import com.mirkoebert.sgi.SingleTestResultRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Arrays;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@Import({AdvisorService.class, HandicapClassifier.class})
+@Import({AdvisorService.class, HandicapClassifier.class, AdvisorServiceTest.MessageSourceConfig.class})
 class AdvisorServiceTest {
 
     @Autowired
     private AdvisorService cut;
+
+    @Autowired
+    private MessageSource messageSource;
 
     @MockitoBean
     private HcpRepository hcpRepository;
 
     @MockitoBean
     private SingleTestResultRepository singleTestResultRepository;
+
+    @Configuration
+    static class MessageSourceConfig {
+        @Bean
+        MessageSource messageSource() {
+            ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+            ms.setBasename("messages");
+            ms.setDefaultEncoding("UTF-8");
+            ms.setFallbackToSystemLocale(false);
+            return ms;
+        }
+    }
+
+    private String[] resolve(String[] keys) {
+        return Arrays.stream(keys)
+                .map(key -> messageSource.getMessage(key, null, Locale.ENGLISH))
+                .toArray(String[]::new);
+    }
 
     @Test
     void getAdvise_returnsFreshMessageForLessThan5DataPoints() {
@@ -37,7 +65,7 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u1");
 
-        assertThat(advice).isIn(AdvisorService.fresh);
+        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.FRESH_KEYS)).toArray());
         verify(hcpRepository).countByUserId("u1");
         verify(singleTestResultRepository).countByUserId("u1");
     }
@@ -49,7 +77,7 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u2");
 
-        assertThat(advice).isIn(AdvisorService.few);
+        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.FEW_KEYS)).toArray());
     }
 
     @Test
@@ -59,7 +87,7 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u3");
 
-        assertThat(advice).isIn(AdvisorService.other);
+        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.OTHER_KEYS)).toArray());
     }
 
     @Test
@@ -85,7 +113,7 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u5");
 
-        assertThat(advice).isIn(AdvisorService.hh);
+        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.HH_KEYS)).toArray());
     }
 
     @Test
@@ -98,6 +126,6 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u6");
 
-        assertThat(advice).isIn(AdvisorService.other);
+        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.OTHER_KEYS)).toArray());
     }
 }

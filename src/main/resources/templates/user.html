@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>User details</title>
+    <title th:text="#{user.title}">User details</title>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -17,21 +17,21 @@
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
 
-<h1 class="text-center mb-4">Gitotg: User details</h1>
+<h1 class="text-center mb-4" th:text="#{user.heading}">Gitotg: User details</h1>
 <ol class="list-group">
     <li class="list-group-item" th:if="${picture != null}">
-        <img alt="user avatar" class="user-avatar img-fluid rounded" th:src="${picture}">
+        <img th:alt="#{user.alt.avatar}" class="user-avatar img-fluid rounded" th:src="${picture}">
     </li>
-    <li class="list-group-item" th:unless="${picture != null}">
+    <li class="list-group-item" th:unless="${picture != null}" th:text="#{user.noPicture}">
         (no profile picture)
     </li>
-    <li class="list-group-item">Name:           <span th:text="${name}"></span></li>
-    <li class="list-group-item">Email:          <span th:text="${email}"></span></li>
-    <li class="list-group-item">HCP:            <span th:text="${lastHCP}"></span></li>
-    <li class="list-group-item">Short Game HCP: <span th:text="${lastSGHCP}"></span></li>
-    <li class="list-group-item">Break 100 checklist: <span th:text="${break100Progress}"></span>%</li>
-    <li class="list-group-item">Break 90 checklist:  <span th:text="${break90Progress}"></span>%</li>
-    <li class="list-group-item">Break 80 checklist:  <span th:text="${break80Progress}"></span>%</li>
+    <li class="list-group-item"><span th:text="#{user.name}">Name:</span> <span th:text="${name}"></span></li>
+    <li class="list-group-item"><span th:text="#{user.email}">Email:</span> <span th:text="${email}"></span></li>
+    <li class="list-group-item"><span th:text="#{user.hcp}">HCP:</span> <span th:text="${lastHCP}"></span></li>
+    <li class="list-group-item"><span th:text="#{user.sgiHcp}">Short Game HCP:</span> <span th:text="${lastSGHCP}"></span></li>
+    <li class="list-group-item"><span th:text="#{user.break100}">Break 100 checklist:</span> <span th:text="${break100Progress}"></span>%</li>
+    <li class="list-group-item"><span th:text="#{user.break90}">Break 90 checklist:</span> <span th:text="${break90Progress}"></span>%</li>
+    <li class="list-group-item"><span th:text="#{user.break80}">Break 80 checklist:</span> <span th:text="${break80Progress}"></span>%</li>
     <li class="list-group-item"><span class="fw-bold" th:text="${advice}"></span></li>
 </ol>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>

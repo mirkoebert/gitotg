@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Gitotg: About</title>
+    <title th:text="#{about.title}">Gitotg: About</title>
     <meta charset="UTF-8">
     <meta content="Mirko Ebert" name="author">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
@@ -11,24 +11,30 @@
 <body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
-<h1 class="text-center mb-4">About Gitotg</h1>
+<h1 class="text-center mb-4" th:text="#{about.heading}">About Gitotg</h1>
 
 <ul class="list-group">
-    <li class="list-group-item">Gitotg: Get It On The Green. It's not an Italian word, yet (2025). I checked it.</li>
-    <li class="list-group-item">Helps to improve your Golf game. It tracks your handicaps. Focus on Short Game.</li>
-    <li class="list-group-item">Author: Mirko Ebert</li>
-    <li class="list-group-item">Bugs & Feature requests: <a href="https://github.com/mirkoebert/gitotg" target="_blank" rel="noopener noreferrer">GitHub</a></li>
-    <li class="list-group-item">Version: <span th:text="${version}">0.0.0</span></li>
+    <li class="list-group-item" th:text="#{about.item1}">Gitotg: Get It On The Green. It's not an Italian word, yet (2025). I checked it.</li>
+    <li class="list-group-item" th:text="#{about.item2}">Helps to improve your Golf game. It tracks your handicaps. Focus on Short Game.</li>
+    <li class="list-group-item" th:text="#{about.author}">Author: Mirko Ebert</li>
+    <li class="list-group-item">
+        <span th:text="#{about.bugs}">Bugs & Feature requests:</span>
+        <a href="https://github.com/mirkoebert/gitotg" target="_blank" rel="noopener noreferrer">GitHub</a>
+    </li>
+    <li class="list-group-item">
+        <span th:text="#{about.version}">Version:</span>
+        <span th:text="${version}">0.0.0</span>
+    </li>
 </ul>
 
-<h2 class="text-center mb-4">Do you want more? Try this:</h2>
+<h2 class="text-center mb-4" th:text="#{about.more}">Do you want more? Try this:</h2>
 <ul class="list-group">
-    <li class="list-group-item">Netflix: Full Swing</li>
-    <li class="list-group-item">Manga, Anime (Netflix): Rising Impact</li>
-    <li class="list-group-item">David Pelz: Short Game Bible</li>
-    <li class="list-group-item">Ben Hogan: Five Lessons: The Modern Fundamentals of Golf</li>
-    <li class="list-group-item">YouTube: Shell's Wonderful World of Golf</li>
-    <li class="list-group-item">Phil Mickelson: Secrets of the Short Game</li>
+    <li class="list-group-item" th:text="#{about.rec.netflix}">Netflix: Full Swing</li>
+    <li class="list-group-item" th:text="#{about.rec.rising}">Manga, Anime (Netflix): Rising Impact</li>
+    <li class="list-group-item" th:text="#{about.rec.pelz}">David Pelz: Short Game Bible</li>
+    <li class="list-group-item" th:text="#{about.rec.hogan}">Ben Hogan: Five Lessons: The Modern Fundamentals of Golf</li>
+    <li class="list-group-item" th:text="#{about.rec.shell}">YouTube: Shell's Wonderful World of Golf</li>
+    <li class="list-group-item" th:text="#{about.rec.mickelson}">Phil Mickelson: Secrets of the Short Game</li>
 </ul>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>

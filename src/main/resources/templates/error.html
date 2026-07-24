@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Error - Gitotg</title>
+    <title th:text="#{error.title}">Error - Gitotg</title>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,13 +21,13 @@
 
 <div class="text-center mt-5">
     <img src="/images/golf-hole-problem.jpg"
-         alt="Golf hole with pin placement problem on the green"
+         th:alt="#{error.alt.hole}"
          class="error-image mb-4">
 
-    <h1 class="display-5 mb-3">Problem on the Green</h1>
-    <p class="lead text-muted mb-4">Looks like the pin placement didn't quite go to plan.</p>
+    <h1 class="display-5 mb-3" th:text="#{error.heading}">Problem on the Green</h1>
+    <p class="lead text-muted mb-4" th:text="#{error.text}">Looks like the pin placement didn't quite go to plan.</p>
 
-    <a href="/" class="btn btn-primary">Back to Home</a>
+    <a th:href="@{/}" class="btn btn-primary" th:text="#{error.back}">Back to Home</a>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
