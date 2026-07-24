@@ -187,4 +187,41 @@ class CsvImportServiceTest {
         List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
         assertThat(all).isEmpty();
     }
+
+    @SneakyThrows
+    @Test
+    void importSgiData_loadsShortGameCsvFromClasspath() {
+        @Cleanup InputStream is = getClass().getClassLoader().getResourceAsStream("2026-07-23-short-game.csv");
+        assertThat(is).isNotNull();
+
+        int count = cut.importSgiData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(12);
+
+        List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
+        assertThat(all).hasSize(12);
+        assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
+        assertThat(all).allMatch(e -> e.getTestType() == TestSuite.SGI);
+        assertThat(all).allMatch(e -> e.getHcp() != null);
+
+        // spot-check a row from each date in the fixture
+        SingleTestResultEntity july23Test7 = all.stream()
+                .filter(e -> e.getDate().equals(LocalDate.of(2026, 7, 23)) && e.getTestId() == 7)
+                .findFirst()
+                .orElseThrow();
+        assertThat(july23Test7.getPoints()).isEqualTo(5);
+        assertThat(july23Test7.getHcp()).isEqualTo(pointsToSgiHcpFunction.apply(7, 5));
+
+        SingleTestResultEntity june21Test1 = all.stream()
+                .filter(e -> e.getDate().equals(LocalDate.of(2025, 6, 21)) && e.getTestId() == 1)
+                .findFirst()
+                .orElseThrow();
+        assertThat(june21Test1.getPoints()).isEqualTo(2);
+        assertThat(june21Test1.getHcp()).isEqualTo(pointsToSgiHcpFunction.apply(1, 2));
+
+        count = cut.importSgiData(is, TEST_USER);
+        assertThat(count).isZero();
+    }
+
 }
+

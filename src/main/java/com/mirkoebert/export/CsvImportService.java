@@ -64,7 +64,7 @@ public class CsvImportService {
         }
     }
 
-    public int importSgiData(InputStream inputStream, String userId) {
+    public int importSgiData(InputStream inputStream, final String userId) {
         try (InputStreamReader reader = new InputStreamReader(inputStream);
              CSVReader csvReader = new CSVReader(reader)) {
 
