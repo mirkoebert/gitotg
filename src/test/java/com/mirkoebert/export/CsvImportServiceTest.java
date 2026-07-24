@@ -191,6 +191,20 @@ class CsvImportServiceTest {
     @SneakyThrows
     @Test
     void importSgiData_loadsShortGameCsvFromClasspath() {
+        SingleTestResultEntity sre = SingleTestResultEntity
+                .builder()
+                .date(LocalDate.of(2025, 6, 21))
+                .hcp(pointsToSgiHcpFunction.apply(1, 2))
+                .points(2)
+                .userId(TEST_USER)
+                .testType(TestSuite.SGI)
+                .testId(1)
+                .build();
+        singleTestResultRepository.save(sre);
+        sre.setId(2);
+        singleTestResultRepository.save(sre);
+        assertThat(singleTestResultRepository.countByUserId(TEST_USER)).isEqualTo(2);
+
         @Cleanup InputStream is = getClass().getClassLoader().getResourceAsStream("2026-07-23-short-game.csv");
         assertThat(is).isNotNull();
 
@@ -198,7 +212,7 @@ class CsvImportServiceTest {
 
         assertThat(count).isEqualTo(12);
 
-        List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
+        final List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
         assertThat(all).hasSize(12);
         assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
         assertThat(all).allMatch(e -> e.getTestType() == TestSuite.SGI);

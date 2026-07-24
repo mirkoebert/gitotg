@@ -86,16 +86,18 @@ public class CsvImportService {
                     .withIgnoreLeadingWhiteSpace(true)
                     .build();
 
-            List<SingleTestResultEntity> beans = csvToBean.parse();
+            List<SingleTestResultEntity> sres = csvToBean.parse();
             int count = 0;
-            for (SingleTestResultEntity bean : beans) {
-                if (bean.getDate() != null && bean.getPoints() != null && bean.getTestId() != null && bean.getTestType() != null) {
-                    bean.setUserId(userId);
-                    Integer computedHcp = pointsToSgiHcpFunction.apply(bean.getTestId(), bean.getPoints());
-                    bean.setHcp(computedHcp);
-                    sgiRepo.findByUserIdAndDateAndTestId(userId, bean.getDate(), bean.getTestId()).ifPresent(existing -> bean.setId(existing.getId()));
-                    sgiRepo.save(bean);
+            removeAllOldEntitiesForUser(userId);
+            for (SingleTestResultEntity sre : sres) {
+                if (sre.getDate() != null && sre.getPoints() != null && sre.getTestId() != null && sre.getTestType() != null) {
+                    sre.setUserId(userId);
+                    Integer computedHcp = pointsToSgiHcpFunction.apply(sre.getTestId(), sre.getPoints());
+                    sre.setHcp(computedHcp);
+                    sgiRepo.save(sre);
                     count++;
+                } else {
+                    log.warn("Ignore line with incomplete data {}", sre);
                 }
             }
             log.info("Imported {} SGI records for user {}", count, userId);
@@ -104,5 +106,11 @@ public class CsvImportService {
             log.error("Failed to import SGI CSV for user {}", userId, e);
             throw new RuntimeException("SGI CSV import failed: " + e.getMessage(), e);
         }
+    }
+
+    private void removeAllOldEntitiesForUser(final String userId) {
+        final List<SingleTestResultEntity> toRemove = sgiRepo.findAllByUserId(userId);
+        log.info("Remove {} old SGI records from db.", toRemove.size());
+        sgiRepo.deleteAll(toRemove);
     }
 }
