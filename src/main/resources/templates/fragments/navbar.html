@@ -7,6 +7,23 @@
 
 <!-- Simple Bootstrap Navbar -->
 <nav class="navbar navbar-expand-lg bg-body-tertiary" th:fragment="navbar">
+    <style>
+        .lang-switch .lang-flag {
+            font-size: 1.15rem;
+            line-height: 1;
+            opacity: 0.55;
+            text-decoration: none;
+            border-radius: 0.25rem;
+        }
+        .lang-switch .lang-flag:hover {
+            opacity: 0.9;
+        }
+        .lang-switch .lang-flag.active {
+            opacity: 1;
+            outline: 2px solid rgba(13, 110, 253, 0.45);
+            outline-offset: 2px;
+        }
+    </style>
     <div class="container-fluid">
         <!-- Brand/Logo -->
         <a class="navbar-brand" th:href="@{/}" th:text="#{nav.brand}">Gitotg</a>
@@ -50,16 +67,19 @@
 
             <!-- Auth actions on the right -->
             <ul class="navbar-nav ms-auto">
-                <li class="nav-item d-flex align-items-center gap-1 me-2">
-                    <a class="nav-link py-0 px-1"
-                       th:classappend="${#locale.language == 'en'} ? 'fw-bold'"
+                <li class="nav-item d-flex align-items-center gap-1 me-2 lang-switch">
+                    <a class="nav-link lang-flag py-0 px-1"
+                       th:classappend="${#locale.language == 'en'} ? 'active'"
                        th:href="@{''(lang=en)}"
-                       th:text="#{nav.lang.en}">EN</a>
-                    <span class="text-muted">|</span>
-                    <a class="nav-link py-0 px-1"
-                       th:classappend="${#locale.language == 'de'} ? 'fw-bold'"
+                       th:title="#{nav.lang.en}"
+                       th:aria-label="#{nav.lang.en}"
+                       th:aria-current="${#locale.language == 'en'} ? 'true' : 'false'">🇬🇧</a>
+                    <a class="nav-link lang-flag py-0 px-1"
+                       th:classappend="${#locale.language == 'de'} ? 'active'"
                        th:href="@{''(lang=de)}"
-                       th:text="#{nav.lang.de}">DE</a>
+                       th:title="#{nav.lang.de}"
+                       th:aria-label="#{nav.lang.de}"
+                       th:aria-current="${#locale.language == 'de'} ? 'true' : 'false'">🇩🇪</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAnonymous()">
                     <a class="nav-link" th:href="@{/login}" th:text="#{nav.login}">Login</a>
