@@ -1,6 +1,9 @@
 package com.mirkoebert.export;
 
 import com.mirkoebert.TestSuite;
+import com.mirkoebert.golfmetric.GMetricEntity;
+import com.mirkoebert.golfmetric.GMetricRepository;
+import com.mirkoebert.golfmetric.GMetricType;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
 import com.mirkoebert.sgi.SingleTestResultEntity;
@@ -33,6 +36,9 @@ class CsvImportServiceTest {
     private SingleTestResultRepository singleTestResultRepository;
 
     @Autowired
+    private GMetricRepository gMetricRepository;
+
+    @Autowired
     private PointsToSgiHcpFunction pointsToSgiHcpFunction;
 
     private static final String TEST_USER = "csv-import-test-user";
@@ -41,6 +47,7 @@ class CsvImportServiceTest {
     void cleanup() {
         hcpRepository.findByUserId(TEST_USER).forEach(hcpRepository::delete);
         singleTestResultRepository.findAllByUserId(TEST_USER).forEach(singleTestResultRepository::delete);
+        gMetricRepository.findByUserId(TEST_USER).forEach(gMetricRepository::delete);
     }
 
     // HCP tests
@@ -235,6 +242,70 @@ class CsvImportServiceTest {
 
         count = cut.importSgiData(is, TEST_USER);
         assertThat(count).isZero();
+    }
+
+    // GMetric tests
+
+    @SneakyThrows
+    @Test
+    void importGMetricData_insertsWhenNoExisting() {
+        final String csv = "date,metricValue,type\n2025-01-31,3,LOST_BALLS\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+        int count = cut.importGMetricData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+
+        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(1);
+        GMetricEntity saved = all.getFirst();
+        assertThat(saved.getUserId()).isEqualTo(TEST_USER);
+        assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 31));
+        assertThat(saved.getMetricValue()).isEqualTo(3);
+        assertThat(saved.getType()).isEqualTo(GMetricType.LOST_BALLS);
+    }
+
+    @SneakyThrows
+    @Test
+    void importGMetricData_replacesWhenSameDateAndTypeExists() {
+        String csv1 = "date,metricValue,type\n2025-01-21,2,BOGEY\n";
+        cut.importGMetricData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
+
+        String csv2 = "date,metricValue,type\n2025-01-21,5,BOGEY\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv2.getBytes());
+
+        int count = cut.importGMetricData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+
+        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(1);
+        assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
+        assertThat(all.getFirst().getType()).isEqualTo(GMetricType.BOGEY);
+    }
+
+    @SneakyThrows
+    @Test
+    void importGMetricData_allowsSameDateDifferentType() {
+        String csv = "date,metricValue,type\n2025-01-21,2,BOGEY\n2025-01-21,1,LOST_BALLS\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+        int count = cut.importGMetricData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(2);
+        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
+    }
+
+    @SneakyThrows
+    @Test
+    void importGMetricData_skipsInvalidRows() {
+        String csv = "date,metricValue,type\n2025-01-01,3,\n,2,BOGEY\n2025-01-02,4,DOUBLE_BOGEY\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+        int count = cut.importGMetricData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(1);
     }
 
 }

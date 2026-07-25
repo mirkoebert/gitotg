@@ -55,6 +55,19 @@ public class CsvExportPrimaryRestController {
         }
 
         @SneakyThrows
+        @GetMapping("/api/gmetric/export")
+        public void getGMetricCsv(final HttpServletResponse response) {
+                log.info("gmetric export as csv");
+                val u = currentUserService.getCurrentUser();
+                final String userId = u.id();
+                String csv = hcpCsvExportService.exportAllGMetricDataToCsv(userId);
+                response.setContentType("text/csv");
+                String filename = csvFileNameService.generateGMetricExportFileName();
+                response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+                response.getOutputStream().print(csv);
+        }
+
+        @SneakyThrows
         @PostMapping(value = "/api/handicap/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         public ResponseEntity<String> importHcpCsv(@RequestParam("file") MultipartFile file) {
                 log.info("hcp import csv");
@@ -74,6 +87,17 @@ public class CsvExportPrimaryRestController {
                 int count = csvImportService.importSgiData(file.getInputStream(), userId);
                 return ResponseEntity.ok(messageSource.getMessage(
                         "api.import.sgi", new Object[]{count}, LocaleContextHolder.getLocale()));
+        }
+
+        @SneakyThrows
+        @PostMapping(value = "/api/gmetric/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        public ResponseEntity<String> importGMetricCsv(@RequestParam("file") MultipartFile file) {
+                log.info("gmetric import csv");
+                val u = currentUserService.getCurrentUser();
+                final String userId = u.id();
+                int count = csvImportService.importGMetricData(file.getInputStream(), userId);
+                return ResponseEntity.ok(messageSource.getMessage(
+                        "api.import.gmetric", new Object[]{count}, LocaleContextHolder.getLocale()));
         }
 
 }

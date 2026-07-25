@@ -27,6 +27,14 @@ class CsvFileNameServiceTest {
     }
 
     @Test
+    void generatesGMetricFilenameWithTodayDate() {
+        String filename = service.generateGMetricExportFileName();
+        assertThat(filename)
+                .startsWith(LocalDate.now().toString())
+                .endsWith("-gmetric.csv");
+    }
+
+    @Test
     void generatesCustomFilenameWithDate() {
         LocalDate date = LocalDate.of(2025, 5, 15);
         String filename = service.generateFileName("my-export", date);

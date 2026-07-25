@@ -1,5 +1,7 @@
 package com.mirkoebert.export;
 
+import com.mirkoebert.golfmetric.GMetricEntity;
+import com.mirkoebert.golfmetric.GMetricRepository;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
 import com.mirkoebert.sgi.SingleTestResultEntity;
@@ -26,6 +28,7 @@ public class CsvImportService {
 
     private final HcpRepository hcpRepo;
     private final SingleTestResultRepository sgiRepo;
+    private final GMetricRepository gMetricRepo;
     private final PointsToSgiHcpFunction pointsToSgiHcpFunction;
 
     public int importHcpData(InputStream inputStream, String userId) {
@@ -112,5 +115,46 @@ public class CsvImportService {
         final List<SingleTestResultEntity> toRemove = sgiRepo.findAllByUserId(userId);
         log.info("Remove {} old SGI records from db.", toRemove.size());
         sgiRepo.deleteAll(toRemove);
+    }
+
+    public int importGMetricData(InputStream inputStream, String userId) {
+        try (InputStreamReader reader = new InputStreamReader(inputStream);
+             CSVReader csvReader = new CSVReader(reader)) {
+
+            HeaderColumnNameTranslateMappingStrategy<GMetricEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
+            strategy.setType(GMetricEntity.class);
+            Map<String, String> columnMapping = new HashMap<>();
+            columnMapping.put("date", "date");
+            columnMapping.put("DATE", "date");
+            columnMapping.put("metricValue", "metricValue");
+            columnMapping.put("METRICVALUE", "metricValue");
+            columnMapping.put("type", "type");
+            columnMapping.put("TYPE", "type");
+            strategy.setColumnMapping(columnMapping);
+
+            CsvToBean<GMetricEntity> csvToBean = new CsvToBeanBuilder<GMetricEntity>(csvReader)
+                    .withMappingStrategy(strategy)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .build();
+
+            List<GMetricEntity> beans = csvToBean.parse();
+            int count = 0;
+            for (GMetricEntity bean : beans) {
+                if (bean.getDate() != null && bean.getType() != null) {
+                    bean.setUserId(userId);
+                    gMetricRepo.findByUserIdAndDateAndType(userId, bean.getDate(), bean.getType())
+                            .ifPresent(existing -> bean.setId(existing.getId()));
+                    gMetricRepo.save(bean);
+                    count++;
+                } else {
+                    log.warn("Ignore gmetric line with incomplete data {}", bean);
+                }
+            }
+            log.info("Imported {} gmetric records for user {}", count, userId);
+            return count;
+        } catch (Exception e) {
+            log.error("Failed to import gmetric CSV for user {}", userId, e);
+            throw new RuntimeException("GMetric CSV import failed: " + e.getMessage(), e);
+        }
     }
 }

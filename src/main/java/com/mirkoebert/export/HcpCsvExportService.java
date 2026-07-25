@@ -1,5 +1,7 @@
 package com.mirkoebert.export;
 
+import com.mirkoebert.golfmetric.GMetricEntity;
+import com.mirkoebert.golfmetric.GMetricRepository;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
 import com.mirkoebert.sgi.SingleTestResultEntity;
@@ -22,6 +24,7 @@ public class HcpCsvExportService {
 
         private final HcpRepository repo;
         private final SingleTestResultRepository sgirepo;
+        private final GMetricRepository gMetricRepository;
 
         String exportAllHcpDataToCsv(final String userId) {
                 final List<HcpScoreEntity> all = repo.findByUserId(userId);
@@ -59,5 +62,24 @@ public class HcpCsvExportService {
         String exportAllSgiDataToCsv(final String userId){
                 final List<SingleTestResultEntity> all = sgirepo.findAllByUserId(userId);
                 return transform2CsvX(all);
+        }
+
+        String exportAllGMetricDataToCsv(final String userId) {
+                final List<GMetricEntity> all = gMetricRepository.findByUserIdOrderByDateDesc(userId);
+                return transformGMetric2Csv(all);
+        }
+
+        String transformGMetric2Csv(final List<GMetricEntity> all) {
+                val w = new StringWriter();
+                try (CSVWriter writer = new CSVWriter(w)) {
+                        StatefulBeanToCsv<GMetricEntity> sbc = new StatefulBeanToCsvBuilder<GMetricEntity>(writer).build();
+                        sbc.write(all);
+                } catch (Exception e) {
+                        log.error("Can't generate CSV for GMetricEntity", e);
+                        throw new RuntimeException(e);
+                }
+                val r = w.toString();
+                log.debug("CSV \n {}", r);
+                return r;
         }
 }

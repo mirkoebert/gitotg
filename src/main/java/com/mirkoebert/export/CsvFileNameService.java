@@ -31,6 +31,14 @@ public class CsvFileNameService {
     }
 
     /**
+     * Generates a filename for golf metric export including today's date.
+     * Example: 2025-06-01-gmetric.csv
+     */
+    public String generateGMetricExportFileName() {
+        return generateFileName("gmetric");
+    }
+
+    /**
      * Generates a CSV filename with the given prefix and today's date.
      *
      * @param prefix the base name for the file (e.g. "handicap" or "short-game")
