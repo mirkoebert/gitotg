@@ -21,6 +21,18 @@
         .hero + .hero {
             margin-top: 2.5rem;
         }
+        a.hero-link {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            transition: box-shadow 0.15s ease, transform 0.15s ease;
+        }
+        a.hero-link:hover,
+        a.hero-link:focus-visible {
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+            transform: translateY(-1px);
+            outline: none;
+        }
         .hero h1 {
             font-size: clamp(1.75rem, 5vw, 3rem);
             margin-bottom: 1rem;
@@ -73,7 +85,15 @@
 </section>
 
 
-<section class="hero bg-light">
+<a class="hero hero-link bg-light" th:href="@{/goal/break100}" th:aria-label="#{home.break100.cta}">
+    <div class="container">
+        <h1 th:text="#{home.break100.heading}">Break 100</h1>
+        <p th:text="#{home.break100.text}">Track your checklist and habits to break 100 for the first time.</p>
+        <span class="btn btn-primary" th:text="#{home.break100.cta}">Start Break 100</span>
+    </div>
+</a>
+
+<section class="hero hero-alt border">
     <div class="container">
         <img src="/images/wedge.jpg"
              th:alt="#{home.alt.wedge}"
@@ -84,7 +104,7 @@
     </div>
 </section>
 
-<section class="hero hero-alt border">
+<section class="hero bg-light">
     <div class="container">
         <h1 th:text="#{home.putting.heading}">Putting Index</h1>
         <p th:text="#{home.putting.text}">Coming soon.</p>
