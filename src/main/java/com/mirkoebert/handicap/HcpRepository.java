@@ -2,6 +2,7 @@ package com.mirkoebert.handicap;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -10,6 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface HcpRepository extends JpaRepository<HcpScoreEntity, Long> {
+
+        @Query("select distinct h.userId from HcpScoreEntity h where h.userId is not null")
+        @NonNull
+        List<String> findDistinctUserIds();
 
         @NonNull
         List<HcpScoreEntity> findByUserId(@NonNull String userId);

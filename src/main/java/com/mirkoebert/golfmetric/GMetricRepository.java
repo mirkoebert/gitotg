@@ -2,6 +2,7 @@ package com.mirkoebert.golfmetric;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -10,6 +11,10 @@ import java.util.Optional;
 
 @Repository
 public interface GMetricRepository extends JpaRepository<GMetricEntity, Long> {
+
+        @Query("select distinct g.userId from GMetricEntity g where g.userId is not null")
+        @NonNull
+        List<String> findDistinctUserIds();
 
         @NonNull
         List<GMetricEntity> findByUserId(@NonNull String userId);

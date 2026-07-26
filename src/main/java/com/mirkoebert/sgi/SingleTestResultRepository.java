@@ -2,6 +2,7 @@ package com.mirkoebert.sgi;
 
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -9,6 +10,10 @@ import java.util.Optional;
 
 @Repository
 public interface SingleTestResultRepository extends JpaRepository<SingleTestResultEntity, Long> {
+
+        @Query("select distinct s.userId from SingleTestResultEntity s where s.userId is not null")
+        @NonNull
+        List<String> findDistinctUserIds();
 
         @NonNull
         List<SingleTestResultEntity> findByUserIdAndTestId(@NonNull String user, @NonNull Integer testId);

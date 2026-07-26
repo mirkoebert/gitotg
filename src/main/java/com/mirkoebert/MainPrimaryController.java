@@ -7,6 +7,7 @@ import com.mirkoebert.handicap.HcpService;
 import com.mirkoebert.sgi.SgiHcpAggregatedService;
 import com.mirkoebert.timeline.TimelineService;
 import com.mirkoebert.user.CurrentUserService;
+import com.mirkoebert.user.UserStatsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -30,6 +31,7 @@ public class MainPrimaryController {
         private final AdvisorService advisorService;
         private final CurrentUserService currentUserService;
         private final ChecklistService checklistService;
+        private final UserStatsService userStatsService;
 
         @Value("${app.version:unknown}")
         private String appVersion;
@@ -71,6 +73,7 @@ public class MainPrimaryController {
         public String getAbout(final Model m) {
                 log.info("about page");
                 m.addAttribute("version", appVersion);
+                m.addAttribute("userCount", userStatsService.countUsers());
                 return "about";
         }
 
