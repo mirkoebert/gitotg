@@ -217,14 +217,16 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <!-- Keep local/runtime footprint modest for this personal app -->
+                    <!-- Keep local/runtime footprint modest for this personal app.
+                         Metaspace must fit Spring Boot 4 + Hibernate + OAuth class load;
+                         96m MaxMetaspaceSize OOMs under real request traffic. -->
                     <jvmArguments>
                         -Xms32m
-                        -Xmx160m
+                        -Xmx192m
                         -Xss512k
-                        -XX:MaxMetaspaceSize=96m
+                        -XX:MaxMetaspaceSize=192m
                         -XX:ReservedCodeCacheSize=48m
-                        -XX:CompressedClassSpaceSize=32m
+                        -XX:CompressedClassSpaceSize=64m
                         -XX:+UseSerialGC
                     </jvmArguments>
                     <excludes>

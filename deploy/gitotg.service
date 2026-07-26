@@ -11,10 +11,11 @@ WorkingDirectory=/opt/gitotg
 
 #EnvironmentFile=/etc/gitotg.env
 
-# Same low-memory flags as your README
+# Low-memory flags; Metaspace sized for Spring Boot 4 + Hibernate + OAuth
 ExecStart=/usr/bin/java \
   -Xms32m -Xmx256m \
-  -XX:MaxMetaspaceSize=128m \
+  -XX:MaxMetaspaceSize=192m \
+  -XX:CompressedClassSpaceSize=64m \
   -XX:+UseSerialGC \
   -jar /opt/gitotg/gitotg.jar --spring.profiles.active=prod
 
