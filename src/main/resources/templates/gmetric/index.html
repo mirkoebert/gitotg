@@ -44,6 +44,14 @@
 <div class="mt-5">
     <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8">
+            <div class="d-flex justify-content-center mb-3">
+                <div class="btn-group" role="group" th:aria-label="#{gmetric.range.label}">
+                    <button type="button" class="btn btn-outline-primary active" id="range-lastYear"
+                            data-range="lastYear" th:text="#{gmetric.range.lastYear}">Last year</button>
+                    <button type="button" class="btn btn-outline-primary" id="range-all"
+                            data-range="all" th:text="#{gmetric.range.all}">All</button>
+                </div>
+            </div>
             <div class="chart-wrap">
                 <canvas id="lineChart"></canvas>
             </div>
@@ -59,59 +67,139 @@
     const i18nUploading = /*[[#{common.uploading}]]*/ 'Uploading...';
     const i18nErrorPrefix = /*[[#{api.import.errorPrefix}]]*/ 'Error:';
     const i18nFailedPrefix = /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:';
+    const chartDataUrl = /*[[@{/api/gmetric/chart-data}]]*/ '/api/gmetric/chart-data';
 
-    fetch(/*[[@{/api/gmetric/chart-data}]]*/ '/api/gmetric/chart-data')
-        .then(response => response.json())
-        .then(data => {
-            const ctx = document.getElementById('lineChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [
-                        {
-                            label: labelLostBalls,
-                            data: data.lostBalls,
-                            borderColor: 'rgba(220, 53, 69, 1)',
-                            backgroundColor: 'rgba(220, 53, 69, 0.2)',
-                            tension: 0.5,
-                            fill: false,
-                            spanGaps: true
-                        },
-                        {
-                            label: labelDoubleBogey,
-                            data: data.doubleBogey,
-                            borderColor: 'rgba(255, 193, 7, 1)',
-                            backgroundColor: 'rgba(255, 193, 7, 0.2)',
-                            tension: 0.5,
-                            fill: false,
-                            spanGaps: true
-                        },
-                        {
-                            label: labelBogey,
-                            data: data.bogey,
-                            borderColor: 'rgba(13, 110, 253, 1)',
-                            backgroundColor: 'rgba(13, 110, 253, 0.2)',
-                            tension: 0.5,
-                            fill: false,
-                            spanGaps: true
-                        }
-                    ]
+    let metricsChart = null;
+    let currentRange = 'lastYear';
+    let loadToken = 0;
+
+    function datasetTemplates() {
+        return [
+            {
+                label: labelLostBalls,
+                data: [],
+                borderColor: 'rgba(220, 53, 69, 1)',
+                backgroundColor: 'rgba(220, 53, 69, 0.2)',
+                tension: 0.5,
+                fill: false,
+                spanGaps: true
+            },
+            {
+                label: labelDoubleBogey,
+                data: [],
+                borderColor: 'rgba(255, 193, 7, 1)',
+                backgroundColor: 'rgba(255, 193, 7, 0.2)',
+                tension: 0.5,
+                fill: false,
+                spanGaps: true
+            },
+            {
+                label: labelBogey,
+                data: [],
+                borderColor: 'rgba(13, 110, 253, 1)',
+                backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                tension: 0.5,
+                fill: false,
+                spanGaps: true
+            }
+        ];
+    }
+
+    function ensureChart() {
+        if (metricsChart) {
+            return metricsChart;
+        }
+        const ctx = document.getElementById('lineChart').getContext('2d');
+        metricsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: datasetTemplates()
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                animation: { duration: 250 },
+                plugins: {
+                    legend: { position: 'top' },
+                    title: { display: true, text: chartTitle }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: chartTitle }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
-                    }
+                scales: {
+                    y: { beginAtZero: true }
                 }
+            }
+        });
+        return metricsChart;
+    }
+
+    function applyChartData(data) {
+        const chart = ensureChart();
+        chart.data.labels = data.labels || [];
+        chart.data.datasets[0].data = data.lostBalls || [];
+        chart.data.datasets[1].data = data.doubleBogey || [];
+        chart.data.datasets[2].data = data.bogey || [];
+        chart.update();
+    }
+
+    function setRangeButtonsEnabled(enabled) {
+        document.querySelectorAll('[data-range]').forEach(btn => {
+            btn.disabled = !enabled;
+        });
+    }
+
+    function setActiveRangeButton(range) {
+        document.querySelectorAll('[data-range]').forEach(btn => {
+            const active = btn.getAttribute('data-range') === range;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+    }
+
+    async function loadChart(range) {
+        const token = ++loadToken;
+        setRangeButtonsEnabled(false);
+        const url = chartDataUrl + (chartDataUrl.includes('?') ? '&' : '?') + 'range=' + encodeURIComponent(range);
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
             });
-        })
-        .catch(error => console.error('Error fetching data:', error));
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            const data = await response.json();
+            // Ignore stale responses if user clicked another range quickly
+            if (token !== loadToken) {
+                return;
+            }
+            applyChartData(data);
+        } catch (error) {
+            console.error('Error loading gmetric chart for range ' + range + ':', error);
+        } finally {
+            if (token === loadToken) {
+                setRangeButtonsEnabled(true);
+            }
+        }
+    }
+
+    function selectRange(range) {
+        if (!range) {
+            return;
+        }
+        currentRange = range;
+        setActiveRangeButton(range);
+        return loadChart(range);
+    }
+
+    document.querySelectorAll('[data-range]').forEach(btn => {
+        btn.addEventListener('click', function (event) {
+            event.preventDefault();
+            selectRange(this.getAttribute('data-range'));
+        });
+    });
+
+    selectRange(currentRange);
 </script>
 
 <div class="my-5">

@@ -34,11 +34,12 @@ public class GMetricRestController {
         }
 
         @GetMapping("/api/gmetric/chart-data")
-        public ResponseEntity<GMetricChartData> getChartData() {
-                log.info("gmetric getChartData");
+        public ResponseEntity<GMetricChartData> getChartData(
+                        @RequestParam(defaultValue = GMetricMonthAggregator.RANGE_LAST_YEAR) String range) {
+                log.info("gmetric getChartData range={}", range);
                 val u = currentUserService.getCurrentUser();
                 final String userId = u.id();
                 log.info("for user {}", userId);
-                return ResponseEntity.ok(monthAggregator.getMetricsForLastMonths(36, userId));
+                return ResponseEntity.ok(monthAggregator.getMetricsForRange(range, userId));
         }
 }
