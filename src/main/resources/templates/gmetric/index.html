@@ -73,35 +73,28 @@
     let currentRange = 'lastYear';
     let loadToken = 0;
 
+    function smoothDataset(label, borderColor, backgroundColor) {
+        return {
+            label: label,
+            data: [],
+            borderColor: borderColor,
+            backgroundColor: backgroundColor,
+            borderWidth: 2.5,
+            tension: 0.4,
+            cubicInterpolationMode: 'monotone',
+            fill: false,
+            spanGaps: true,
+            pointRadius: 2,
+            pointHoverRadius: 5,
+            pointHitRadius: 8
+        };
+    }
+
     function datasetTemplates() {
         return [
-            {
-                label: labelLostBalls,
-                data: [],
-                borderColor: 'rgba(220, 53, 69, 1)',
-                backgroundColor: 'rgba(220, 53, 69, 0.2)',
-                tension: 0.5,
-                fill: false,
-                spanGaps: true
-            },
-            {
-                label: labelDoubleBogey,
-                data: [],
-                borderColor: 'rgba(255, 193, 7, 1)',
-                backgroundColor: 'rgba(255, 193, 7, 0.2)',
-                tension: 0.5,
-                fill: false,
-                spanGaps: true
-            },
-            {
-                label: labelBogey,
-                data: [],
-                borderColor: 'rgba(13, 110, 253, 1)',
-                backgroundColor: 'rgba(13, 110, 253, 0.2)',
-                tension: 0.5,
-                fill: false,
-                spanGaps: true
-            }
+            smoothDataset(labelLostBalls, 'rgba(220, 53, 69, 1)', 'rgba(220, 53, 69, 0.15)'),
+            smoothDataset(labelDoubleBogey, 'rgba(255, 193, 7, 1)', 'rgba(255, 193, 7, 0.15)'),
+            smoothDataset(labelBogey, 'rgba(13, 110, 253, 1)', 'rgba(13, 110, 253, 0.15)')
         ];
     }
 
@@ -119,13 +112,42 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                animation: { duration: 250 },
+                animation: {
+                    duration: 450,
+                    easing: 'easeOutQuart'
+                },
+                elements: {
+                    line: {
+                        tension: 0.4,
+                        cubicInterpolationMode: 'monotone',
+                        borderJoinStyle: 'round',
+                        borderCapStyle: 'round'
+                    },
+                    point: {
+                        radius: 2,
+                        hoverRadius: 5
+                    }
+                },
                 plugins: {
                     legend: { position: 'top' },
                     title: { display: true, text: chartTitle }
                 },
                 scales: {
-                    y: { beginAtZero: true }
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 }
+                    },
+                    x: {
+                        ticks: {
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 12
+                        }
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
                 }
             }
         });
