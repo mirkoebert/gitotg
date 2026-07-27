@@ -117,6 +117,12 @@ public class CsvImportService {
         sgiRepo.deleteAll(toRemove);
     }
 
+    private void removeAllOldGMetricsForUser(final String userId) {
+        final List<GMetricEntity> toRemove = gMetricRepo.findByUserId(userId);
+        log.info("Remove {} old gmetric records from db for user {}.", toRemove.size(), userId);
+        gMetricRepo.deleteAll(toRemove);
+    }
+
     public int importGMetricData(InputStream inputStream, String userId) {
         try (InputStreamReader reader = new InputStreamReader(inputStream);
              CSVReader csvReader = new CSVReader(reader)) {
@@ -138,12 +144,12 @@ public class CsvImportService {
                     .build();
 
             List<GMetricEntity> beans = csvToBean.parse();
+            removeAllOldGMetricsForUser(userId);
             int count = 0;
             for (GMetricEntity bean : beans) {
                 if (bean.getDate() != null && bean.getType() != null) {
+                    bean.setId(0);
                     bean.setUserId(userId);
-                    gMetricRepo.findByUserIdAndDateAndType(userId, bean.getDate(), bean.getType())
-                            .ifPresent(existing -> bean.setId(existing.getId()));
                     gMetricRepo.save(bean);
                     count++;
                 } else {

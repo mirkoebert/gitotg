@@ -1,6 +1,6 @@
 Feature: Golf metrics CSV import
   Users can import golf metrics from CSV files.
-  Records are upserted by user, date and type.
+  Existing records for the user are removed before import.
 
   Background:
     Given a clean gmetric user "gherkin-gmetric-user"
@@ -14,11 +14,12 @@ Feature: Golf metrics CSV import
     Then the user has 1 gmetric record
     And a gmetric exists with date "2025-01-31", type "LOST_BALLS" and value 3
 
-  Scenario: Replacing the same date and type updates the value
+  Scenario: Import replaces all previous metrics for the user
     Given the gmetric CSV has already been imported:
       """
       date,metricValue,type
       2025-01-21,2,BOGEY
+      2025-01-21,9,LOST_BALLS
       """
     When the user imports the gmetric CSV:
       """

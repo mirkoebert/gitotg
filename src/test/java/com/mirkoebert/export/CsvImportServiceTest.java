@@ -267,9 +267,43 @@ class CsvImportServiceTest {
 
     @SneakyThrows
     @Test
-    void importGMetricData_replacesWhenSameDateAndTypeExists() {
-        String csv1 = "date,metricValue,type\n2025-01-21,2,BOGEY\n";
+    void importGMetricData_removesExistingUserDataBeforeImport() {
+        gMetricRepository.save(GMetricEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 1, 1))
+                .metricValue(99)
+                .type(GMetricType.LOST_BALLS)
+                .build());
+        gMetricRepository.save(GMetricEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 2, 1))
+                .metricValue(88)
+                .type(GMetricType.BOGEY)
+                .build());
+        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
+
+        final String csv = "date,metricValue,type\n2025-01-21,5,BOGEY\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+        int count = cut.importGMetricData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(1);
+        assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
+        assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
+        assertThat(all.getFirst().getType()).isEqualTo(GMetricType.BOGEY);
+        assertThat(gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2024, 1, 1), GMetricType.LOST_BALLS))
+                .isEmpty();
+    }
+
+    @SneakyThrows
+    @Test
+    void importGMetricData_replacesPreviousImportCompletely() {
+        String csv1 = "date,metricValue,type\n2025-01-21,2,BOGEY\n2025-01-21,1,LOST_BALLS\n";
         cut.importGMetricData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
+        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
 
         String csv2 = "date,metricValue,type\n2025-01-21,5,BOGEY\n";
         @Cleanup InputStream is = new ByteArrayInputStream(csv2.getBytes());
@@ -277,11 +311,13 @@ class CsvImportServiceTest {
         int count = cut.importGMetricData(is, TEST_USER);
 
         assertThat(count).isEqualTo(1);
-
         List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
         assertThat(all).hasSize(1);
         assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
         assertThat(all.getFirst().getType()).isEqualTo(GMetricType.BOGEY);
+        assertThat(gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2025, 1, 21), GMetricType.LOST_BALLS))
+                .isEmpty();
     }
 
     @SneakyThrows
@@ -306,6 +342,64 @@ class CsvImportServiceTest {
 
         assertThat(count).isEqualTo(1);
         assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(1);
+    }
+
+    @SneakyThrows
+    @Test
+    void importGMetricData_loadsFixtureCsvFromClasspath() {
+        // Pre-seed data that must be removed by import
+        gMetricRepository.save(GMetricEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2020, 1, 1))
+                .metricValue(1)
+                .type(GMetricType.DOUBLE_BOGEY)
+                .build());
+
+        @Cleanup InputStream is = getClass().getClassLoader().getResourceAsStream("2026-07-26-gmetric.csv");
+        assertThat(is).isNotNull();
+
+        int count = cut.importGMetricData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(5);
+
+        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(5);
+        assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
+        assertThat(gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2020, 1, 1), GMetricType.DOUBLE_BOGEY))
+                .isEmpty();
+
+        GMetricEntity lostBalls = gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 7, 26), GMetricType.LOST_BALLS)
+                .orElseThrow();
+        assertThat(lostBalls.getMetricValue()).isEqualTo(2);
+
+        GMetricEntity bogey = gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2025, 6, 15), GMetricType.BOGEY)
+                .orElseThrow();
+        assertThat(bogey.getMetricValue()).isEqualTo(2);
+
+        // Re-import same fixture: still exactly fixture rows
+        @Cleanup InputStream again = getClass().getClassLoader().getResourceAsStream("2026-07-26-gmetric.csv");
+        assertThat(again).isNotNull();
+        int secondCount = cut.importGMetricData(again, TEST_USER);
+        assertThat(secondCount).isEqualTo(5);
+        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(5);
+    }
+
+    @SneakyThrows
+    @Test
+    void importGMetricData_acceptsUppercaseHeaders() {
+        final String csv = "DATE,METRICVALUE,TYPE\n2026-03-01,7,DOUBLE_BOGEY\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+        int count = cut.importGMetricData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+        GMetricEntity saved = gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 3, 1), GMetricType.DOUBLE_BOGEY)
+                .orElseThrow();
+        assertThat(saved.getMetricValue()).isEqualTo(7);
     }
 
 }
