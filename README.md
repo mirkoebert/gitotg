@@ -35,6 +35,6 @@ If you see `OutOfMemoryError: Metaspace`, raise `-XX:MaxMetaspaceSize` and `-XX:
 
 ## CSV Export / Import
 - Export: GET `/api/handicap/export` and `/api/sgi/export` (downloads CSV for current user).
-- Import: POST `/api/handicap/import` and `/api/sgi/import` with multipart file (appends/replaces records for current user; max file size 1MB).
-- UI: File upload forms with AJAX on the Handicap and Short Game Index pages (no page reload on upload).
+- Import: POST `/api/handicap/import`, `/api/sgi/import`, `/api/gmetric/import` with multipart file (replaces all existing records for the current user; max file size 1MB).
+- UI: File upload forms with AJAX on Handicap, Short Game Index, and Metrics pages.
 - CSV format matches export

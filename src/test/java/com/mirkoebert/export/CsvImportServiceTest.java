@@ -72,24 +72,50 @@ class CsvImportServiceTest {
 
     @SneakyThrows
     @Test
-    void importHcpData_replacesWhenSameDateExists() {
-        // first import
-        String csv1 = "date,hcp\n2025-01-21,20.0\n";
-        cut.importHcpData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
+    void importHcpData_removesExistingUserDataBeforeImport() {
+        hcpRepository.save(HcpScoreEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 1, 1))
+                .hcp(30.0)
+                .build());
+        hcpRepository.save(HcpScoreEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 6, 1))
+                .hcp(28.0)
+                .build());
+        assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(2);
 
-        // second import same date, different value -> should replace
+        final String csv = "date,hcp\n2025-01-21,25.5\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+        int count = cut.importHcpData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+        List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(1);
+        assertThat(all.getFirst().getHcp()).isEqualTo(25.5);
+        assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
+        assertThat(hcpRepository.findByUserIdAndDate(TEST_USER, LocalDate.of(2024, 1, 1))).isEmpty();
+    }
+
+    @SneakyThrows
+    @Test
+    void importHcpData_replacesPreviousImportCompletely() {
+        String csv1 = "date,hcp\n2025-01-21,20.0\n2025-02-01,19.0\n";
+        cut.importHcpData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
+        assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(2);
+
         String csv2 = "date,hcp\n2025-01-21,25.5\n";
         @Cleanup InputStream is = new ByteArrayInputStream(csv2.getBytes());
 
         int count = cut.importHcpData(is, TEST_USER);
 
         assertThat(count).isEqualTo(1);
-
         List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
         assertThat(all).hasSize(1);
-        HcpScoreEntity saved = all.getFirst();
-        assertThat(saved.getHcp()).isEqualTo(25.5); // replaced
-        assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
+        assertThat(all.getFirst().getHcp()).isEqualTo(25.5);
+        assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
+        assertThat(hcpRepository.findByUserIdAndDate(TEST_USER, LocalDate.of(2025, 2, 1))).isEmpty();
     }
 
     @SneakyThrows
@@ -108,15 +134,20 @@ class CsvImportServiceTest {
 
     @Test
     void importHcpData_returnsZeroForNoValidRows() {
+        // Seed data must still be cleared even when CSV has no valid rows
+        hcpRepository.save(HcpScoreEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 3, 1))
+                .hcp(22.0)
+                .build());
+
         String csv = "date,hcp\n,25.5\n";
         InputStream is = new ByteArrayInputStream(csv.getBytes());
 
         int count = cut.importHcpData(is, TEST_USER);
 
         assertThat(count).isEqualTo(0);
-
-        List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
-        assertThat(all).isEmpty();
+        assertThat(hcpRepository.findByUserId(TEST_USER)).isEmpty();
     }
 
     // SGI tests

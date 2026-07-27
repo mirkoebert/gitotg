@@ -50,11 +50,12 @@ public class CsvImportService {
                     .build();
 
             List<HcpScoreEntity> beans = csvToBean.parse();
+            removeAllOldHcpForUser(userId);
             int count = 0;
             for (HcpScoreEntity bean : beans) {
                 if (bean.getDate() != null && bean.getHcp() != null) {
+                    bean.setId(0);
                     bean.setUserId(userId);
-                    hcpRepo.findByUserIdAndDate(userId, bean.getDate()).ifPresent(existing -> bean.setId(existing.getId()));
                     hcpRepo.save(bean);
                     count++;
                 }
@@ -65,6 +66,12 @@ public class CsvImportService {
             log.error("Failed to import HCP CSV for user {}", userId, e);
             throw new RuntimeException("HCP CSV import failed: " + e.getMessage(), e);
         }
+    }
+
+    private void removeAllOldHcpForUser(final String userId) {
+        final List<HcpScoreEntity> toRemove = hcpRepo.findByUserId(userId);
+        log.info("Remove {} old HCP records from db for user {}.", toRemove.size(), userId);
+        hcpRepo.deleteAll(toRemove);
     }
 
     public int importSgiData(InputStream inputStream, final String userId) {
