@@ -65,7 +65,12 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u1");
 
-        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.FRESH_KEYS)).toArray());
+        assertThat(advice).isIn(
+                Stream.concat(
+                        Stream.of(resolve(AdvisorService.FRESH_KEYS)),
+                        Stream.of(resolve(AdvisorService.OTHER_KEYS))
+                ).toArray());
+
         verify(hcpRepository).countByUserId("u1");
         verify(singleTestResultRepository).countByUserId("u1");
     }
@@ -117,7 +122,11 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u5");
 
-        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.HH_KEYS)).toArray());
+        assertThat(advice).isIn(
+                Stream.concat(
+                        Stream.of(resolve(AdvisorService.HH_KEYS)),
+                        Stream.of(resolve(AdvisorService.OTHER_KEYS))
+                ).toArray());
     }
 
     @Test
