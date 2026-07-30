@@ -22,10 +22,12 @@
 <h1 class="text-center mb-4"><span th:text="${lastResult.testType}"></span> <span th:text="${lastResult.testId}"></span>
     <span th:text="#{sgi.result.suffix}">Result</span></h1>
 <ul class="list-group">
-    <li class="list-group-item"><span th:text="#{common.points}">Points</span>:     <span th:text="${lastResult.points}"></span></li>
-    <li class="list-group-item"><span th:text="#{common.date}">Date</span>:       <span th:text="${lastResult.date}"></span></li>
-    <li class="list-group-item"><span th:text="#{common.hcp}">HCP</span>:        <span th:text="${lastResult.hcp}"></span></li>
-    <li class="list-group-item"><span th:text="#{common.trend}">Trend</span>:      <span th:text="${trend}"></span></li>
+    <li class="list-group-item"><span th:text="#{common.points}">Points</span>: <span
+            th:text="${lastResult.points}"></span></li>
+    <li class="list-group-item"><span th:text="#{common.date}">Date</span>: <span th:text="${lastResult.date}"></span>
+    </li>
+    <li class="list-group-item"><span th:text="#{common.hcp}">HCP</span>: <span th:text="${lastResult.hcp}"></span></li>
+    <li class="list-group-item"><span th:text="#{common.trend}">Trend</span>: <span th:text="${trend}"></span></li>
 </ul>
 <div class="mt-5">
     <div class="row justify-content-center">
@@ -65,11 +67,11 @@
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: sgiChartTitle }
+                        legend: {position: 'top'},
+                        title: {display: true, text: sgiChartTitle}
                     },
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {beginAtZero: true}
                     }
                 }
             });

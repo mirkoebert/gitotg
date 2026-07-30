@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class GolfCheckListItem {
 
-        @Id
-        private Long id;
-        private String name;
-        private String description;
-        private String goal;
+    @Id
+    private Long id;
+    private String name;
+    private String description;
+    private String goal;
 
 }

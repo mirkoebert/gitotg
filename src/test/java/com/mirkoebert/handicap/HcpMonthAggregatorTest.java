@@ -11,25 +11,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class HcpMonthAggregatorTest {
 
-        @Autowired
-        private HcpMonthAggregator cut;
+    @Autowired
+    private HcpMonthAggregator cut;
 
-        @Test
-        void getHcpForLastMonth() {
-                HcpData r = cut.getHcpForLastMonth(600, ME);
-                assertThat(r).isNotNull();
-                assertThat(r.labels().size()).isGreaterThanOrEqualTo(22);
-                assertThat(r.hcp().size()).isGreaterThanOrEqualTo(22);
-                assertThat(r.hcp().size()).isEqualTo(r.labels().size());
-                assertThat(r.hcp().getFirst()).isEqualTo(32.4);
-        }
+    @Test
+    void getHcpForLastMonth() {
+        HcpData r = cut.getHcpForLastMonth(600, ME);
+        assertThat(r).isNotNull();
+        assertThat(r.labels().size()).isGreaterThanOrEqualTo(22);
+        assertThat(r.hcp().size()).isGreaterThanOrEqualTo(22);
+        assertThat(r.hcp().size()).isEqualTo(r.labels().size());
+        assertThat(r.hcp().getFirst()).isEqualTo(32.4);
+    }
 
-        @Test
-        void getHcpForLastMonthEmpty() {
-                HcpData r = cut.getHcpForLastMonth(600, "UNKNOWN");
-                assertThat(r).isNotNull();
-                assertThat(r.labels().size()).isGreaterThanOrEqualTo(22);
-                assertThat(r.hcp().size()).isGreaterThanOrEqualTo(22);
-                assertThat(r.hcp().size()).isEqualTo(r.labels().size());
-        }
+    @Test
+    void getHcpForLastMonthEmpty() {
+        HcpData r = cut.getHcpForLastMonth(600, "UNKNOWN");
+        assertThat(r).isNotNull();
+        assertThat(r.labels().size()).isGreaterThanOrEqualTo(22);
+        assertThat(r.hcp().size()).isGreaterThanOrEqualTo(22);
+        assertThat(r.hcp().size()).isEqualTo(r.labels().size());
+    }
 }

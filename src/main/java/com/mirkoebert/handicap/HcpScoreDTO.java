@@ -16,11 +16,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class HcpScoreDTO {
 
-        @NotNull
-        private LocalDate selectedDate;
+    @NotNull
+    private LocalDate selectedDate;
 
-        @Min(-20)
-        @Max(56)
-        @NotNull
-        private Double hcp;
+    @Min(-20)
+    @Max(56)
+    @NotNull
+    private Double hcp;
 }

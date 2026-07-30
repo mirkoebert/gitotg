@@ -23,7 +23,9 @@
 <h1 class="text-center mb-4"><span th:text="${sgitest.name}"></span></h1>
 
 <ul class="list-group">
-    <li class="list-group-item"><span th:text="#{sgi.distance}">Distance:</span> <span th:text="${sgitest.distanceMeterToCup}"></span>m</li>
+    <li class="list-group-item"><span th:text="#{sgi.distance}">Distance:</span> <span
+            th:text="${sgitest.distanceMeterToCup}"></span>m
+    </li>
     <li class="list-group-item" th:text="#{sgi.shots}">Shots: 10</li>
     <li class="list-group-item" th:text="#{sgi.holed}">Holed: 4 Points</li>
     <li class="list-group-item" th:text="#{sgi.in1m}">In 1m: 2 Points</li>
@@ -41,11 +43,11 @@
                 <input class="form-control" id="points" th:field="*{points}" type="number"/>
             </div>
             <div class="col-12 col-sm-auto">
-                <button class="btn btn-primary" type="submit" th:text="#{common.submit}">Submit</button>
+                <button class="btn btn-primary" th:text="#{common.submit}" type="submit">Submit</button>
             </div>
         </form>
     </li>
-    <li class="list-group-item"><span th:text="#{common.trend}">Trend:</span>      <span th:text="${trend}"></span></li>
+    <li class="list-group-item"><span th:text="#{common.trend}">Trend:</span> <span th:text="${trend}"></span></li>
 
 </ul>
 <div class="mt-5">
@@ -86,11 +88,11 @@
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
-                        legend: { position: 'top' },
-                        title: { display: true, text: sgiChartTitle }
+                        legend: {position: 'top'},
+                        title: {display: true, text: sgiChartTitle}
                     },
                     scales: {
-                        y: { beginAtZero: true }
+                        y: {beginAtZero: true}
                     }
                 }
             });

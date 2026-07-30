@@ -20,9 +20,9 @@
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
 <div class="text-center mb-4">
-    <img src="/images/golf-glove.jpg"
-         th:alt="#{login.alt.glove}"
-         class="login-image mb-3">
+    <img class="login-image mb-3"
+         src="/images/golf-glove.jpg"
+         th:alt="#{login.alt.glove}">
     <h1 class="mb-0" th:text="#{login.heading}">Login</h1>
 </div>
 
@@ -30,8 +30,10 @@
 <section class="mt-5">
     <div class="container">
         <h2 th:text="#{login.warning.title}">Warning - This is an experimental app</h2>
-        <p th:text="#{login.warning.p1}">This is an experimental app and under heavy development. Don't expect anything.</p>
-        <p th:text="#{login.warning.p2}">This app is for me, but you can use it for free. I try my best to make save and secure.
+        <p th:text="#{login.warning.p1}">This is an experimental app and under heavy development. Don't expect
+            anything.</p>
+        <p th:text="#{login.warning.p2}">This app is for me, but you can use it for free. I try my best to make save and
+            secure.
             But expect nothing. The app only store data you give, no hidden tracking or whatever bs.</p>
         <p th:text="#{login.warning.p3}">All data is bound to your login.</p>
     </div>

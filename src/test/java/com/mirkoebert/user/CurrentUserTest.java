@@ -11,6 +11,14 @@ import static org.springframework.security.core.authority.AuthorityUtils.createA
 
 class CurrentUserTest {
 
+    private static OAuth2User user(Map<String, Object> attributes, String nameAttributeKey) {
+        return new DefaultOAuth2User(
+                createAuthorityList("ROLE_USER"),
+                attributes,
+                nameAttributeKey
+        );
+    }
+
     @Test
     void from_mapsGoogleOidcAttributes() {
         OAuth2User oauth2User = user(Map.of(
@@ -65,13 +73,5 @@ class CurrentUserTest {
     @Test
     void from_returnsNullForNullPrincipal() {
         assertThat(CurrentUser.from(null)).isNull();
-    }
-
-    private static OAuth2User user(Map<String, Object> attributes, String nameAttributeKey) {
-        return new DefaultOAuth2User(
-                createAuthorityList("ROLE_USER"),
-                attributes,
-                nameAttributeKey
-        );
     }
 }

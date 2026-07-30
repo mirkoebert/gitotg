@@ -14,16 +14,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class SgiPrimaryRestController {
 
-        private final MonthlySgiHcpAggregator monthlySgiHcpAggregator;
-        private final CurrentUserService currentUserService;
+    private final MonthlySgiHcpAggregator monthlySgiHcpAggregator;
+    private final CurrentUserService currentUserService;
 
-        @GetMapping("/api/sgi/chart-data/{testId}")
-        public ResponseEntity<HcpData> getLineChartData(@PathVariable String testId) {
-                log.info("getLineChartData testId {}", testId);
-                val u = currentUserService.getCurrentUser();
-                final String userId = u.id();
-                log.info("for user {}", userId);
-                return ResponseEntity.ok(monthlySgiHcpAggregator.getHcpForLastMonth(12, userId, Integer.parseInt(testId)));
-        }
+    @GetMapping("/api/sgi/chart-data/{testId}")
+    public ResponseEntity<HcpData> getLineChartData(@PathVariable String testId) {
+        log.info("getLineChartData testId {}", testId);
+        val u = currentUserService.getCurrentUser();
+        final String userId = u.id();
+        log.info("for user {}", userId);
+        return ResponseEntity.ok(monthlySgiHcpAggregator.getHcpForLastMonth(12, userId, Integer.parseInt(testId)));
+    }
 
 }

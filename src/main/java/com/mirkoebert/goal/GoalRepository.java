@@ -8,13 +8,13 @@ import java.util.Optional;
 
 public interface GoalRepository extends JpaRepository<UsersGoalEntity, Long> {
 
-        @NonNull
-        List<UsersGoalEntity> findAllByGoal(@NonNull GoalEnum goalEnum);
+    @NonNull
+    List<UsersGoalEntity> findAllByGoal(@NonNull GoalEnum goalEnum);
 
-        @Override
-        @NonNull
-        Optional<UsersGoalEntity> findById(@NonNull Long id);
+    @Override
+    @NonNull
+    Optional<UsersGoalEntity> findById(@NonNull Long id);
 
-        @Override
-        void deleteById(@NonNull Long id);
+    @Override
+    void deleteById(@NonNull Long id);
 }

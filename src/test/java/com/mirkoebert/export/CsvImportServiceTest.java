@@ -26,22 +26,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class CsvImportServiceTest {
 
+    private static final String TEST_USER = "csv-import-test-user";
     @Autowired
     private CsvImportService cut;
-
     @Autowired
     private HcpRepository hcpRepository;
-
     @Autowired
     private SingleTestResultRepository singleTestResultRepository;
-
     @Autowired
     private GMetricRepository gMetricRepository;
-
     @Autowired
     private PointsToSgiHcpFunction pointsToSgiHcpFunction;
-
-    private static final String TEST_USER = "csv-import-test-user";
 
     @BeforeEach
     void cleanup() {

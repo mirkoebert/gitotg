@@ -15,32 +15,39 @@
             text-align: center;
             border-radius: 12px;
         }
+
         .hero-alt {
             background-color: #fff;
         }
+
         .hero + .hero {
             margin-top: 2.5rem;
         }
+
         a.hero-link {
             display: block;
             text-decoration: none;
             color: inherit;
             transition: box-shadow 0.15s ease, transform 0.15s ease;
         }
+
         a.hero-link:hover,
         a.hero-link:focus-visible {
             box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
             transform: translateY(-1px);
             outline: none;
         }
+
         .hero h1 {
             font-size: clamp(1.75rem, 5vw, 3rem);
             margin-bottom: 1rem;
         }
+
         .hero p {
             font-size: clamp(1rem, 2.5vw, 1.25rem);
             margin-bottom: 2rem;
         }
+
         .hero-image {
             max-width: 100%;
             height: auto;
@@ -49,6 +56,7 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
             margin-bottom: 1.25rem;
         }
+
         .made-with-ai {
             position: fixed;
             bottom: 10px;
@@ -59,10 +67,12 @@
             opacity: 0.9;
             pointer-events: none;
         }
+
         /* Keep page content clear of the fixed badge */
         body {
             padding-bottom: calc(clamp(72px, 18vw, 160px) + 24px);
         }
+
         @media (max-width: 575.98px) {
             .hero {
                 padding: 2rem 0.75rem;
@@ -73,19 +83,20 @@
 <body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
-<img src="/images/made-with-ai.jpg" th:alt="#{home.alt.madeWithAi}" class="made-with-ai">
+<img class="made-with-ai" src="/images/made-with-ai.jpg" th:alt="#{home.alt.madeWithAi}">
 
 <h1 class="text-center mb-4" th:text="#{home.title}">Gitotg: Get it on the Green</h1>
 
 <section class="py-5">
     <div class="container">
         <h2 th:text="#{home.heading}">Improve your Golf game</h2>
-        <p th:text="#{home.intro}">This app helps you to improve your Golf game, it helps to break 100, 90, 80. It focussed on Short Game and it's free.</p>
+        <p th:text="#{home.intro}">This app helps you to improve your Golf game, it helps to break 100, 90, 80. It
+            focussed on Short Game and it's free.</p>
     </div>
 </section>
 
 
-<a class="hero hero-link bg-light" th:href="@{/goal/break100}" th:aria-label="#{home.break100.cta}">
+<a class="hero hero-link bg-light" th:aria-label="#{home.break100.cta}" th:href="@{/goal/break100}">
     <div class="container">
         <h1 th:text="#{home.break100.heading}">Break 100</h1>
         <p th:text="#{home.break100.text}">Track your checklist and habits to break 100 for the first time.</p>
@@ -95,9 +106,9 @@
 
 <section class="hero hero-alt border">
     <div class="container">
-        <img src="/images/wedge.jpg"
-             th:alt="#{home.alt.wedge}"
-             class="hero-image">
+        <img class="hero-image"
+             src="/images/wedge.jpg"
+             th:alt="#{home.alt.wedge}">
         <h1 th:text="#{home.sgi.heading}">Short Game Index</h1>
         <p th:text="#{home.sgi.text}">Fastest way to lower your scores for high handicappers.</p>
         <a class="btn btn-primary" th:href="@{/short-game-index}" th:text="#{home.sgi.cta}">Start now</a>

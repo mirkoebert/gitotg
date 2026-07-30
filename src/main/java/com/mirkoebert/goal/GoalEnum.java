@@ -5,29 +5,29 @@ import java.util.Optional;
 
 public enum GoalEnum {
 
-        BREAK100("Break 100", "break100"),
-        BREAK90("Break 90", "break90"),
-        BREAK80("Break 80", "break80");
+    BREAK100("Break 100", "break100"),
+    BREAK90("Break 90", "break90"),
+    BREAK80("Break 80", "break80");
 
-        private final String full;
-        private final String slug;
+    private final String full;
+    private final String slug;
 
-        GoalEnum(String full, String slug) {
-                this.full = full;
-                this.slug = slug;
-        }
+    GoalEnum(String full, String slug) {
+        this.full = full;
+        this.slug = slug;
+    }
 
-        public String getFull() {
-                return full;
-        }
+    public static Optional<GoalEnum> fromSlug(String slug) {
+        return Arrays.stream(values())
+                .filter(g -> g.slug.equalsIgnoreCase(slug))
+                .findFirst();
+    }
 
-        public String getSlug() {
-                return slug;
-        }
+    public String getFull() {
+        return full;
+    }
 
-        public static Optional<GoalEnum> fromSlug(String slug) {
-                return Arrays.stream(values())
-                        .filter(g -> g.slug.equalsIgnoreCase(slug))
-                        .findFirst();
-        }
+    public String getSlug() {
+        return slug;
+    }
 }

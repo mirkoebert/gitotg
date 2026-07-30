@@ -25,62 +25,62 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Slf4j
 public class MainPrimaryController {
 
-        private final TimelineService timeService;
-        private final HcpService hcpService;
-        private final SgiHcpAggregatedService sgiHcpAggregatedService;
-        private final AdvisorService advisorService;
-        private final CurrentUserService currentUserService;
-        private final ChecklistService checklistService;
-        private final UserStatsService userStatsService;
+    private final TimelineService timeService;
+    private final HcpService hcpService;
+    private final SgiHcpAggregatedService sgiHcpAggregatedService;
+    private final AdvisorService advisorService;
+    private final CurrentUserService currentUserService;
+    private final ChecklistService checklistService;
+    private final UserStatsService userStatsService;
 
-        @Value("${app.version:unknown}")
-        private String appVersion;
+    @Value("${app.version:unknown}")
+    private String appVersion;
 
-        @GetMapping("/user-page")
-        public String getUser(Model model) {
-                val u = currentUserService.getCurrentUser();
-                log.debug("Rendering user page for {}", u);
-                model.addAttribute("name", u.name());
-                model.addAttribute("email", u.email());
-                model.addAttribute("lastHCP", hcpService.findLatestByUserId(u.id()).getHcp());
-                model.addAttribute("lastSGHCP", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u.id()));
-                model.addAttribute("advice", advisorService.getAdvise(u.id()));
-                model.addAttribute("picture", u.pictureUrl());
-                model.addAttribute("break100Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK100).percentage());
-                model.addAttribute("break90Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK90).percentage());
-                model.addAttribute("break80Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK80).percentage());
-                return "user";
-        }
+    @GetMapping("/user-page")
+    public String getUser(Model model) {
+        val u = currentUserService.getCurrentUser();
+        log.debug("Rendering user page for {}", u);
+        model.addAttribute("name", u.name());
+        model.addAttribute("email", u.email());
+        model.addAttribute("lastHCP", hcpService.findLatestByUserId(u.id()).getHcp());
+        model.addAttribute("lastSGHCP", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u.id()));
+        model.addAttribute("advice", advisorService.getAdvise(u.id()));
+        model.addAttribute("picture", u.pictureUrl());
+        model.addAttribute("break100Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK100).percentage());
+        model.addAttribute("break90Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK90).percentage());
+        model.addAttribute("break80Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK80).percentage());
+        return "user";
+    }
 
-        @GetMapping("/timeline")
-        public String getTimeline(Model m) {
-                log.info("timeline page");
-                val u = currentUserService.getCurrentUser();
-                m.addAttribute("timeline", timeService.getLatestResults(u.id()));
-                return "timeline";
-        }
+    @GetMapping("/timeline")
+    public String getTimeline(Model m) {
+        log.info("timeline page");
+        val u = currentUserService.getCurrentUser();
+        m.addAttribute("timeline", timeService.getLatestResults(u.id()));
+        return "timeline";
+    }
 
-        @PostMapping("/timeline/delete")
-        public String deleteTimelineEntry(@RequestParam GolfType type,
-                                          @RequestParam Long id) {
-                log.info("Deleting timeline entry: type={}, id={}", type, id);
-                val u = currentUserService.getCurrentUser();
-                timeService.deleteEntry(type, id, u.id());
-                return "redirect:/timeline";
-        }
+    @PostMapping("/timeline/delete")
+    public String deleteTimelineEntry(@RequestParam GolfType type,
+                                      @RequestParam Long id) {
+        log.info("Deleting timeline entry: type={}, id={}", type, id);
+        val u = currentUserService.getCurrentUser();
+        timeService.deleteEntry(type, id, u.id());
+        return "redirect:/timeline";
+    }
 
-        @GetMapping("/about")
-        public String getAbout(final Model m) {
-                log.info("about page");
-                m.addAttribute("version", appVersion);
-                m.addAttribute("userCount", userStatsService.countUsers());
-                return "about";
-        }
+    @GetMapping("/about")
+    public String getAbout(final Model m) {
+        log.info("about page");
+        m.addAttribute("version", appVersion);
+        m.addAttribute("userCount", userStatsService.countUsers());
+        return "about";
+    }
 
-        @GetMapping("/putting-index")
-        public String getPuttingIndex() {
-                log.info("putting-index page");
-                return "putting-index";
-        }
+    @GetMapping("/putting-index")
+    public String getPuttingIndex() {
+        log.info("putting-index page");
+        return "putting-index";
+    }
 
 }

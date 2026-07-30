@@ -18,47 +18,47 @@ import org.springframework.web.bind.annotation.PostMapping;
 @Slf4j
 public class HcpPrimaryController {
 
-        private final HcpRepository repo;
-        private final HcpService hcpService;
-        private final CurrentUserService currentUserService;
+    private final HcpRepository repo;
+    private final HcpService hcpService;
+    private final CurrentUserService currentUserService;
 
-        @GetMapping({"/handicap/input"})
-        public String getInputPage(final Model model){
-                log.info("Get hcp page");
-                val u = currentUserService.getCurrentUser();
-                model.addAttribute("lastResult", hcpService.findLatestByUserId(u.id()));
-                model.addAttribute("hcpScore", new HcpScoreDTO());
-                return "hcp/input";
+    @GetMapping({"/handicap/input"})
+    public String getInputPage(final Model model) {
+        log.info("Get hcp page");
+        val u = currentUserService.getCurrentUser();
+        model.addAttribute("lastResult", hcpService.findLatestByUserId(u.id()));
+        model.addAttribute("hcpScore", new HcpScoreDTO());
+        return "hcp/input";
+    }
+
+    @PostMapping("/handicap/submit")
+    public String submitForm(
+            @ModelAttribute("hcpScore") @Valid final HcpScoreDTO score,
+            BindingResult bindingResult,
+            final Model model
+    ) {
+        val u = currentUserService.getCurrentUser();
+
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("lastResult", hcpService.findLatestByUserId(u.id()));
+            return "hcp/input";
         }
 
-        @PostMapping("/handicap/submit")
-        public String submitForm(
-                @ModelAttribute("hcpScore") @Valid final HcpScoreDTO score,
-                BindingResult bindingResult,
-                final Model model
-        ) {
-                val u = currentUserService.getCurrentUser();
-
-                if (bindingResult.hasErrors()) {
-                        model.addAttribute("lastResult", hcpService.findLatestByUserId(u.id()));
-                        return "hcp/input";
-                }
-
-                try {
-                        log.info("Input processing: date {}, hcp {}", score.getSelectedDate(), score.getHcp());
-                        val he = HcpScoreEntity
-                                .builder()
-                                .hcp(score.getHcp())
-                                .date(score.getSelectedDate())
-                                .userId(u.id())
-                                .build();
-                        repo.save(he);
-                } catch (Exception e) {
-                        log.warn("Can't process hcp {}", score, e);
-                }
-                model.addAttribute("lastResult", hcpService.findLatestByUserId(u.id()));
-                model.addAttribute("hcpScore", new HcpScoreDTO());
-                return "hcp/input";
+        try {
+            log.info("Input processing: date {}, hcp {}", score.getSelectedDate(), score.getHcp());
+            val he = HcpScoreEntity
+                    .builder()
+                    .hcp(score.getHcp())
+                    .date(score.getSelectedDate())
+                    .userId(u.id())
+                    .build();
+            repo.save(he);
+        } catch (Exception e) {
+            log.warn("Can't process hcp {}", score, e);
         }
+        model.addAttribute("lastResult", hcpService.findLatestByUserId(u.id()));
+        model.addAttribute("hcpScore", new HcpScoreDTO());
+        return "hcp/input";
+    }
 
 }

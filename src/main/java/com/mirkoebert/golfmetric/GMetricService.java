@@ -12,15 +12,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GMetricService {
 
-        private final GMetricRepository repo;
+    private final GMetricRepository repo;
 
-        public @NonNull List<GMetricEntity> findByUserId(@NonNull String userId) {
-                log.debug("findByUserId {}", userId);
-                return repo.findByUserIdOrderByDateDesc(userId);
-        }
+    public @NonNull List<GMetricEntity> findByUserId(@NonNull String userId) {
+        log.debug("findByUserId {}", userId);
+        return repo.findByUserIdOrderByDateDesc(userId);
+    }
 
-        public @NonNull List<GMetricEntity> findByUserIdAndType(@NonNull String userId, @NonNull GMetricType type) {
-                log.debug("findByUserIdAndType {} {}", userId, type);
-                return repo.findByUserIdAndTypeOrderByDateDesc(userId, type);
-        }
+    public @NonNull List<GMetricEntity> findByUserIdAndType(@NonNull String userId, @NonNull GMetricType type) {
+        log.debug("findByUserIdAndType {} {}", userId, type);
+        return repo.findByUserIdAndTypeOrderByDateDesc(userId, type);
+    }
 }

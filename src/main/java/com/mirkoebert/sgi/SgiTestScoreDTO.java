@@ -16,16 +16,16 @@ import lombok.NoArgsConstructor;
 class SgiTestScoreDTO {
 
 
-        @Min(0)
-        @Max(40)
-        @NotNull
-        private Integer points;
+    @Min(0)
+    @Max(40)
+    @NotNull
+    private Integer points;
 
-        @NotNull
-        private TestSuite type;
+    @NotNull
+    private TestSuite type;
 
-        @Min(1)
-        @Max(10)
-        @NotNull
-        private Integer testId;
+    @Min(1)
+    @Max(10)
+    @NotNull
+    private Integer testId;
 }

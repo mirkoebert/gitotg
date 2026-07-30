@@ -32,6 +32,13 @@ public class LocalePreferenceInterceptor implements HandlerInterceptor {
     private final UserPreferenceService userPreferenceService;
     private final CurrentUserService currentUserService;
 
+    private static boolean isOAuth2Authenticated() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        return authentication != null
+                && authentication.isAuthenticated()
+                && authentication.getPrincipal() instanceof OAuth2User;
+    }
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String langParam = request.getParameter("lang");
@@ -77,12 +84,5 @@ public class LocalePreferenceInterceptor implements HandlerInterceptor {
         if (localeResolver != null) {
             localeResolver.setLocale(request, response, locale);
         }
-    }
-
-    private static boolean isOAuth2Authenticated() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null
-                && authentication.isAuthenticated()
-                && authentication.getPrincipal() instanceof OAuth2User;
     }
 }

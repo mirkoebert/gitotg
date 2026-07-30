@@ -19,63 +19,63 @@ import java.util.stream.Stream;
 @Slf4j
 public class TimelineService {
 
-        private final SingleTestResultRepository singleTestResultRepository;
-        private final HcpRepository hcpRepository;
+    private final SingleTestResultRepository singleTestResultRepository;
+    private final HcpRepository hcpRepository;
 
-        public List<MeasurementDTO> getLatestResults(@NonNull final String userId) {
-                // Cap each source so we never materialize full history for a short timeline view
-                List<HcpScoreEntity> h = hcpRepository.findTop12ByUserIdOrderByDateDesc(userId);
-                List<MeasurementDTO> hm = h
-                        .stream()
-                        .map(hc -> MeasurementDTO
-                                .builder()
-                                .id(hc.getId())
-                                .value(String.format("%.1f", hc.getHcp()))
-                                .userId(userId)
-                                .type(GolfType.HCP)
-                                .date(hc.getDate())
-                                .comment("Handicap")
-                                .build()
+    public List<MeasurementDTO> getLatestResults(@NonNull final String userId) {
+        // Cap each source so we never materialize full history for a short timeline view
+        List<HcpScoreEntity> h = hcpRepository.findTop12ByUserIdOrderByDateDesc(userId);
+        List<MeasurementDTO> hm = h
+                .stream()
+                .map(hc -> MeasurementDTO
+                        .builder()
+                        .id(hc.getId())
+                        .value(String.format("%.1f", hc.getHcp()))
+                        .userId(userId)
+                        .type(GolfType.HCP)
+                        .date(hc.getDate())
+                        .comment("Handicap")
+                        .build()
                 ).toList();
 
-                List<SingleTestResultEntity> sgiTests = singleTestResultRepository.findTop12ByUserIdOrderByDateDesc(userId);
+        List<SingleTestResultEntity> sgiTests = singleTestResultRepository.findTop12ByUserIdOrderByDateDesc(userId);
 
-                List<MeasurementDTO> sgi = sgiTests
-                        .stream()
-                        .map(m -> MeasurementDTO
-                                .builder()
-                                .id(m.getId())
-                                .value("" + m.getHcp())
-                                .type(GolfType.SGIHCP)
-                                .userId(userId)
-                                .comment("Short Game Test " + m.getTestId())
-                                .date(m.getDate())
-                                .build())
-                        .toList();
+        List<MeasurementDTO> sgi = sgiTests
+                .stream()
+                .map(m -> MeasurementDTO
+                        .builder()
+                        .id(m.getId())
+                        .value("" + m.getHcp())
+                        .type(GolfType.SGIHCP)
+                        .userId(userId)
+                        .comment("Short Game Test " + m.getTestId())
+                        .date(m.getDate())
+                        .build())
+                .toList();
 
-                return Stream.concat(hm.stream(), sgi.stream())
-                        .sorted(Comparator.comparing(MeasurementDTO::getDate, Comparator.reverseOrder()))
-                        .limit(12L)
-                        .toList();
+        return Stream.concat(hm.stream(), sgi.stream())
+                .sorted(Comparator.comparing(MeasurementDTO::getDate, Comparator.reverseOrder()))
+                .limit(12L)
+                .toList();
+    }
+
+    public void deleteEntry(GolfType type, Long id, @NonNull String currentUserId) {
+        if (id == null || type == null) {
+            return;
         }
 
-        public void deleteEntry(GolfType type, Long id, @NonNull String currentUserId) {
-                if (id == null || type == null) {
-                        return;
+        if (type == GolfType.HCP) {
+            hcpRepository.findById(id).ifPresent(entry -> {
+                if (entry.getUserId().equals(currentUserId)) {
+                    hcpRepository.deleteById(id);
                 }
-
-                if (type == GolfType.HCP) {
-                        hcpRepository.findById(id).ifPresent(entry -> {
-                                if (entry.getUserId().equals(currentUserId)) {
-                                        hcpRepository.deleteById(id);
-                                }
-                        });
-                } else if (type == GolfType.SGIHCP) {
-                        singleTestResultRepository.findById(id).ifPresent(entry -> {
-                                if (entry.getUserId().equals(currentUserId)) {
-                                        singleTestResultRepository.deleteById(id);
-                                }
-                        });
+            });
+        } else if (type == GolfType.SGIHCP) {
+            singleTestResultRepository.findById(id).ifPresent(entry -> {
+                if (entry.getUserId().equals(currentUserId)) {
+                    singleTestResultRepository.deleteById(id);
                 }
+            });
         }
+    }
 }

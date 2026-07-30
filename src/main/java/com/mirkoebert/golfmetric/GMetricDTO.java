@@ -15,13 +15,13 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class GMetricDTO {
 
-        @NotNull
-        private LocalDate selectedDate;
+    @NotNull
+    private LocalDate selectedDate;
 
-        @Min(0)
-        @NotNull
-        private Integer metricValue;
+    @Min(0)
+    @NotNull
+    private Integer metricValue;
 
-        @NotNull
-        private GMetricType type;
+    @NotNull
+    private GMetricType type;
 }

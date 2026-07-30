@@ -20,15 +20,15 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class HcpScoreEntity {
 
-        @Id
-        @GeneratedValue
-        @CsvIgnore
-        private long id;
-        @CsvIgnore
-        private String userId;
-        @CsvBindByName(column = "date")
-        @CsvDate("yyyy-MM-dd")
-        private LocalDate date;
-        @CsvBindByName(column = "hcp")
-        private Double hcp;
+    @Id
+    @GeneratedValue
+    @CsvIgnore
+    private long id;
+    @CsvIgnore
+    private String userId;
+    @CsvBindByName(column = "date")
+    @CsvDate("yyyy-MM-dd")
+    private LocalDate date;
+    @CsvBindByName(column = "hcp")
+    private Double hcp;
 }

@@ -11,31 +11,31 @@ import java.util.Optional;
 @Repository
 public interface SingleTestResultRepository extends JpaRepository<SingleTestResultEntity, Long> {
 
-        @Query("select distinct s.userId from SingleTestResultEntity s where s.userId is not null")
-        @NonNull
-        List<String> findDistinctUserIds();
+    @Query("select distinct s.userId from SingleTestResultEntity s where s.userId is not null")
+    @NonNull
+    List<String> findDistinctUserIds();
 
-        @NonNull
-        List<SingleTestResultEntity> findByUserIdAndTestId(@NonNull String user, @NonNull Integer testId);
+    @NonNull
+    List<SingleTestResultEntity> findByUserIdAndTestId(@NonNull String user, @NonNull Integer testId);
 
-        @NonNull
-        List<SingleTestResultEntity> findTop4ByUserIdAndTestIdOrderByDateDesc(@NonNull String user, @NonNull Integer testId);
+    @NonNull
+    List<SingleTestResultEntity> findTop4ByUserIdAndTestIdOrderByDateDesc(@NonNull String user, @NonNull Integer testId);
 
-        @NonNull
-        Optional<SingleTestResultEntity> findFirstByUserIdAndTestIdOrderByDateDesc(@NonNull String user, @NonNull Integer testId);
+    @NonNull
+    Optional<SingleTestResultEntity> findFirstByUserIdAndTestIdOrderByDateDesc(@NonNull String user, @NonNull Integer testId);
 
-        @NonNull
-        List<SingleTestResultEntity> findAllByUserId(@NonNull String userId);
+    @NonNull
+    List<SingleTestResultEntity> findAllByUserId(@NonNull String userId);
 
-        @NonNull
-        List<SingleTestResultEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);
+    @NonNull
+    List<SingleTestResultEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);
 
-        int countByUserId(@NonNull String userId);
+    int countByUserId(@NonNull String userId);
 
-        @Override
-        @NonNull
-        Optional<SingleTestResultEntity> findById(@NonNull Long id);
+    @Override
+    @NonNull
+    Optional<SingleTestResultEntity> findById(@NonNull Long id);
 
-        @Override
-        void deleteById(@NonNull Long id);
+    @Override
+    void deleteById(@NonNull Long id);
 }

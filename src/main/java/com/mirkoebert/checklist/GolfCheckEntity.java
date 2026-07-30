@@ -17,12 +17,12 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class GolfCheckEntity {
 
-        @Id
-        @GeneratedValue
-        private long id;
-        private LocalDate date;
-        private String userId;
-        private Long checkListItemId;
-        private boolean checked;
+    @Id
+    @GeneratedValue
+    private long id;
+    private LocalDate date;
+    private String userId;
+    private Long checkListItemId;
+    private boolean checked;
 
 }

@@ -16,30 +16,30 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GMetricRestController {
 
-        private final GMetricService gMetricService;
-        private final GMetricMonthAggregator monthAggregator;
-        private final CurrentUserService currentUserService;
+    private final GMetricService gMetricService;
+    private final GMetricMonthAggregator monthAggregator;
+    private final CurrentUserService currentUserService;
 
-        @GetMapping("/api/gmetric")
-        public ResponseEntity<List<GMetricEntity>> getGMetrics(
-                        @RequestParam(required = false) GMetricType type) {
-                val u = currentUserService.getCurrentUser();
-                final String userId = u.id();
-                log.info("getGMetrics for user {} type {}", userId, type);
+    @GetMapping("/api/gmetric")
+    public ResponseEntity<List<GMetricEntity>> getGMetrics(
+            @RequestParam(required = false) GMetricType type) {
+        val u = currentUserService.getCurrentUser();
+        final String userId = u.id();
+        log.info("getGMetrics for user {} type {}", userId, type);
 
-                final List<GMetricEntity> metrics = type == null
-                                ? gMetricService.findByUserId(userId)
-                                : gMetricService.findByUserIdAndType(userId, type);
-                return ResponseEntity.ok(metrics);
-        }
+        final List<GMetricEntity> metrics = type == null
+                ? gMetricService.findByUserId(userId)
+                : gMetricService.findByUserIdAndType(userId, type);
+        return ResponseEntity.ok(metrics);
+    }
 
-        @GetMapping("/api/gmetric/chart-data")
-        public ResponseEntity<GMetricChartData> getChartData(
-                        @RequestParam(defaultValue = GMetricMonthAggregator.RANGE_LAST_YEAR) String range) {
-                log.info("gmetric getChartData range={}", range);
-                val u = currentUserService.getCurrentUser();
-                final String userId = u.id();
-                log.info("for user {}", userId);
-                return ResponseEntity.ok(monthAggregator.getMetricsForRange(range, userId));
-        }
+    @GetMapping("/api/gmetric/chart-data")
+    public ResponseEntity<GMetricChartData> getChartData(
+            @RequestParam(defaultValue = GMetricMonthAggregator.RANGE_LAST_YEAR) String range) {
+        log.info("gmetric getChartData range={}", range);
+        val u = currentUserService.getCurrentUser();
+        final String userId = u.id();
+        log.info("for user {}", userId);
+        return ResponseEntity.ok(monthAggregator.getMetricsForRange(range, userId));
+    }
 }

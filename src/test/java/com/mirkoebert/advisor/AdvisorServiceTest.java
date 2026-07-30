@@ -40,18 +40,6 @@ class AdvisorServiceTest {
     @MockitoBean
     private SingleTestResultRepository singleTestResultRepository;
 
-    @Configuration
-    static class MessageSourceConfig {
-        @Bean
-        MessageSource messageSource() {
-            ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
-            ms.setBasename("messages");
-            ms.setDefaultEncoding("UTF-8");
-            ms.setFallbackToSystemLocale(false);
-            return ms;
-        }
-    }
-
     private String[] resolve(String[] keys) {
         return Arrays.stream(keys)
                 .map(key -> messageSource.getMessage(key, null, Locale.ENGLISH))
@@ -84,8 +72,8 @@ class AdvisorServiceTest {
 
         assertThat(advice).isIn(
                 Stream.concat(
-                    Stream.of(resolve(AdvisorService.FEW_KEYS)),
-                    Stream.of(resolve(AdvisorService.OTHER_KEYS))
+                        Stream.of(resolve(AdvisorService.FEW_KEYS)),
+                        Stream.of(resolve(AdvisorService.OTHER_KEYS))
                 ).toArray());
     }
 
@@ -140,5 +128,17 @@ class AdvisorServiceTest {
         String advice = cut.getAdvise("u6");
 
         assertThat(advice).isIn(Stream.of(resolve(AdvisorService.OTHER_KEYS)).toArray());
+    }
+
+    @Configuration
+    static class MessageSourceConfig {
+        @Bean
+        MessageSource messageSource() {
+            ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
+            ms.setBasename("messages");
+            ms.setDefaultEncoding("UTF-8");
+            ms.setFallbackToSystemLocale(false);
+            return ms;
+        }
     }
 }

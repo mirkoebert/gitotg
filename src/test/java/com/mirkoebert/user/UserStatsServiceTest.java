@@ -19,39 +19,39 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class UserStatsServiceTest {
 
-        @Mock
-        private HcpRepository hcpRepository;
-        @Mock
-        private SingleTestResultRepository sgiRepository;
-        @Mock
-        private UserPreferenceRepository userPreferenceRepository;
-        @Mock
-        private GMetricRepository gMetricRepository;
-        @Mock
-        private GolfCheckEntityRepository golfCheckEntityRepository;
+    @Mock
+    private HcpRepository hcpRepository;
+    @Mock
+    private SingleTestResultRepository sgiRepository;
+    @Mock
+    private UserPreferenceRepository userPreferenceRepository;
+    @Mock
+    private GMetricRepository gMetricRepository;
+    @Mock
+    private GolfCheckEntityRepository golfCheckEntityRepository;
 
-        @InjectMocks
-        private UserStatsService cut;
+    @InjectMocks
+    private UserStatsService cut;
 
-        @Test
-        void countUsers_unionsDistinctIdsAcrossSources() {
-                when(hcpRepository.findDistinctUserIds()).thenReturn(List.of("u1", "u2"));
-                when(sgiRepository.findDistinctUserIds()).thenReturn(List.of("u2", "u3"));
-                when(userPreferenceRepository.findDistinctUserIds()).thenReturn(List.of("u1"));
-                when(gMetricRepository.findDistinctUserIds()).thenReturn(List.of("u4"));
-                when(golfCheckEntityRepository.findDistinctUserIds()).thenReturn(List.of());
+    @Test
+    void countUsers_unionsDistinctIdsAcrossSources() {
+        when(hcpRepository.findDistinctUserIds()).thenReturn(List.of("u1", "u2"));
+        when(sgiRepository.findDistinctUserIds()).thenReturn(List.of("u2", "u3"));
+        when(userPreferenceRepository.findDistinctUserIds()).thenReturn(List.of("u1"));
+        when(gMetricRepository.findDistinctUserIds()).thenReturn(List.of("u4"));
+        when(golfCheckEntityRepository.findDistinctUserIds()).thenReturn(List.of());
 
-                assertThat(cut.countUsers()).isEqualTo(4);
-        }
+        assertThat(cut.countUsers()).isEqualTo(4);
+    }
 
-        @Test
-        void countUsers_ignoresNullAndBlank() {
-                when(hcpRepository.findDistinctUserIds()).thenReturn(Arrays.asList("u1", "", null));
-                when(sgiRepository.findDistinctUserIds()).thenReturn(List.of());
-                when(userPreferenceRepository.findDistinctUserIds()).thenReturn(List.of());
-                when(gMetricRepository.findDistinctUserIds()).thenReturn(List.of());
-                when(golfCheckEntityRepository.findDistinctUserIds()).thenReturn(List.of());
+    @Test
+    void countUsers_ignoresNullAndBlank() {
+        when(hcpRepository.findDistinctUserIds()).thenReturn(Arrays.asList("u1", "", null));
+        when(sgiRepository.findDistinctUserIds()).thenReturn(List.of());
+        when(userPreferenceRepository.findDistinctUserIds()).thenReturn(List.of());
+        when(gMetricRepository.findDistinctUserIds()).thenReturn(List.of());
+        when(golfCheckEntityRepository.findDistinctUserIds()).thenReturn(List.of());
 
-                assertThat(cut.countUsers()).isEqualTo(1);
-        }
+        assertThat(cut.countUsers()).isEqualTo(1);
+    }
 }

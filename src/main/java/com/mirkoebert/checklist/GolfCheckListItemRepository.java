@@ -10,13 +10,13 @@ import java.util.Optional;
 @Repository
 public interface GolfCheckListItemRepository extends JpaRepository<GolfCheckListItem, Long> {
 
-        @NonNull
-        List<GolfCheckListItem> findByGoal(@NonNull final String goal);
+    @NonNull
+    List<GolfCheckListItem> findByGoal(@NonNull final String goal);
 
-        @Override
-        @NonNull
-        Optional<GolfCheckListItem> findById(@NonNull Long id);
+    @Override
+    @NonNull
+    Optional<GolfCheckListItem> findById(@NonNull Long id);
 
-        @Override
-        void deleteById(@NonNull Long id);
+    @Override
+    void deleteById(@NonNull Long id);
 }

@@ -3,11 +3,7 @@ package com.mirkoebert.golfmetric;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvDate;
 import com.opencsv.bean.CsvIgnore;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,19 +18,21 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class GMetricEntity {
 
-        @Id
-        @GeneratedValue
-        @CsvIgnore
-        private long id;
-        @CsvIgnore
-        private String userId;
-        @CsvBindByName(column = "date")
-        @CsvDate("yyyy-MM-dd")
-        private LocalDate date;
-        /** Metric count/score; not named {@code value} (reserved in H2). */
-        @CsvBindByName(column = "metricValue")
-        private int metricValue;
-        @CsvBindByName(column = "type")
-        @Enumerated(EnumType.STRING)
-        private GMetricType type;
+    @Id
+    @GeneratedValue
+    @CsvIgnore
+    private long id;
+    @CsvIgnore
+    private String userId;
+    @CsvBindByName(column = "date")
+    @CsvDate("yyyy-MM-dd")
+    private LocalDate date;
+    /**
+     * Metric count/score; not named {@code value} (reserved in H2).
+     */
+    @CsvBindByName(column = "metricValue")
+    private int metricValue;
+    @CsvBindByName(column = "type")
+    @Enumerated(EnumType.STRING)
+    private GMetricType type;
 }

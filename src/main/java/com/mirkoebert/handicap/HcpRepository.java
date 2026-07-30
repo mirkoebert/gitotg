@@ -12,31 +12,31 @@ import java.util.Optional;
 @Repository
 public interface HcpRepository extends JpaRepository<HcpScoreEntity, Long> {
 
-        @Query("select distinct h.userId from HcpScoreEntity h where h.userId is not null")
-        @NonNull
-        List<String> findDistinctUserIds();
+    @Query("select distinct h.userId from HcpScoreEntity h where h.userId is not null")
+    @NonNull
+    List<String> findDistinctUserIds();
 
-        @NonNull
-        List<HcpScoreEntity> findByUserId(@NonNull String userId);
+    @NonNull
+    List<HcpScoreEntity> findByUserId(@NonNull String userId);
 
-        @NonNull
-        List<HcpScoreEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);
+    @NonNull
+    List<HcpScoreEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);
 
-        @NonNull
-        List<HcpScoreEntity> findTop4ByUserIdOrderByDateDesc(@NonNull String userId);
+    @NonNull
+    List<HcpScoreEntity> findTop4ByUserIdOrderByDateDesc(@NonNull String userId);
 
-        int countByUserId(@NonNull String userId);
+    int countByUserId(@NonNull String userId);
 
-        @NonNull
-        Optional<HcpScoreEntity> findFirstByUserIdOrderByDateDesc(@NonNull String userId);
+    @NonNull
+    Optional<HcpScoreEntity> findFirstByUserIdOrderByDateDesc(@NonNull String userId);
 
-        @NonNull
-        Optional<HcpScoreEntity> findByUserIdAndDate(@NonNull String userId, @NonNull LocalDate date);
+    @NonNull
+    Optional<HcpScoreEntity> findByUserIdAndDate(@NonNull String userId, @NonNull LocalDate date);
 
-        @Override
-        @NonNull
-        Optional<HcpScoreEntity> findById(@NonNull Long id);
+    @Override
+    @NonNull
+    Optional<HcpScoreEntity> findById(@NonNull Long id);
 
-        @Override
-        void deleteById(@NonNull Long id);
+    @Override
+    void deleteById(@NonNull Long id);
 }

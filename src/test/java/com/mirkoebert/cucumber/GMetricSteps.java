@@ -18,56 +18,56 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class GMetricSteps {
 
-        @Autowired
-        private CsvImportService csvImportService;
+    @Autowired
+    private CsvImportService csvImportService;
 
-        @Autowired
-        private GMetricRepository gMetricRepository;
+    @Autowired
+    private GMetricRepository gMetricRepository;
 
-        private String userId;
-        private int lastImportCount;
+    private String userId;
+    private int lastImportCount;
 
-        @Given("a clean gmetric user {string}")
-        public void aCleanGmetricUser(String userId) {
-                this.userId = userId;
-                gMetricRepository.findByUserId(userId).forEach(gMetricRepository::delete);
-        }
+    @Given("a clean gmetric user {string}")
+    public void aCleanGmetricUser(String userId) {
+        this.userId = userId;
+        gMetricRepository.findByUserId(userId).forEach(gMetricRepository::delete);
+    }
 
-        @Given("the gmetric CSV has already been imported:")
-        public void theGmetricCsvHasAlreadyBeenImported(String csv) {
-                importGmetricCsv(csv);
-        }
+    @Given("the gmetric CSV has already been imported:")
+    public void theGmetricCsvHasAlreadyBeenImported(String csv) {
+        importGmetricCsv(csv);
+    }
 
-        @When("the user imports the gmetric CSV:")
-        public void theUserImportsTheGmetricCsv(String csv) {
-                importGmetricCsv(csv);
-        }
+    @When("the user imports the gmetric CSV:")
+    public void theUserImportsTheGmetricCsv(String csv) {
+        importGmetricCsv(csv);
+    }
 
-        private void importGmetricCsv(String csv) {
-                lastImportCount = csvImportService.importGMetricData(
-                                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)),
-                                userId);
-        }
+    private void importGmetricCsv(String csv) {
+        lastImportCount = csvImportService.importGMetricData(
+                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)),
+                userId);
+    }
 
-        @Then("the user has {int} gmetric record(s)")
-        public void theUserHasGmetricRecords(int expectedCount) {
-                List<GMetricEntity> all = gMetricRepository.findByUserId(userId);
-                assertThat(all).hasSize(expectedCount);
-        }
+    @Then("the user has {int} gmetric record(s)")
+    public void theUserHasGmetricRecords(int expectedCount) {
+        List<GMetricEntity> all = gMetricRepository.findByUserId(userId);
+        assertThat(all).hasSize(expectedCount);
+    }
 
-        @Then("the last import saved {int} records")
-        public void theLastImportSavedRecords(int expectedCount) {
-                assertThat(lastImportCount).isEqualTo(expectedCount);
-        }
+    @Then("the last import saved {int} records")
+    public void theLastImportSavedRecords(int expectedCount) {
+        assertThat(lastImportCount).isEqualTo(expectedCount);
+    }
 
-        @Then("a gmetric exists with date {string}, type {string} and value {int}")
-        public void aGmetricExistsWithDateTypeAndValue(String date, String type, int value) {
-                LocalDate localDate = LocalDate.parse(date);
-                GMetricType metricType = GMetricType.valueOf(type);
-                GMetricEntity found = gMetricRepository
-                                .findByUserIdAndDateAndType(userId, localDate, metricType)
-                                .orElseThrow(() -> new AssertionError(
-                                                "No gmetric for user=" + userId + " date=" + date + " type=" + type));
-                assertThat(found.getMetricValue()).isEqualTo(value);
-        }
+    @Then("a gmetric exists with date {string}, type {string} and value {int}")
+    public void aGmetricExistsWithDateTypeAndValue(String date, String type, int value) {
+        LocalDate localDate = LocalDate.parse(date);
+        GMetricType metricType = GMetricType.valueOf(type);
+        GMetricEntity found = gMetricRepository
+                .findByUserIdAndDateAndType(userId, localDate, metricType)
+                .orElseThrow(() -> new AssertionError(
+                        "No gmetric for user=" + userId + " date=" + date + " type=" + type));
+        assertThat(found.getMetricValue()).isEqualTo(value);
+    }
 }

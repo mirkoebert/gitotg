@@ -19,6 +19,13 @@ public class UserPreferenceService {
 
     private final UserPreferenceRepository repository;
 
+    private static String normalize(String language) {
+        if (language == null) {
+            return "";
+        }
+        return language.trim().toLowerCase(Locale.ROOT);
+    }
+
     public boolean isSupported(@NonNull String language) {
         return SUPPORTED_LANGUAGES.contains(normalize(language));
     }
@@ -42,12 +49,5 @@ public class UserPreferenceService {
         entity.setLanguage(normalized);
         repository.save(entity);
         log.debug("Saved language preference {} for user {}", normalized, userId);
-    }
-
-    private static String normalize(String language) {
-        if (language == null) {
-            return "";
-        }
-        return language.trim().toLowerCase(Locale.ROOT);
     }
 }

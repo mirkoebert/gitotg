@@ -30,6 +30,10 @@ class ChecklistServiceTest {
     @MockitoBean
     private GolfCheckEntityRepository golfCheckEntityRepository;
 
+    private static GolfCheckListItem item(Long id, String name) {
+        return GolfCheckListItem.builder().id(id).name(name).goal(GoalEnum.BREAK100.name()).build();
+    }
+
     @Test
     void getSelectedItemIds_returnsOnlyCheckedItemsForGoal() {
         when(golfCheckListItemRepository.findByGoal(GoalEnum.BREAK100.name()))
@@ -119,9 +123,5 @@ class ChecklistServiceTest {
         assertThat(progress.totalCount()).isZero();
         assertThat(progress.percentage()).isZero();
         assertThat(progress.isEmpty()).isTrue();
-    }
-
-    private static GolfCheckListItem item(Long id, String name) {
-        return GolfCheckListItem.builder().id(id).name(name).goal(GoalEnum.BREAK100.name()).build();
     }
 }

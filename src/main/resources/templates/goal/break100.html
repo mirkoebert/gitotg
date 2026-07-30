@@ -12,7 +12,7 @@
 
 <h1 class="text-center mb-4" th:text="${goalTitle}">Goal</h1>
 
-<div th:if="${saved}" class="alert alert-success" role="alert" th:text="#{goal.saved}">
+<div class="alert alert-success" role="alert" th:if="${saved}" th:text="#{goal.saved}">
     Checklist saved.
 </div>
 
@@ -25,39 +25,42 @@
         </span>
     </div>
     <div class="progress" role="progressbar"
-         th:attr="aria-valuenow=${progress.percentage}, aria-valuemin=0, aria-valuemax=100"
-         th:aria-label="#{goal.progressAria(${progress.percentage})}">
+         th:aria-label="#{goal.progressAria(${progress.percentage})}"
+         th:attr="aria-valuenow=${progress.percentage}, aria-valuemin=0, aria-valuemax=100">
         <div class="progress-bar"
              th:classappend="${progress.percentage == 100} ? 'bg-success'"
              th:style="'width: ' + ${progress.percentage} + '%'"
-             th:text="${progress.percentage} + '%'">0%</div>
+             th:text="${progress.percentage} + '%'">0%
+        </div>
     </div>
 </div>
 
-<form th:action="@{/goal/{slug}/save(slug=${goalSlug})}" th:object="${myForm}" method="post">
+<form method="post" th:action="@{/goal/{slug}/save(slug=${goalSlug})}" th:object="${myForm}">
 
     <div class="mb-3">
         <label class="form-label fw-bold" th:text="#{goal.checklist}">Checklist</label>
 
-        <div th:each="option : ${allOptions}" class="mb-2">
+        <div class="mb-2" th:each="option : ${allOptions}">
             <div class="form-check">
                 <input class="form-check-input"
-                       type="checkbox"
                        th:field="*{selectedOptions}"
+                       th:id="'option-' + ${option.id}"
                        th:value="${option.id}"
-                       th:id="'option-' + ${option.id}" />
+                       type="checkbox"/>
                 <label class="form-check-label"
                        th:for="'option-' + ${option.id}"
                        th:text="${option.name}">Option</label>
             </div>
             <div class="form-text ms-4"
                  th:if="${option.description != null and !option.description.isEmpty()}"
-                 th:text="${option.description}">Description</div>
+                 th:text="${option.description}">Description
+            </div>
         </div>
-        <p th:if="${#lists.isEmpty(allOptions)}" class="text-muted" th:text="#{goal.empty}">No checklist items for this goal yet.</p>
+        <p class="text-muted" th:if="${#lists.isEmpty(allOptions)}" th:text="#{goal.empty}">No checklist items for this
+            goal yet.</p>
     </div>
 
-    <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
+    <button class="btn btn-primary" th:text="#{common.save}" type="submit">Save</button>
 </form>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>

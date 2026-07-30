@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="en" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
 </head>
@@ -15,9 +15,11 @@
             text-decoration: none;
             border-radius: 0.25rem;
         }
+
         .lang-switch .lang-flag:hover {
             opacity: 0.9;
         }
+
         .lang-switch .lang-flag.active {
             opacity: 1;
             outline: 2px solid rgba(13, 110, 253, 0.45);
@@ -50,14 +52,18 @@
                     <a class="nav-link" th:href="@{/gmetric}" th:text="#{nav.gmetric}">Metrics</a>
                 </li>
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       role="button"
                        th:text="#{nav.goal}">
                         Goal
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" th:href="@{/goal/break100}" th:text="#{nav.goal.break100}">Break 100</a></li>
-                        <li><a class="dropdown-item" th:href="@{/goal/break90}" th:text="#{nav.goal.break90}">Break 90</a></li>
-                        <li><a class="dropdown-item" th:href="@{/goal/break80}" th:text="#{nav.goal.break80}">Break 80</a></li>
+                        <li><a class="dropdown-item" th:href="@{/goal/break100}" th:text="#{nav.goal.break100}">Break
+                            100</a></li>
+                        <li><a class="dropdown-item" th:href="@{/goal/break90}" th:text="#{nav.goal.break90}">Break
+                            90</a></li>
+                        <li><a class="dropdown-item" th:href="@{/goal/break80}" th:text="#{nav.goal.break80}">Break
+                            80</a></li>
                     </ul>
                 </li>
                 <li class="nav-item">
@@ -72,31 +78,31 @@
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item d-flex align-items-center gap-1 me-2 lang-switch">
                     <a class="nav-link lang-flag py-0 px-1"
+                       th:aria-current="${#locale.language == 'en'} ? 'true' : 'false'"
+                       th:aria-label="#{nav.lang.en}"
                        th:classappend="${#locale.language == 'en'} ? 'active'"
                        th:href="@{''(lang=en)}"
-                       th:title="#{nav.lang.en}"
-                       th:aria-label="#{nav.lang.en}"
-                       th:aria-current="${#locale.language == 'en'} ? 'true' : 'false'">🇬🇧</a>
+                       th:title="#{nav.lang.en}">🇬🇧</a>
                     <a class="nav-link lang-flag py-0 px-1"
+                       th:aria-current="${#locale.language == 'de'} ? 'true' : 'false'"
+                       th:aria-label="#{nav.lang.de}"
                        th:classappend="${#locale.language == 'de'} ? 'active'"
                        th:href="@{''(lang=de)}"
-                       th:title="#{nav.lang.de}"
-                       th:aria-label="#{nav.lang.de}"
-                       th:aria-current="${#locale.language == 'de'} ? 'true' : 'false'">🇩🇪</a>
+                       th:title="#{nav.lang.de}">🇩🇪</a>
                 </li>
                 <li class="nav-item" sec:authorize="isAnonymous()">
                     <a class="nav-link" th:href="@{/login}" th:text="#{nav.login}">Login</a>
                 </li>
 
-                <li sec:authorize="isAuthenticated()" class="nav-item d-flex flex-wrap align-items-center gap-1">
+                <li class="nav-item d-flex flex-wrap align-items-center gap-1" sec:authorize="isAuthenticated()">
                     <span class="navbar-text me-2 small text-muted text-truncate"
-                          style="max-width: 12rem;"
-                          sec:authentication="principal.attributes['name']">
+                          sec:authentication="principal.attributes['name']"
+                          style="max-width: 12rem;">
                     </span>
-                    <form th:action="@{/logout}" method="post" class="d-inline">
-                        <button type="submit"
-                                class="nav-link btn btn-link p-0 text-decoration-none"
-                                th:text="#{nav.logout}">
+                    <form class="d-inline" method="post" th:action="@{/logout}">
+                        <button class="nav-link btn btn-link p-0 text-decoration-none"
+                                th:text="#{nav.logout}"
+                                type="submit">
                             Logout
                         </button>
                     </form>

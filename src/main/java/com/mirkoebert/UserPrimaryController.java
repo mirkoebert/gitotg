@@ -14,13 +14,13 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class UserPrimaryController {
 
-        private final CurrentUserService currentUserService;
+    private final CurrentUserService currentUserService;
 
-        @GetMapping({"/user", "/home"})
-        public Map<String, String> userOauth2CallBack() {
-                log.debug("user");
-                val u = currentUserService.getCurrentUser();
-                val m = Map.of("name", u.name(), "email", u.email(), "pictureUrl", u.pictureUrl());
-                return m;
-        }
+    @GetMapping({"/user", "/home"})
+    public Map<String, String> userOauth2CallBack() {
+        log.debug("user");
+        val u = currentUserService.getCurrentUser();
+        val m = Map.of("name", u.name(), "email", u.email(), "pictureUrl", u.pictureUrl());
+        return m;
+    }
 }

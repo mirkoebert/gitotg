@@ -24,51 +24,51 @@ import java.time.LocalDate;
 @Slf4j
 public class SgiPrimaryController {
 
-        private final SingleTestResultRepository repo;
-        private final PointsToSgiHcpFunction pointsToSgiHcpFunction;
-        private final SgiTestRepo sgiTestRepo;
-        private final TrendService trendService;
-        private final SgiHcpAggregatedService sgiHcpAggregatedService;
-        private final CurrentUserService currentUserService;
+    private final SingleTestResultRepository repo;
+    private final PointsToSgiHcpFunction pointsToSgiHcpFunction;
+    private final SgiTestRepo sgiTestRepo;
+    private final TrendService trendService;
+    private final SgiHcpAggregatedService sgiHcpAggregatedService;
+    private final CurrentUserService currentUserService;
 
-        @GetMapping("/short-game-index")
-        public String getShortGameIndex(Model m) {
-                log.info("short-game-index  page");
-                val u = currentUserService.getCurrentUser();
-                m.addAttribute("lastResult", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u.id()));
-                return "sgi/index";
-        }
+    @GetMapping("/short-game-index")
+    public String getShortGameIndex(Model m) {
+        log.info("short-game-index  page");
+        val u = currentUserService.getCurrentUser();
+        m.addAttribute("lastResult", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u.id()));
+        return "sgi/index";
+    }
 
-        @GetMapping("/sgi/{testId}")
-        public String getShortGameInput(Model m, @PathVariable @Min(1) @Max(8) int testId) {
-                log.info("short-game-input {}", testId);
-                val u = currentUserService.getCurrentUser();
-                m.addAttribute("sgitest", sgiTestRepo.getTestById(testId));
-                m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(testId).build());
-                m.addAttribute("testId", testId);
-                m.addAttribute("trend", trendService.getTrend(testId, u.id()));
-                return "sgi/input";
-        }
+    @GetMapping("/sgi/{testId}")
+    public String getShortGameInput(Model m, @PathVariable @Min(1) @Max(8) int testId) {
+        log.info("short-game-input {}", testId);
+        val u = currentUserService.getCurrentUser();
+        m.addAttribute("sgitest", sgiTestRepo.getTestById(testId));
+        m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(testId).build());
+        m.addAttribute("testId", testId);
+        m.addAttribute("trend", trendService.getTrend(testId, u.id()));
+        return "sgi/input";
+    }
 
-        @PostMapping("/submit")
-        public String submitForm(@ModelAttribute @Valid final SgiTestScoreDTO score, Model m) {
-                log.info("Submit {}", score);
-                val u = currentUserService.getCurrentUser();
-                var s = SingleTestResultEntity
-                        .builder()
-                        .testType(score.getType())
-                        .testId(score.getTestId())
-                        .date(LocalDate.now())
-                        .points(score.getPoints())
-                        .hcp(pointsToSgiHcpFunction.apply(score.getTestId(), score.getPoints()))
-                        .userId(u.id())
-                        .build();
-                repo.save(s);
-                m.addAttribute("sgitest", sgiTestRepo.getTestById(score.getTestId()));
-                m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(score.getTestId()).build());
-                m.addAttribute("testId", score.getTestId());
-                m.addAttribute("trend", trendService.getTrend(score.getTestId(), u.id()));
-                return "sgi/input";
-        }
+    @PostMapping("/submit")
+    public String submitForm(@ModelAttribute @Valid final SgiTestScoreDTO score, Model m) {
+        log.info("Submit {}", score);
+        val u = currentUserService.getCurrentUser();
+        var s = SingleTestResultEntity
+                .builder()
+                .testType(score.getType())
+                .testId(score.getTestId())
+                .date(LocalDate.now())
+                .points(score.getPoints())
+                .hcp(pointsToSgiHcpFunction.apply(score.getTestId(), score.getPoints()))
+                .userId(u.id())
+                .build();
+        repo.save(s);
+        m.addAttribute("sgitest", sgiTestRepo.getTestById(score.getTestId()));
+        m.addAttribute("sgitest1score", SgiTestScoreDTO.builder().type(TestSuite.SGI).testId(score.getTestId()).build());
+        m.addAttribute("testId", score.getTestId());
+        m.addAttribute("trend", trendService.getTrend(score.getTestId(), u.id()));
+        return "sgi/input";
+    }
 
 }

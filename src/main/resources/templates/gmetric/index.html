@@ -29,15 +29,17 @@
     <li class="list-group-item">
         <div class="d-flex flex-column flex-sm-row flex-wrap align-items-sm-center gap-2">
             <span th:text="#{common.import}">Import:</span>
-            <form id="gmetric-import-form" method="post" th:action="@{/api/gmetric/import}" enctype="multipart/form-data"
-                  class="d-flex flex-column flex-sm-row flex-wrap align-items-stretch align-items-sm-center gap-2">
-                <input class="form-control form-control-sm" type="file" name="file" accept=".csv" required
-                       style="max-width: 100%; width: min(100%, 220px);">
-                <button type="submit" class="btn btn-primary btn-sm" th:text="#{common.upload}">Upload</button>
+            <form class="d-flex flex-column flex-sm-row flex-wrap align-items-stretch align-items-sm-center gap-2" enctype="multipart/form-data" id="gmetric-import-form"
+                  method="post"
+                  th:action="@{/api/gmetric/import}">
+                <input accept=".csv" class="form-control form-control-sm" name="file" required style="max-width: 100%; width: min(100%, 220px);"
+                       type="file">
+                <button class="btn btn-primary btn-sm" th:text="#{common.upload}" type="submit">Upload</button>
             </form>
         </div>
-        <small class="d-block mt-1 text-muted" th:text="#{gmetric.importHint}">(CSV with date,metricValue,type columns; upserts by date+type; max 1MB)</small>
-        <div id="gmetric-import-status" class="mt-1 small" style="display:none;"></div>
+        <small class="d-block mt-1 text-muted" th:text="#{gmetric.importHint}">(CSV with date,metricValue,type columns;
+            upserts by date+type; max 1MB)</small>
+        <div class="mt-1 small" id="gmetric-import-status" style="display:none;"></div>
     </li>
 </ul>
 
@@ -46,10 +48,12 @@
         <div class="col-12 col-md-10 col-lg-8">
             <div class="d-flex justify-content-center mb-3">
                 <div class="btn-group" role="group" th:aria-label="#{gmetric.range.label}">
-                    <button type="button" class="btn btn-outline-primary active" id="range-lastYear"
-                            data-range="lastYear" th:text="#{gmetric.range.lastYear}">Last year</button>
-                    <button type="button" class="btn btn-outline-primary" id="range-all"
-                            data-range="all" th:text="#{gmetric.range.all}">All</button>
+                    <button class="btn btn-outline-primary active" data-range="lastYear" id="range-lastYear"
+                            th:text="#{gmetric.range.lastYear}" type="button">Last year
+                    </button>
+                    <button class="btn btn-outline-primary" data-range="all" id="range-all"
+                            th:text="#{gmetric.range.all}" type="button">All
+                    </button>
                 </div>
             </div>
             <div class="chart-wrap">
@@ -129,13 +133,13 @@
                     }
                 },
                 plugins: {
-                    legend: { position: 'top' },
-                    title: { display: true, text: chartTitle }
+                    legend: {position: 'top'},
+                    title: {display: true, text: chartTitle}
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        ticks: { precision: 0 }
+                        ticks: {precision: 0}
                     },
                     x: {
                         ticks: {
@@ -184,7 +188,7 @@
         try {
             const response = await fetch(url, {
                 method: 'GET',
-                headers: { 'Accept': 'application/json' },
+                headers: {'Accept': 'application/json'},
                 credentials: 'same-origin'
             });
             if (!response.ok) {
@@ -230,74 +234,76 @@
         <div class="row g-3 align-items-end">
             <div class="col-12 col-md-3" th:classappend="${#fields.hasErrors('type')} ? 'is-invalid'">
                 <label class="form-label" for="type" th:text="#{gmetric.typeLabel}">Type</label>
-                <select class="form-select" id="type" th:field="*{type}" required>
-                    <option th:value="LOST_BALLS" th:text="#{gmetric.type.lostBalls}">Lost Balls</option>
-                    <option th:value="DOUBLE_BOGEY" th:text="#{gmetric.type.doubleBogey}">Double Bogey</option>
-                    <option th:value="BOGEY" th:text="#{gmetric.type.bogey}">Bogey</option>
+                <select class="form-select" id="type" required th:field="*{type}">
+                    <option th:text="#{gmetric.type.lostBalls}" th:value="LOST_BALLS">Lost Balls</option>
+                    <option th:text="#{gmetric.type.doubleBogey}" th:value="DOUBLE_BOGEY">Double Bogey</option>
+                    <option th:text="#{gmetric.type.bogey}" th:value="BOGEY">Bogey</option>
                 </select>
                 <div class="text-danger small" th:errors="*{type}"></div>
             </div>
             <div class="col-12 col-md-3" th:classappend="${#fields.hasErrors('metricValue')} ? 'is-invalid'">
                 <label class="form-label" for="metricValue" th:text="#{gmetric.valueLabel}">Value</label>
-                <input class="form-control" id="metricValue" th:field="*{metricValue}" type="number" min="0" step="1"
-                       th:placeholder="#{gmetric.valuePlaceholder}" required>
+                <input class="form-control" id="metricValue" min="0" required step="1" th:field="*{metricValue}"
+                       th:placeholder="#{gmetric.valuePlaceholder}" type="number">
                 <div class="text-danger small" th:errors="*{metricValue}"></div>
             </div>
             <div class="col-12 col-md-3" th:classappend="${#fields.hasErrors('selectedDate')} ? 'is-invalid'">
                 <label class="form-label" for="selectedDate" th:text="#{common.date}">Date</label>
-                <input class="form-control" id="selectedDate" th:field="*{selectedDate}" type="date" required>
+                <input class="form-control" id="selectedDate" required th:field="*{selectedDate}" type="date">
                 <div class="text-danger small" th:errors="*{selectedDate}"></div>
             </div>
             <div class="col-12 col-md-3">
-                <button class="btn btn-primary" type="submit" th:text="#{gmetric.addScore}">Add Metric</button>
+                <button class="btn btn-primary" th:text="#{gmetric.addScore}" type="submit">Add Metric</button>
             </div>
         </div>
     </form>
 </div>
 
 <script>
-(function() {
-  const form = document.getElementById('gmetric-import-form');
-  const statusEl = document.getElementById('gmetric-import-status');
-  if (!form || !statusEl) return;
+    (function () {
+        const form = document.getElementById('gmetric-import-form');
+        const statusEl = document.getElementById('gmetric-import-status');
+        if (!form || !statusEl) return;
 
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    const originalText = btn ? btn.textContent : '';
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = i18nUploading;
-    }
-    statusEl.style.display = 'none';
-    statusEl.innerHTML = '';
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn ? btn.textContent : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = i18nUploading;
+            }
+            statusEl.style.display = 'none';
+            statusEl.innerHTML = '';
 
-    try {
-      const formData = new FormData(form);
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: formData
-      });
-      const text = await response.text();
-      if (response.ok) {
-        statusEl.innerHTML = '<span class="text-success">' + text + '</span>';
-        setTimeout(function() { window.location.reload(); }, 1200);
-      } else {
-        statusEl.innerHTML = '<span class="text-danger">' + i18nErrorPrefix + ' ' + text + '</span>';
-      }
-    } catch (err) {
-      statusEl.innerHTML = '<span class="text-danger">' + i18nFailedPrefix + ' ' + (err.message || err) + '</span>';
-    } finally {
-      statusEl.style.display = 'block';
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-      const fileInput = form.querySelector('input[type="file"]');
-      if (fileInput) fileInput.value = '';
-    }
-  });
-})();
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+                const text = await response.text();
+                if (response.ok) {
+                    statusEl.innerHTML = '<span class="text-success">' + text + '</span>';
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1200);
+                } else {
+                    statusEl.innerHTML = '<span class="text-danger">' + i18nErrorPrefix + ' ' + text + '</span>';
+                }
+            } catch (err) {
+                statusEl.innerHTML = '<span class="text-danger">' + i18nFailedPrefix + ' ' + (err.message || err) + '</span>';
+            } finally {
+                statusEl.style.display = 'block';
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+                const fileInput = form.querySelector('input[type="file"]');
+                if (fileInput) fileInput.value = '';
+            }
+        });
+    })();
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>

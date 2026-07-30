@@ -15,83 +15,96 @@
     <h1 class="text-center mb-4" th:text="#{sgi.heading}">Short Game Index</h1>
 
     <ul class="list-group">
-        <li class="list-group-item"><span th:text="#{sgi.current}">Current SGI HCP:</span> <span th:text="${lastResult}"></span></li>
-        <li class="list-group-item"><span th:text="#{sgi.export}">Export:</span> <a th:href="@{/api/sgi/export}" th:text="#{common.csv}">CSV</a> </li>
+        <li class="list-group-item"><span th:text="#{sgi.current}">Current SGI HCP:</span> <span
+                th:text="${lastResult}"></span></li>
+        <li class="list-group-item"><span th:text="#{sgi.export}">Export:</span> <a th:href="@{/api/sgi/export}"
+                                                                                    th:text="#{common.csv}">CSV</a></li>
         <li class="list-group-item">
             <div class="d-flex flex-column flex-sm-row flex-wrap align-items-sm-center gap-2">
                 <span th:text="#{common.import}">Import:</span>
-                <form id="sgi-import-form" method="post" th:action="@{/api/sgi/import}" enctype="multipart/form-data"
-                      class="d-flex flex-column flex-sm-row flex-wrap align-items-stretch align-items-sm-center gap-2">
-                    <input class="form-control form-control-sm" type="file" name="file" accept=".csv" required
-                           style="max-width: 100%; width: min(100%, 220px);">
-                    <button type="submit" class="btn btn-primary btn-sm" th:text="#{common.upload}">Upload</button>
+                <form class="d-flex flex-column flex-sm-row flex-wrap align-items-stretch align-items-sm-center gap-2" enctype="multipart/form-data" id="sgi-import-form" method="post"
+                      th:action="@{/api/sgi/import}">
+                    <input accept=".csv" class="form-control form-control-sm" name="file" required style="max-width: 100%; width: min(100%, 220px);"
+                           type="file">
+                    <button class="btn btn-primary btn-sm" th:text="#{common.upload}" type="submit">Upload</button>
                 </form>
             </div>
-            <small class="d-block mt-1 text-muted" th:text="#{sgi.importHint}">(CSV with date,points,testId,testType; appends data; max 1MB)</small>
-            <div id="sgi-import-status" class="mt-1 small" style="display:none;"></div>
+            <small class="d-block mt-1 text-muted" th:text="#{sgi.importHint}">(CSV with date,points,testId,testType;
+                appends data; max 1MB)</small>
+            <div class="mt-1 small" id="sgi-import-status" style="display:none;"></div>
         </li>
     </ul>
     <div class="list-group">
-        <a class="list-group-item list-group-item-action" th:href="@{/sgi/1}" th:text="#{sgi.test1}">Test 1: 50-yard wedge</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/sgi/2}" th:text="#{sgi.test2}">Test 2: 30-yard wedge</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/sgi/3}" th:text="#{sgi.test3}">Test 3: 8-yard sand shot</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/sgi/4}" th:text="#{sgi.test4}">Test 4: 15-yard sand shot</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/sgi/5}" th:text="#{sgi.test5}">Test 5: 10-yard chipping from the light fringe</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/sgi/6}" th:text="#{sgi.test6}">Test 6: 20-yard chip from the light rough</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/sgi/7}" th:text="#{sgi.test7}">Test 7: 15-yard short pitch</a>
-        <a class="list-group-item list-group-item-action" th:href="@{/sgi/8}" th:text="#{sgi.test8}">Test 8: 15-yard pitch over the bunker</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/sgi/1}" th:text="#{sgi.test1}">Test 1: 50-yard
+            wedge</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/sgi/2}" th:text="#{sgi.test2}">Test 2: 30-yard
+            wedge</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/sgi/3}" th:text="#{sgi.test3}">Test 3: 8-yard sand
+            shot</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/sgi/4}" th:text="#{sgi.test4}">Test 4: 15-yard
+            sand shot</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/sgi/5}" th:text="#{sgi.test5}">Test 5: 10-yard
+            chipping from the light fringe</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/sgi/6}" th:text="#{sgi.test6}">Test 6: 20-yard
+            chip from the light rough</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/sgi/7}" th:text="#{sgi.test7}">Test 7: 15-yard
+            short pitch</a>
+        <a class="list-group-item list-group-item-action" th:href="@{/sgi/8}" th:text="#{sgi.test8}">Test 8: 15-yard
+            pitch over the bunker</a>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
 
 <script th:inline="javascript">
-const i18nUploading = /*[[#{common.uploading}]]*/ 'Uploading...';
-const i18nErrorPrefix = /*[[#{api.import.errorPrefix}]]*/ 'Error:';
-const i18nFailedPrefix = /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:';
+    const i18nUploading = /*[[#{common.uploading}]]*/ 'Uploading...';
+    const i18nErrorPrefix = /*[[#{api.import.errorPrefix}]]*/ 'Error:';
+    const i18nFailedPrefix = /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:';
 
-(function() {
-  const form = document.getElementById('sgi-import-form');
-  const statusEl = document.getElementById('sgi-import-status');
-  if (!form || !statusEl) return;
+    (function () {
+        const form = document.getElementById('sgi-import-form');
+        const statusEl = document.getElementById('sgi-import-status');
+        if (!form || !statusEl) return;
 
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    const btn = form.querySelector('button[type="submit"]');
-    const originalText = btn ? btn.textContent : '';
-    if (btn) {
-      btn.disabled = true;
-      btn.textContent = i18nUploading;
-    }
-    statusEl.style.display = 'none';
-    statusEl.innerHTML = '';
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const btn = form.querySelector('button[type="submit"]');
+            const originalText = btn ? btn.textContent : '';
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = i18nUploading;
+            }
+            statusEl.style.display = 'none';
+            statusEl.innerHTML = '';
 
-    try {
-      const formData = new FormData(form);
-      const response = await fetch(form.action, {
-        method: 'POST',
-        body: formData
-      });
-      const text = await response.text();
-      if (response.ok) {
-        statusEl.innerHTML = '<span class="text-success">' + text + '</span>';
-        setTimeout(function() { window.location.reload(); }, 1200);
-      } else {
-        statusEl.innerHTML = '<span class="text-danger">' + i18nErrorPrefix + ' ' + text + '</span>';
-      }
-    } catch (err) {
-      statusEl.innerHTML = '<span class="text-danger">' + i18nFailedPrefix + ' ' + (err.message || err) + '</span>';
-    } finally {
-      statusEl.style.display = 'block';
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-      const fileInput = form.querySelector('input[type="file"]');
-      if (fileInput) fileInput.value = '';
-    }
-  });
-})();
+            try {
+                const formData = new FormData(form);
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData
+                });
+                const text = await response.text();
+                if (response.ok) {
+                    statusEl.innerHTML = '<span class="text-success">' + text + '</span>';
+                    setTimeout(function () {
+                        window.location.reload();
+                    }, 1200);
+                } else {
+                    statusEl.innerHTML = '<span class="text-danger">' + i18nErrorPrefix + ' ' + text + '</span>';
+                }
+            } catch (err) {
+                statusEl.innerHTML = '<span class="text-danger">' + i18nFailedPrefix + ' ' + (err.message || err) + '</span>';
+            } finally {
+                statusEl.style.display = 'block';
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+                const fileInput = form.querySelector('input[type="file"]');
+                if (fileInput) fileInput.value = '';
+            }
+        });
+    })();
 </script>
 </body>
 </html>

@@ -14,17 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class HcpPrimaryRestController {
 
-        private final HcpMonthAggregator monthlyHcpAggregator;
-        private final CurrentUserService currentUserService;
+    private final HcpMonthAggregator monthlyHcpAggregator;
+    private final CurrentUserService currentUserService;
 
-        @GetMapping("/api/handicap/chart-data")
-        public ResponseEntity<HcpData> getLineChartData() {
-                log.info("hcp getLineChartData");
-                val u = currentUserService.getCurrentUser();
-                String userId = u.id();
-                log.info("for user {}", userId);
-                return ResponseEntity.ok(monthlyHcpAggregator.getHcpForLastMonth(36, userId));
-        }
+    @GetMapping("/api/handicap/chart-data")
+    public ResponseEntity<HcpData> getLineChartData() {
+        log.info("hcp getLineChartData");
+        val u = currentUserService.getCurrentUser();
+        String userId = u.id();
+        log.info("for user {}", userId);
+        return ResponseEntity.ok(monthlyHcpAggregator.getHcpForLastMonth(36, userId));
+    }
 
 }
 

@@ -17,21 +17,21 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class UserStatsService {
 
-        private final HcpRepository hcpRepository;
-        private final SingleTestResultRepository sgiRepository;
-        private final UserPreferenceRepository userPreferenceRepository;
-        private final GMetricRepository gMetricRepository;
-        private final GolfCheckEntityRepository golfCheckEntityRepository;
+    private final HcpRepository hcpRepository;
+    private final SingleTestResultRepository sgiRepository;
+    private final UserPreferenceRepository userPreferenceRepository;
+    private final GMetricRepository gMetricRepository;
+    private final GolfCheckEntityRepository golfCheckEntityRepository;
 
-        public long countUsers() {
-                Set<String> userIds = new HashSet<>();
-                userIds.addAll(hcpRepository.findDistinctUserIds());
-                userIds.addAll(sgiRepository.findDistinctUserIds());
-                userIds.addAll(userPreferenceRepository.findDistinctUserIds());
-                userIds.addAll(gMetricRepository.findDistinctUserIds());
-                userIds.addAll(golfCheckEntityRepository.findDistinctUserIds());
-                userIds.remove(null);
-                userIds.remove("");
-                return userIds.size();
-        }
+    public long countUsers() {
+        Set<String> userIds = new HashSet<>();
+        userIds.addAll(hcpRepository.findDistinctUserIds());
+        userIds.addAll(sgiRepository.findDistinctUserIds());
+        userIds.addAll(userPreferenceRepository.findDistinctUserIds());
+        userIds.addAll(gMetricRepository.findDistinctUserIds());
+        userIds.addAll(golfCheckEntityRepository.findDistinctUserIds());
+        userIds.remove(null);
+        userIds.remove("");
+        return userIds.size();
+    }
 }

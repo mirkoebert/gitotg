@@ -15,10 +15,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UsersGoalEntity {
 
-        @Id
-        @GeneratedValue
-        private long id;
-        private GoalEnum goal;
-        private String userId;
+    @Id
+    @GeneratedValue
+    private long id;
+    private GoalEnum goal;
+    private String userId;
 
 }

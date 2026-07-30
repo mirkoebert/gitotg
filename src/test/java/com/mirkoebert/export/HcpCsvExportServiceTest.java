@@ -10,12 +10,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class HcpCsvExportServiceTest {
 
-        @Autowired
-        private HcpCsvExportService cut;
+    @Autowired
+    private HcpCsvExportService cut;
 
-        @Test
-        void exportAllHcpDataToCsv() {
-                String csv = cut.exportAllHcpDataToCsv(ME);
-                assertThat(csv).isNotEmpty().contains("26.0");
-        }
+    @Test
+    void exportAllHcpDataToCsv() {
+        String csv = cut.exportAllHcpDataToCsv(ME);
+        assertThat(csv).isNotEmpty().contains("26.0");
+    }
 }

@@ -24,45 +24,45 @@ import static org.mockito.Mockito.when;
 @Import({MonthlySgiHcpAggregator.class})
 class MonthlySgiHcpAggregatorTest {
 
-        @Autowired
-        private MonthlySgiHcpAggregator cut;
-        @MockitoBean
-        private SingleTestResultRepository repo;
-        private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-yyyy");
+    private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-yyyy");
+    @Autowired
+    private MonthlySgiHcpAggregator cut;
+    @MockitoBean
+    private SingleTestResultRepository repo;
 
-        @Test
-        void getHcpLastOfMonth() {
-                assertThat(cut).isNotNull();
-                val ld1 = LocalDate.now().minusMonths(2);
-                val ld2 = ld1.minusDays(1);
-
-
-                val d1 = SingleTestResultEntity.builder().testId(1).hcp(1).date(ld1).build();
-                val d2 = SingleTestResultEntity.builder().testId(1).hcp(2).date(ld2).build();
-
-                when(repo.findByUserIdAndTestId(anyString(), eq(1))).thenReturn(List.of(d2, d1));
-
-                final HcpData r = cut.getHcpForLastMonth(6, "userId", 1);
-
-                assertThat(r).isNotNull();
-                assertThat(r.labels().size()).isLessThanOrEqualTo(6);
-                assertThat(r.labels().getFirst()).hasToString(ld1.format(fmt));
-                assertThat(r.hcp().getFirst()).isEqualTo(1.5);
-        }
-
-        @Test
-        void testWithWrongCount(){
-                final HcpData r = cut.getHcpForLastMonth(-6, "userId", 1);
-                assertThat(r).isNotNull();
-        }
+    @Test
+    void getHcpLastOfMonth() {
+        assertThat(cut).isNotNull();
+        val ld1 = LocalDate.now().minusMonths(2);
+        val ld2 = ld1.minusDays(1);
 
 
-        @Test
-        void testWithEmptyList(){
-                when(repo.findByUserIdAndTestId(anyString(), eq(1))).thenReturn(Collections.emptyList());
+        val d1 = SingleTestResultEntity.builder().testId(1).hcp(1).date(ld1).build();
+        val d2 = SingleTestResultEntity.builder().testId(1).hcp(2).date(ld2).build();
 
-                final HcpData r = cut.getHcpForLastMonth(6, "userId", 1);
+        when(repo.findByUserIdAndTestId(anyString(), eq(1))).thenReturn(List.of(d2, d1));
 
-                assertThat(r).isNotNull();
-        }
+        final HcpData r = cut.getHcpForLastMonth(6, "userId", 1);
+
+        assertThat(r).isNotNull();
+        assertThat(r.labels().size()).isLessThanOrEqualTo(6);
+        assertThat(r.labels().getFirst()).hasToString(ld1.format(fmt));
+        assertThat(r.hcp().getFirst()).isEqualTo(1.5);
+    }
+
+    @Test
+    void testWithWrongCount() {
+        final HcpData r = cut.getHcpForLastMonth(-6, "userId", 1);
+        assertThat(r).isNotNull();
+    }
+
+
+    @Test
+    void testWithEmptyList() {
+        when(repo.findByUserIdAndTestId(anyString(), eq(1))).thenReturn(Collections.emptyList());
+
+        final HcpData r = cut.getHcpForLastMonth(6, "userId", 1);
+
+        assertThat(r).isNotNull();
+    }
 }

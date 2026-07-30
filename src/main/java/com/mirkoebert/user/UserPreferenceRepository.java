@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface UserPreferenceRepository extends JpaRepository<UserPreferenceEntity, String> {
 
-        @Query("select distinct u.userId from UserPreferenceEntity u where u.userId is not null")
-        @NonNull
-        List<String> findDistinctUserIds();
+    @Query("select distinct u.userId from UserPreferenceEntity u where u.userId is not null")
+    @NonNull
+    List<String> findDistinctUserIds();
 }

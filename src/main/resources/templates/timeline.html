@@ -11,6 +11,7 @@
             position: relative;
             padding: 20px 0;
         }
+
         .timeline::before {
             content: '';
             position: absolute;
@@ -21,10 +22,12 @@
             left: 50%;
             margin-left: -2px;
         }
+
         .timeline-item {
             position: relative;
             margin-bottom: 30px;
         }
+
         .timeline-item::before {
             content: '';
             position: absolute;
@@ -37,29 +40,35 @@
             margin-left: -8px;
             z-index: 1;
         }
+
         .timeline-content {
             padding: 20px;
             background: #f8f9fa;
             border-radius: 6px;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
             position: relative;
         }
+
         .timeline-item:nth-child(odd) .timeline-content {
             margin-right: 10%;
             margin-left: 5%;
         }
+
         .timeline-item:nth-child(even) .timeline-content {
             margin-left: 10%;
             margin-right: 5%;
         }
+
         @media (max-width: 767.98px) {
             .timeline::before {
                 left: 20px;
             }
+
             .timeline-item::before {
                 left: 20px;
                 margin-left: -8px;
             }
+
             .timeline-item:nth-child(odd) .timeline-content,
             .timeline-item:nth-child(even) .timeline-content {
                 margin-left: 40px;
@@ -73,19 +82,21 @@
 
 <h2 class="text-center mb-4" th:text="#{timeline.heading}">Timeline</h2>
 <div class="timeline">
-    <div th:each="m: ${timeline}" class="timeline-item">
+    <div class="timeline-item" th:each="m: ${timeline}">
         <div class="timeline-content">
             <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <h5 class="mb-0 text-break" th:text="${#temporals.format(m.date, 'dd. MMMM yyyy')}"></h5>
-                <form th:action="@{/timeline/delete}" method="post" class="m-0 flex-shrink-0"
+                <form class="m-0 flex-shrink-0" method="post" th:action="@{/timeline/delete}"
                       th:attr="onsubmit=|return confirm('#{timeline.deleteConfirm}');|">
-                    <input type="hidden" name="type" th:value="${m.type}">
-                    <input type="hidden" name="id" th:value="${m.id}">
-                    <button type="submit" class="btn btn-primary btn-sm" th:aria-label="#{timeline.deleteAria}">×</button>
+                    <input name="type" th:value="${m.type}" type="hidden">
+                    <input name="id" th:value="${m.id}" type="hidden">
+                    <button class="btn btn-primary btn-sm" th:aria-label="#{timeline.deleteAria}" type="submit">×
+                    </button>
                 </form>
             </div>
-            <p class="mb-0 mt-2 text-break"><span th:text="${m.comment}"></span>: <span th:text="${m.type}"></span> <span
-                    th:text="${m.value}"></span></p>
+            <p class="mb-0 mt-2 text-break"><span th:text="${m.comment}"></span>: <span th:text="${m.type}"></span>
+                <span
+                        th:text="${m.value}"></span></p>
         </div>
     </div>
 </div>

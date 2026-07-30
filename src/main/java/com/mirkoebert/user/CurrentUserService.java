@@ -22,5 +22,5 @@ public class CurrentUserService {
         log.debug("Authenticated user: id={}", u);
         return u;
     }
-    
+
 }
