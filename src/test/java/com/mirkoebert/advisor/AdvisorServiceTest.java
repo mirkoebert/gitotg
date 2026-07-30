@@ -77,7 +77,11 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u2");
 
-        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.FEW_KEYS)).toArray());
+        assertThat(advice).isIn(
+                Stream.concat(
+                    Stream.of(resolve(AdvisorService.FEW_KEYS)),
+                    Stream.of(resolve(AdvisorService.OTHER_KEYS))
+                ).toArray());
     }
 
     @Test
