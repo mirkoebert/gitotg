@@ -1,11 +1,29 @@
-package com.mirkoebert;
-
-import lombok.experimental.UtilityClass;
-
+/**
+ * Constants used throughout the application.
+ */
 @UtilityClass
 public class Constants {
 
-        public static final String ME = "103256477727391736832";
-        public static final short HCP_Epsilon = 1;
-        public static final String NOT_ENOUGH_DATA_AVAILABLE = "not enough data available";
+    /**
+     * Unique identifier for the user.
+     */
+    public static final String ME = "103256477727391736832";
+    
+    /**
+     * Epsilon value for HCP calculations.
+     */
+    public static final short HCP_Epsilon = 1;
+    
+    /**
+     * Error message displayed when not enough data is available.
+     */
+    public static final String NOT_ENOUGH_DATA_AVAILABLE = "not enough data available";
+
+    /**
+     * Enum values for login types.
+     */
+    public enum LoginType {
+        PRIMARY,
+        SECONDARY
+    }
 }
