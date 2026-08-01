@@ -33,7 +33,9 @@ class MonthlySgiHcpAggregatorTest {
     @Test
     void getHcpLastOfMonth() {
         assertThat(cut).isNotNull();
-        val ld1 = LocalDate.now().minusMonths(2);
+        var ld1 = LocalDate.now().minusMonths(2);
+        if (ld1.getDayOfMonth() == 1)
+           ld1 = ld1.plusDays(1);
         val ld2 = ld1.minusDays(1);
 
 

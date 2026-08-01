@@ -59,6 +59,7 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -253,7 +254,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <skip>true</skip>
+                    <skip>false</skip>
+                    <failBuildOnCVSS>7</failBuildOnCVSS>
                 </configuration>
             </plugin>
             <plugin>
