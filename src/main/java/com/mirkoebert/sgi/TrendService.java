@@ -16,7 +16,7 @@ import static com.mirkoebert.Constants.HCP_Epsilon;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-class TrendService {
+public class TrendService {
 
     private final SingleTestResultRepository resultRepository;
     private final MessageSource messageSource;

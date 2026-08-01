@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.function.Function;
 
 @Service
-class SgiTestSuiteHcpFunction implements Function<Integer, Integer> {
+public class SgiTestSuiteHcpFunction implements Function<Integer, Integer> {
 
     @Override
     public @NonNull Integer apply(@Nullable Integer points) {
