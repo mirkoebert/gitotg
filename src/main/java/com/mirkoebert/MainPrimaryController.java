@@ -5,6 +5,7 @@ import com.mirkoebert.checklist.ChecklistService;
 import com.mirkoebert.goal.GoalEnum;
 import com.mirkoebert.handicap.HcpService;
 import com.mirkoebert.sgi.SgiHcpAggregatedService;
+import com.mirkoebert.timeline.TimelineRange;
 import com.mirkoebert.timeline.TimelineService;
 import com.mirkoebert.user.CurrentUserService;
 import com.mirkoebert.user.UserStatsService;
@@ -17,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponentsBuilder;
 
 
 @SuppressWarnings("SameReturnValue")
@@ -53,20 +55,28 @@ public class MainPrimaryController {
     }
 
     @GetMapping("/timeline")
-    public String getTimeline(Model m) {
-        log.info("timeline page");
+    public String getTimeline(Model m,
+                              @RequestParam(defaultValue = "last30") String range) {
+        log.info("timeline page range={}", range);
         val u = currentUserService.getCurrentUser();
-        m.addAttribute("timeline", timeService.getLatestResults(u.id()));
+        TimelineRange timelineRange = TimelineRange.fromParam(range);
+        m.addAttribute("timeline", timeService.getLatestResults(u.id(), timelineRange));
+        m.addAttribute("range", timelineRange.getParam());
         return "timeline";
     }
 
     @PostMapping("/timeline/delete")
     public String deleteTimelineEntry(@RequestParam GolfType type,
-                                      @RequestParam Long id) {
-        log.info("Deleting timeline entry: type={}, id={}", type, id);
+                                      @RequestParam Long id,
+                                      @RequestParam(defaultValue = "last30") String range) {
+        log.info("Deleting timeline entry: type={}, id={}, range={}", type, id, range);
         val u = currentUserService.getCurrentUser();
         timeService.deleteEntry(type, id, u.id());
-        return "redirect:/timeline";
+        String redirect = UriComponentsBuilder.fromPath("/timeline")
+                .queryParam("range", TimelineRange.fromParam(range).getParam())
+                .build()
+                .toUriString();
+        return "redirect:" + redirect;
     }
 
     @GetMapping("/about")

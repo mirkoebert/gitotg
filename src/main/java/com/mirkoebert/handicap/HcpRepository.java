@@ -1,6 +1,7 @@
 package com.mirkoebert.handicap;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,6 +19,9 @@ public interface HcpRepository extends JpaRepository<HcpScoreEntity, Long> {
 
     @NonNull
     List<HcpScoreEntity> findByUserId(@NonNull String userId);
+
+    @NonNull
+    List<HcpScoreEntity> findByUserIdOrderByDateDesc(@NonNull String userId, Pageable pageable);
 
     @NonNull
     List<HcpScoreEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);

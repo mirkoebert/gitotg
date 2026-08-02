@@ -81,6 +81,21 @@
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
 <h2 class="text-center mb-4" th:text="#{timeline.heading}">Timeline</h2>
+
+<div class="d-flex justify-content-center mb-4">
+    <form class="d-flex flex-wrap align-items-center gap-2" method="get" th:action="@{/timeline}">
+        <label class="form-label mb-0" for="range" th:text="#{timeline.range.label}">Show</label>
+        <select class="form-select form-select-sm" id="range" name="range" onchange="this.form.submit()"
+                style="width: auto; min-width: 8rem;" th:aria-label="#{timeline.range.label}">
+            <option th:selected="${range == 'last30'}" th:text="#{timeline.range.last30}" value="last30">Last 30
+            </option>
+            <option th:selected="${range == 'last100'}" th:text="#{timeline.range.last100}" value="last100">Last 100
+            </option>
+            <option th:selected="${range == 'all'}" th:text="#{timeline.range.all}" value="all">All</option>
+        </select>
+    </form>
+</div>
+
 <div class="timeline">
     <div class="timeline-item" th:each="m: ${timeline}">
         <div class="timeline-content">
@@ -90,6 +105,7 @@
                       th:attr="onsubmit=|return confirm('#{timeline.deleteConfirm}');|">
                     <input name="type" th:value="${m.type}" type="hidden">
                     <input name="id" th:value="${m.id}" type="hidden">
+                    <input name="range" th:value="${range}" type="hidden">
                     <button class="btn btn-primary btn-sm" th:aria-label="#{timeline.deleteAria}" type="submit">×
                     </button>
                 </form>

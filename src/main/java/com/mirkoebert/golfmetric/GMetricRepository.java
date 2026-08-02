@@ -1,6 +1,7 @@
 package com.mirkoebert.golfmetric;
 
 import org.jspecify.annotations.NonNull;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -21,6 +22,12 @@ public interface GMetricRepository extends JpaRepository<GMetricEntity, Long> {
 
     @NonNull
     List<GMetricEntity> findByUserIdOrderByDateDesc(@NonNull String userId);
+
+    @NonNull
+    List<GMetricEntity> findByUserIdOrderByDateDesc(@NonNull String userId, Pageable pageable);
+
+    @NonNull
+    List<GMetricEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);
 
     @NonNull
     List<GMetricEntity> findByType(@NonNull GMetricType type);
