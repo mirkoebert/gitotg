@@ -14,6 +14,7 @@ import com.opencsv.bean.HeaderColumnNameTranslateMappingStrategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,6 +32,7 @@ public class CsvImportService {
     private final GMetricRepository gMetricRepo;
     private final PointsToSgiHcpFunction pointsToSgiHcpFunction;
 
+    @Transactional
     public int importHcpData(InputStream inputStream, String userId) {
         try (InputStreamReader reader = new InputStreamReader(inputStream);
              CSVReader csvReader = new CSVReader(reader)) {
@@ -74,6 +76,7 @@ public class CsvImportService {
         hcpRepo.deleteAll(toRemove);
     }
 
+    @Transactional
     public int importSgiData(InputStream inputStream, final String userId) {
         try (InputStreamReader reader = new InputStreamReader(inputStream);
              CSVReader csvReader = new CSVReader(reader)) {
@@ -130,6 +133,7 @@ public class CsvImportService {
         gMetricRepo.deleteAll(toRemove);
     }
 
+    @Transactional
     public int importGMetricData(InputStream inputStream, String userId) {
         try (InputStreamReader reader = new InputStreamReader(inputStream);
              CSVReader csvReader = new CSVReader(reader)) {
