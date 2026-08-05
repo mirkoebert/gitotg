@@ -43,6 +43,16 @@ public class AdvisorService {
             "advisor.hh.6",
             "advisor.hh.7"
     };
+    static final String[] MH_KEYS = {
+            "advisor.mh.0",
+            "advisor.mh.1",
+            "advisor.mh.2",
+            "advisor.mh.3",
+            "advisor.mh.4",
+            "advisor.mh.5",
+            "advisor.mh.6",
+            "advisor.mh.7"
+    };
     static final String[] OTHER_KEYS = {
             "advisor.other.0",
             "advisor.other.1",
@@ -96,9 +106,16 @@ public class AdvisorService {
 
     private @NonNull Collection<String> getAdviseListHandicap(@NonNull String userId) {
         Optional<HcpScoreEntity> hcp = hcpRepository.findFirstByUserIdOrderByDateDesc(userId);
-        if (hcp.isPresent() && HandicapClassifier.HIGH_HANDICAPER.equals(handicapClassifier.apply(hcp.get().getHcp()))) {
+        if (hcp.isEmpty()) {
+            return Collections.emptyList();
+        }
+        String tier = handicapClassifier.apply(hcp.get().getHcp());
+        if (HandicapClassifier.HIGH_HANDICAPER.equals(tier)) {
             log.info(HandicapClassifier.HIGH_HANDICAPER);
             return Arrays.stream(HH_KEYS).map(this::message).toList();
+        } else if (HandicapClassifier.MID_HANDICAPER.equals(tier)) {
+            log.info(HandicapClassifier.MID_HANDICAPER);
+            return Arrays.stream(MH_KEYS).map(this::message).toList();
         }
         return Collections.emptyList();
     }
