@@ -130,6 +130,23 @@ class AdvisorServiceTest {
         assertThat(advice).isIn(Stream.of(resolve(AdvisorService.OTHER_KEYS)).toArray());
     }
 
+    @Test
+    void getAdvise_returnsMidHandicaperMessageForEnoughDataAndMidHcp() {
+        when(hcpRepository.countByUserId("u7")).thenReturn(30);
+        when(singleTestResultRepository.countByUserId("u7")).thenReturn(5);
+
+        HcpScoreEntity entity = HcpScoreEntity.builder().hcp(20.0).build();
+        when(hcpRepository.findFirstByUserIdOrderByDateDesc("u7")).thenReturn(Optional.of(entity));
+
+        String advice = cut.getAdvise("u7");
+
+        assertThat(advice).isIn(
+                Stream.concat(
+                        Stream.of(resolve(AdvisorService.MH_KEYS)),
+                        Stream.of(resolve(AdvisorService.OTHER_KEYS))
+                ).toArray());
+    }
+
     @Configuration
     static class MessageSourceConfig {
         @Bean
