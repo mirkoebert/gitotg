@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{golfcourse.title}">Gitotg: Golf Course</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
+    <th:block th:insert="~{fragments/head :: favicons}"></th:block>
+</head>
+<body class="container mt-3 mt-md-5">
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<h1 class="text-center mb-4" th:text="#{golfcourse.heading}">Golf Course</h1>
+
+<div th:if="${error}" class="alert alert-danger" th:text="#{${error}}"></div>
+
+<div class="my-4">
+    <form id="round-form" method="post" th:action="@{/golfcourse/submit}">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-md-6">
+                <label class="form-label" for="courseName" th:text="#{golfcourse.courseLabel}">Golf Course</label>
+                <select class="form-select" id="courseName" name="courseName" required>
+                    <option th:each="course : ${courses}" th:text="${course.name}" th:value="${course.name}"></option>
+                </select>
+            </div>
+            <div class="col-12 col-md-3">
+                <label class="form-label" for="selectedDate" th:text="#{common.date}">Date</label>
+                <input class="form-control" id="selectedDate" name="selectedDate" required
+                       th:value="${round.selectedDate}" type="date">
+            </div>
+            <div class="col-12 col-md-3">
+                <span th:text="#{golfcourse.totalLabel}">Total strokes:</span>
+                <strong id="totalStrokes">0</strong>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1" id="holesContainer"></div>
+
+        <div class="row g-3 mt-3">
+            <div class="col-12 col-md-3">
+                <label class="form-label" for="lostBalls" th:text="#{golfcourse.lostBallsLabel}">Lost Balls</label>
+                <input class="form-control" id="lostBalls" min="0" name="lostBalls" required
+                       th:value="${round.lostBalls}" type="number">
+            </div>
+        </div>
+
+        <button class="btn btn-primary mt-3" th:text="#{golfcourse.submit}" type="submit">Save Round</button>
+    </form>
+</div>
+
+<div class="my-5" th:if="${rounds != null and !rounds.isEmpty()}">
+    <h2 th:text="#{golfcourse.recentHeading}">Recent Rounds</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th th:text="#{common.date}">Date</th>
+            <th th:text="#{golfcourse.courseLabel}">Golf Course</th>
+            <th th:text="#{golfcourse.table.total}">Total</th>
+            <th th:text="#{golfcourse.lostBallsLabel}">Lost Balls</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="round : ${rounds}">
+            <td th:text="${round.date}"></td>
+            <td th:text="${round.courseName}"></td>
+            <td th:text="${round.totalStrokes}"></td>
+            <td th:text="${round.lostBalls}"></td>
+            <td>
+                <form class="m-0" method="post" th:action="@{/golfcourse/delete}"
+                      th:attr="onsubmit=|return confirm('#{golfcourse.deleteConfirm}');|">
+                    <input name="id" th:value="${round.id}" type="hidden">
+                    <button class="btn btn-danger btn-sm" th:aria-label="#{golfcourse.deleteAria}"
+                            type="submit">×
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script th:inline="javascript">
+    const courses = /*[[${courses}]]*/ [];
+    const holeLabel = /*[[#{golfcourse.holeLabel}]]*/ 'Hole';
+    const parLabel = /*[[#{golfcourse.parLabel}]]*/ 'Par';
+
+    const select = document.getElementById('courseName');
+    const container = document.getElementById('holesContainer');
+    const totalEl = document.getElementById('totalStrokes');
+
+    function updateTotal() {
+        const values = Array.from(container.querySelectorAll('input[name="holeStrokes"]'))
+            .map(input => parseInt(input.value, 10) || 0);
+        totalEl.textContent = values.reduce((sum, v) => sum + v, 0);
+    }
+
+    function renderHoles() {
+        const course = courses.find(c => c.name === select.value);
+        container.innerHTML = '';
+        if (!course) {
+            updateTotal();
+            return;
+        }
+        course.holes.forEach(hole => {
+            const col = document.createElement('div');
+            col.className = 'col-6 col-sm-4 col-md-2';
+            col.innerHTML =
+                '<label class="form-label">' + holeLabel + ' ' + hole.number +
+                ' <span class="text-muted">(' + parLabel + ' ' + hole.par + ')</span></label>' +
+                '<input class="form-control" type="number" min="1" step="1" required name="holeStrokes">';
+            container.appendChild(col);
+        });
+        updateTotal();
+    }
+
+    select.addEventListener('change', renderHoles);
+    container.addEventListener('input', updateTotal);
+    renderHoles();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
