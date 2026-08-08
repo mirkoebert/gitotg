@@ -16,6 +16,7 @@ public class CourseService {
 
     private final GolfCourseCatalog catalog;
     private final RoundRepository roundRepository;
+    private final DoubleBogeyCountFunction doubleBogeyCountFunction;
 
     public @NonNull List<GolfCourse> findAllCourses() {
         return catalog.findAll();
