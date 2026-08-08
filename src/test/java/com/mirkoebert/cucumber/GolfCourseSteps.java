@@ -1,0 +1,98 @@
+package com.mirkoebert.cucumber;
+
+import com.mirkoebert.golfcourse.CourseService;
+import com.mirkoebert.golfcourse.RoundEntity;
+import com.mirkoebert.golfcourse.RoundRepository;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class GolfCourseSteps {
+
+    @Autowired
+    private CourseService courseService;
+
+    @Autowired
+    private RoundRepository roundRepository;
+
+    private String userId;
+    private boolean lastSubmitResult;
+    private long lastRoundId;
+    private List<RoundEntity> lastRounds;
+
+    @Given("a clean golfcourse user {string}")
+    public void aCleanGolfcourseUser(String userId) {
+        this.userId = userId;
+        roundRepository.findByUserIdOrderByDateDesc(userId).forEach(roundRepository::delete);
+    }
+
+    @Given("the user has submitted a round for course {string} on {string} with hole strokes {string} and {int} lost ball(s)")
+    @When("the user submits a round for course {string} on {string} with hole strokes {string} and {int} lost ball(s)")
+    public void theUserSubmitsARound(String courseName, String date, String holeStrokesCsv, int lostBalls) {
+        List<Integer> holeStrokes = Arrays.stream(holeStrokesCsv.split(","))
+                .map(String::trim)
+                .map(Integer::parseInt)
+                .toList();
+        lastSubmitResult = courseService.submitRound(userId, courseName, LocalDate.parse(date), holeStrokes, lostBalls);
+
+        List<RoundEntity> rounds = courseService.findRoundsForUser(userId);
+        if (!rounds.isEmpty()) {
+            lastRoundId = rounds.get(0).getId();
+        }
+    }
+
+    @Then("the round submission succeeds")
+    public void theRoundSubmissionSucceeds() {
+        assertThat(lastSubmitResult).isTrue();
+    }
+
+    @Then("the round submission fails")
+    public void theRoundSubmissionFails() {
+        assertThat(lastSubmitResult).isFalse();
+    }
+
+    @Then("the user has {int} round(s)")
+    public void theUserHasRounds(int expectedCount) {
+        assertThat(courseService.findRoundsForUser(userId)).hasSize(expectedCount);
+    }
+
+    @Then("the latest round has total strokes {int}")
+    public void theLatestRoundHasTotalStrokes(int expectedTotal) {
+        List<RoundEntity> rounds = courseService.findRoundsForUser(userId);
+        assertThat(rounds).isNotEmpty();
+        assertThat(rounds.get(0).getTotalStrokes()).isEqualTo(expectedTotal);
+    }
+
+    @When("the rounds are listed for the user")
+    public void theRoundsAreListedForTheUser() {
+        lastRounds = courseService.findRoundsForUser(userId);
+    }
+
+    @Then("the rounds are ordered by course {string}, {string}")
+    public void theRoundsAreOrderedByCourse(String first, String second) {
+        assertThat(lastRounds)
+                .extracting(RoundEntity::getCourseName)
+                .containsExactly(first, second);
+    }
+
+    @When("the user deletes their round for course {string}")
+    public void theUserDeletesTheirRoundForCourse(String courseName) {
+        RoundEntity round = courseService.findRoundsForUser(userId).stream()
+                .filter(r -> r.getCourseName().equals(courseName))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("No round for course " + courseName));
+        courseService.deleteRound(userId, round.getId());
+    }
+
+    @When("another user {string} attempts to delete that round")
+    public void anotherUserAttemptsToDeleteThatRound(String otherUserId) {
+        courseService.deleteRound(otherUserId, lastRoundId);
+    }
+}
