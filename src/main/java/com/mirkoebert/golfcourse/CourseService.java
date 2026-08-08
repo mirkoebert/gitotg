@@ -16,7 +16,7 @@ public class CourseService {
 
     private final GolfCourseCatalog catalog;
     private final RoundRepository roundRepository;
-    private final DoubleBogeyCountFunction doubleBogeyCountFunction;
+    private final DoubleBogeyPlusCountFunction doubleBogeyPlusCountFunction;
 
     public @NonNull List<GolfCourse> findAllCourses() {
         return catalog.findAll();
@@ -39,14 +39,22 @@ public class CourseService {
             return false;
         }
 
-        log.info("Saving round: user {}, course {}, date {}, holes {}, lostBalls {}",
-                userId, courseName, date, holeStrokes.size(), lostBalls);
+        val doubleBogeys = doubleBogeyPlusCountFunction.applyAsInt(RoundDto.builder()
+                .courseName(courseName)
+                .selectedDate(date)
+                .holeStrokes(holeStrokes)
+                .lostBalls(lostBalls)
+                .build());
+
+        log.info("Saving round: user {}, course {}, date {}, holes {}, lostBalls {}, doubleBogeys {}",
+                userId, courseName, date, holeStrokes.size(), lostBalls, doubleBogeys);
         val entity = RoundEntity.builder()
                 .userId(userId)
                 .date(date)
                 .courseName(courseName)
                 .holeStrokes(holeStrokes)
                 .lostBalls(lostBalls)
+                .doubleBogeys(doubleBogeys)
                 .build();
         roundRepository.save(entity);
         return true;

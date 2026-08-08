@@ -70,6 +70,13 @@ public class GolfCourseSteps {
         assertThat(rounds.get(0).getTotalStrokes()).isEqualTo(expectedTotal);
     }
 
+    @Then("the latest round has {int} double bogey(s)")
+    public void theLatestRoundHasDoubleBogeys(int expectedCount) {
+        List<RoundEntity> rounds = courseService.findRoundsForUser(userId);
+        assertThat(rounds).isNotEmpty();
+        assertThat(rounds.get(0).getDoubleBogeys()).isEqualTo(expectedCount);
+    }
+
     @When("the rounds are listed for the user")
     public void theRoundsAreListedForTheUser() {
         lastRounds = courseService.findRoundsForUser(userId);

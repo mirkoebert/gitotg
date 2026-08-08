@@ -2,9 +2,10 @@ package com.mirkoebert.golfcourse;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,17 +17,18 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith(SpringExtension.class)
+@Import({CourseService.class, DoubleBogeyPlusCountFunction.class})
 class CourseServiceTest {
 
-    @Mock
+    @Autowired
+    private CourseService cut;
+
+    @MockitoBean
     private GolfCourseCatalog catalog;
 
-    @Mock
+    @MockitoBean
     private RoundRepository roundRepository;
-
-    @InjectMocks
-    private CourseService cut;
 
     private static GolfCourse course(final String name, final int... pars) {
         return GolfCourse.builder()
@@ -57,15 +59,17 @@ class CourseServiceTest {
     void submitRound_savesAndReturnsTrue_whenHoleCountMatchesCourse() {
         when(catalog.findByName("Fischland")).thenReturn(Optional.of(course("Fischland", 5, 4)));
 
-        boolean result = cut.submitRound("u1", "Fischland", LocalDate.of(2026, 1, 1), List.of(5, 4), 2);
+        // hole1: 7 strokes on a par 5 (+2, double bogey), hole2: 4 strokes on a par 4 (0)
+        boolean result = cut.submitRound("u1", "Fischland", LocalDate.of(2026, 1, 1), List.of(7, 4), 2);
 
         assertThat(result).isTrue();
         verify(roundRepository).save(RoundEntity.builder()
                 .userId("u1")
                 .date(LocalDate.of(2026, 1, 1))
                 .courseName("Fischland")
-                .holeStrokes(List.of(5, 4))
+                .holeStrokes(List.of(7, 4))
                 .lostBalls(2)
+                .doubleBogeys(1)
                 .build());
     }
 

@@ -12,6 +12,11 @@ Feature: Golf course round tracking
     And the user has 1 round
     And the latest round has total strokes 34
 
+  Scenario: Double bogeys are counted from hole strokes against par
+    When the user submits a round for course "Fischland" on "2026-01-01" with hole strokes "7,4,2,5,5,4,6,3,4" and 0 lost balls
+    Then the round submission succeeds
+    And the latest round has 3 double bogeys
+
   Scenario: Reject a round for an unknown course
     When the user submits a round for course "Nonexistent" on "2026-01-01" with hole strokes "5,4,2,5,3,4,4,3,4" and 0 lost balls
     Then the round submission fails

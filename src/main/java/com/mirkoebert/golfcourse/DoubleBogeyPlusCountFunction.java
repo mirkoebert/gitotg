@@ -12,7 +12,7 @@ import java.util.function.ToIntFunction;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DoubleBogeyCountFunction implements ToIntFunction<RoundDto> {
+public class DoubleBogeyPlusCountFunction implements ToIntFunction<RoundDto> {
 
     private final GolfCourseCatalog catalog;
 
@@ -34,7 +34,7 @@ public class DoubleBogeyCountFunction implements ToIntFunction<RoundDto> {
 
         int count = 0;
         for (int i = 0; i < holes.size(); i++) {
-            if (strokes.get(i) - holes.get(i).getPar() == 2) {
+            if (strokes.get(i) - holes.get(i).getPar() >= 2) {
                 count++;
             }
         }
