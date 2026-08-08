@@ -57,6 +57,7 @@
             <th th:text="#{golfcourse.courseLabel}">Golf Course</th>
             <th th:text="#{golfcourse.table.total}">Total</th>
             <th th:text="#{golfcourse.lostBallsLabel}">Lost Balls</th>
+            <th th:text="#{golfcourse.doubleBogeysLabel}">Double Bogeys+</th>
             <th></th>
         </tr>
         </thead>
@@ -66,6 +67,7 @@
             <td th:text="${round.courseName}"></td>
             <td th:text="${round.totalStrokes}"></td>
             <td th:text="${round.lostBalls}"></td>
+            <td th:text="${round.doubleBogeys}"></td>
             <td>
                 <form class="m-0" method="post" th:action="@{/golfcourse/delete}"
                       th:attr="onsubmit=|return confirm('#{golfcourse.deleteConfirm}');|">
