@@ -10,5 +10,8 @@ import java.util.List;
 public interface RoundRepository extends JpaRepository<RoundEntity, Long> {
 
     @NonNull
-    List<RoundEntity> findByUserIdOrderByDateDesc(@NonNull String userId);
+    List<RoundEntity> findByUserId(@NonNull String userId);
+
+    @NonNull
+    List<RoundEntity> findTop10ByUserIdOrderByDateDesc(@NonNull String userId);
 }

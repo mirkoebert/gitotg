@@ -23,7 +23,7 @@ public class CourseService {
     }
 
     public @NonNull List<RoundEntity> findRoundsForUser(@NonNull String userId) {
-        return roundRepository.findByUserIdOrderByDateDesc(userId);
+        return roundRepository.findTop10ByUserIdOrderByDateDesc(userId);
     }
 
     public boolean submitRound(

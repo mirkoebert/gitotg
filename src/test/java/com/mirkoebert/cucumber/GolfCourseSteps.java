@@ -30,7 +30,7 @@ public class GolfCourseSteps {
     @Given("a clean golfcourse user {string}")
     public void aCleanGolfcourseUser(String userId) {
         this.userId = userId;
-        roundRepository.findByUserIdOrderByDateDesc(userId).forEach(roundRepository::delete);
+        roundRepository.findByUserId(userId).forEach(roundRepository::delete);
     }
 
     @Given("the user has submitted a round for course {string} on {string} with hole strokes {string} and {int} lost ball(s)")

@@ -50,7 +50,7 @@ class CourseServiceTest {
     void findRoundsForUser_delegatesToRepositoryOrderedByDateDesc() {
         RoundEntity round = RoundEntity.builder().userId("u1").date(LocalDate.of(2026, 1, 1))
                 .courseName("Fischland").holeStrokes(List.of(5, 4)).build();
-        when(roundRepository.findByUserIdOrderByDateDesc("u1")).thenReturn(List.of(round));
+        when(roundRepository.findTop10ByUserIdOrderByDateDesc("u1")).thenReturn(List.of(round));
 
         assertThat(cut.findRoundsForUser("u1")).containsExactly(round);
     }
