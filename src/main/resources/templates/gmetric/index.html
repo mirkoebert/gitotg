@@ -236,7 +236,7 @@
                 <label class="form-label" for="type" th:text="#{gmetric.typeLabel}">Type</label>
                 <select class="form-select" id="type" required th:field="*{type}">
                     <option th:text="#{gmetric.type.lostBalls}" th:value="LOST_BALLS">Lost Balls</option>
-                    <option th:text="#{gmetric.type.doubleBogey}" th:value="DOUBLE_BOGEY">Double Bogey</option>
+                    <option th:text="#{gmetric.type.doubleBogey}" th:value="DOUBLE_BOGEY_PLUS">Double Bogey</option>
                     <option th:text="#{gmetric.type.bogey}" th:value="BOGEY">Bogey</option>
                 </select>
                 <div class="text-danger small" th:errors="*{type}"></div>

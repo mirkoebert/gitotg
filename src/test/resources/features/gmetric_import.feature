@@ -44,7 +44,7 @@ Feature: Golf metrics CSV import
       date,metricValue,type
       2025-01-01,3,
       ,2,BOGEY
-      2025-01-02,4,DOUBLE_BOGEY
+      2025-01-02,4,DOUBLE_BOGEY_PLUS
       """
     Then the user has 1 gmetric record
-    And a gmetric exists with date "2025-01-02", type "DOUBLE_BOGEY" and value 4
+    And a gmetric exists with date "2025-01-02", type "DOUBLE_BOGEY_PLUS" and value 4

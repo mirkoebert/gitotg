@@ -117,7 +117,7 @@ public class TimelineService {
         }
         return switch (type) {
             case LOST_BALLS -> "Lost Balls";
-            case DOUBLE_BOGEY -> "Double Bogey";
+            case DOUBLE_BOGEY_PLUS -> "Double Bogey";
             case BOGEY -> "Bogey";
         };
     }

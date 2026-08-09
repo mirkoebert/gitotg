@@ -89,7 +89,7 @@ public class GMetricMonthAggregator {
         for (int i = 0; i < months; i++) {
             labels.add(fmt.format(cursor));
             lostBalls.add(byType.get(GMetricType.LOST_BALLS).get(cursor));
-            doubleBogey.add(byType.get(GMetricType.DOUBLE_BOGEY).get(cursor));
+            doubleBogey.add(byType.get(GMetricType.DOUBLE_BOGEY_PLUS).get(cursor));
             bogey.add(byType.get(GMetricType.BOGEY).get(cursor));
             cursor = cursor.plusMonths(1);
         }

@@ -361,7 +361,7 @@ class CsvImportServiceTest {
     @SneakyThrows
     @Test
     void importGMetricData_skipsInvalidRows() {
-        String csv = "date,metricValue,type\n2025-01-01,3,\n,2,BOGEY\n2025-01-02,4,DOUBLE_BOGEY\n";
+        String csv = "date,metricValue,type\n2025-01-01,3,\n,2,BOGEY\n2025-01-02,4,DOUBLE_BOGEY_PLUS\n";
         @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
 
         int count = cut.importGMetricData(is, TEST_USER);
@@ -378,7 +378,7 @@ class CsvImportServiceTest {
                 .userId(TEST_USER)
                 .date(LocalDate.of(2020, 1, 1))
                 .metricValue(1)
-                .type(GMetricType.DOUBLE_BOGEY)
+                .type(GMetricType.DOUBLE_BOGEY_PLUS)
                 .build());
 
         @Cleanup InputStream is = getClass().getClassLoader().getResourceAsStream("2026-07-26-gmetric.csv");
@@ -392,7 +392,7 @@ class CsvImportServiceTest {
         assertThat(all).hasSize(5);
         assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
         assertThat(gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2020, 1, 1), GMetricType.DOUBLE_BOGEY))
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2020, 1, 1), GMetricType.DOUBLE_BOGEY_PLUS))
                 .isEmpty();
 
         GMetricEntity lostBalls = gMetricRepository
@@ -416,14 +416,14 @@ class CsvImportServiceTest {
     @SneakyThrows
     @Test
     void importGMetricData_acceptsUppercaseHeaders() {
-        final String csv = "DATE,METRICVALUE,TYPE\n2026-03-01,7,DOUBLE_BOGEY\n";
+        final String csv = "DATE,METRICVALUE,TYPE\n2026-03-01,7,DOUBLE_BOGEY_PLUS\n";
         @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
 
         int count = cut.importGMetricData(is, TEST_USER);
 
         assertThat(count).isEqualTo(1);
         GMetricEntity saved = gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 3, 1), GMetricType.DOUBLE_BOGEY)
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 3, 1), GMetricType.DOUBLE_BOGEY_PLUS)
                 .orElseThrow();
         assertThat(saved.getMetricValue()).isEqualTo(7);
     }
