@@ -45,13 +45,16 @@ public class GolfCoursePrimaryController {
     ) {
         val u = currentUserService.getCurrentUser();
 
-        if (bindingResult.hasErrors()
-                || !courseService.submitRound(u.id(), form.getCourseName(), form.getSelectedDate(), form.getHoleStrokes(), form.getLostBalls())) {
+        boolean submitted = !bindingResult.hasErrors()
+                && courseService.submitRound(u.id(), form.getCourseName(), form.getSelectedDate(), form.getHoleStrokes(), form.getLostBalls());
+
+        if (submitted) {
+            model.addAttribute("round", emptyForm());
+        } else {
             model.addAttribute("error", "golfcourse.error.mismatch");
         }
 
         model.addAttribute("courses", courseService.findAllCourses());
-        model.addAttribute("round", emptyForm());
         model.addAttribute("rounds", courseService.findRoundsForUser(u.id()));
         return "golfcourse/index";
     }
