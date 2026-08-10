@@ -69,6 +69,12 @@ spring:
       max-request-size: 1MB
   thymeleaf:
     cache: true
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 7d
+          cache-public: true
   messages:
     basename: messages
     encoding: UTF-8
