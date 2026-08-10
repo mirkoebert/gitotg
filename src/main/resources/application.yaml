@@ -1,5 +1,7 @@
 server:
   port: 80
+  compression:
+    enabled: true
   tomcat:
     # Personal app: keep platform threads low (default stack ~1MB each unless -Xss is set)
     threads:
