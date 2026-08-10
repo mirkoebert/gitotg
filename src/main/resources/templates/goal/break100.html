@@ -4,7 +4,7 @@
     <title th:text="#{goal.titlePrefix} + ' ' + ${goalTitle}">Gitotg: Goal</title>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <th:block th:insert="~{fragments/head :: favicons}"></th:block>
 </head>
 <body class="container mt-3 mt-md-5">
@@ -63,6 +63,6 @@
     <button class="btn btn-primary" th:text="#{common.save}" type="submit">Save</button>
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@latest/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>
 </body>
 </html>
