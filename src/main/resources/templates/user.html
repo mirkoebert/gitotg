@@ -40,6 +40,8 @@
             th:text="${break80Progress}"></span>%
     </li>
     <li class="list-group-item"><span class="fw-bold" th:text="${advice}"></span></li>
+    <li class="list-group-item"><span th:text="#{user.exportAll}">Export all data:</span> <a th:href="@{/api/export/all}"
+            th:text="#{common.zip}">ZIP</a></li>
 </ol>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>
 </body>

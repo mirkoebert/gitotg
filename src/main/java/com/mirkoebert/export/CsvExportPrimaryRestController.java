@@ -22,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class CsvExportPrimaryRestController {
 
     private final HcpCsvExportService hcpCsvExportService;
+    private final AllDataCsvExportService allDataCsvExportService;
     private final CurrentUserService currentUserService;
     private final CsvFileNameService csvFileNameService;
     private final CsvImportService csvImportService;
@@ -65,6 +66,19 @@ public class CsvExportPrimaryRestController {
         String filename = csvFileNameService.generateGMetricExportFileName();
         response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
         response.getOutputStream().print(csv);
+    }
+
+    @SneakyThrows
+    @GetMapping("/api/export/all")
+    public void getAllDataZip(final HttpServletResponse response) {
+        log.info("export all data as zip");
+        val u = currentUserService.getCurrentUser();
+        final String userId = u.id();
+        byte[] zip = allDataCsvExportService.exportAllDataAsZip(userId);
+        response.setContentType("application/zip");
+        String filename = csvFileNameService.generateAllDataExportFileName();
+        response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        response.getOutputStream().write(zip);
     }
 
     @SneakyThrows

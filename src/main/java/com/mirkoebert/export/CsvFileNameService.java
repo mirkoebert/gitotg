@@ -39,6 +39,22 @@ public class CsvFileNameService {
     }
 
     /**
+     * Generates a filename for the all-data ZIP export including today's date.
+     * Example: 2025-06-01-all-data.zip
+     */
+    public String generateAllDataExportFileName() {
+        return generateAllDataExportFileName(LocalDate.now());
+    }
+
+    /**
+     * Generates a filename for the all-data ZIP export for a specific date.
+     * Useful for testing or backdating exports.
+     */
+    public String generateAllDataExportFileName(LocalDate date) {
+        return date.format(DATE_FORMATTER) + "-all-data.zip";
+    }
+
+    /**
      * Generates a CSV filename with the given prefix and today's date.
      *
      * @param prefix the base name for the file (e.g. "handicap" or "short-game")

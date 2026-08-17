@@ -35,6 +35,21 @@ class CsvFileNameServiceTest {
     }
 
     @Test
+    void generatesAllDataFilenameWithTodayDate() {
+        String filename = service.generateAllDataExportFileName();
+        assertThat(filename)
+                .startsWith(LocalDate.now().toString())
+                .endsWith("-all-data.zip");
+    }
+
+    @Test
+    void generatesAllDataFilenameWithGivenDate() {
+        LocalDate date = LocalDate.of(2025, 5, 15);
+        String filename = service.generateAllDataExportFileName(date);
+        assertThat(filename).isEqualTo("2025-05-15-all-data.zip");
+    }
+
+    @Test
     void generatesCustomFilenameWithDate() {
         LocalDate date = LocalDate.of(2025, 5, 15);
         String filename = service.generateFileName("my-export", date);
