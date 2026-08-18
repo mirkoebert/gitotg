@@ -12,6 +12,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 @Component
 @Order(1) // Run very early
@@ -19,6 +20,8 @@ public class RequestTracingFilter extends OncePerRequestFilter {
 
     public static final String TRACE_ID_HEADER = "X-Trace-Id";
     public static final String TRACE_ID_MDC_KEY = "traceId";
+    static final int MAX_TRACE_ID_LENGTH = 32;
+    private static final Pattern ALLOWED_TRACE_ID = Pattern.compile("[A-Za-z0-9_-]{1," + MAX_TRACE_ID_LENGTH + "}");
 
     @Override
     protected void doFilterInternal(
@@ -28,9 +31,8 @@ public class RequestTracingFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String traceId = request.getHeader(TRACE_ID_HEADER);
-
-        if (traceId == null || traceId.isBlank()) {
-            // Generate short trace ID (first 8 chars of UUID)
+        if (!isValidTraceId(traceId)) {
+            // Short hex id; charset matches ALLOWED_TRACE_ID
             traceId = UUID.randomUUID().toString().substring(0, 8);
         }
 
@@ -44,5 +46,9 @@ public class RequestTracingFilter extends OncePerRequestFilter {
         } finally {
             MDC.remove(TRACE_ID_MDC_KEY);
         }
+    }
+
+    static boolean isValidTraceId(String traceId) {
+        return traceId != null && ALLOWED_TRACE_ID.matcher(traceId).matches();
     }
 }
