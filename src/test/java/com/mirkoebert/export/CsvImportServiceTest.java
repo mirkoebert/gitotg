@@ -129,6 +129,19 @@ class CsvImportServiceTest {
         assertThat(all).hasSize(1);
     }
 
+    @SneakyThrows
+    @Test
+    void importHcpData_skipsValuesOutsideNumericLimits() {
+        final String csv = "date,hcp\n2025-01-01,200.0\n2025-01-02,-50.0\n2025-01-03,20.0\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+        int count = cut.importHcpData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+        assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(1);
+        assertThat(hcpRepository.findByUserId(TEST_USER).getFirst().getHcp()).isEqualTo(20.0);
+    }
+
     @Test
     void importHcpData_returnsZeroForNoValidRows() {
         // Seed data must still be cleared even when CSV has no valid rows
@@ -207,6 +220,18 @@ class CsvImportServiceTest {
 
         List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
         assertThat(all).hasSize(2);
+    }
+
+    @SneakyThrows
+    @Test
+    void importSgiData_skipsValuesOutsideNumericLimits() {
+        final String csv = "date,points,testId,testType\n2025-01-01,99,1,SGI\n2025-01-02,5,99,SGI\n2025-01-03,5,1,SGI\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+        int count = cut.importSgiData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+        assertThat(singleTestResultRepository.findAllByUserId(TEST_USER)).hasSize(1);
     }
 
     @SneakyThrows
@@ -370,6 +395,19 @@ class CsvImportServiceTest {
 
         assertThat(count).isEqualTo(1);
         assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(1);
+    }
+
+    @SneakyThrows
+    @Test
+    void importGMetricData_skipsValuesOutsideNumericLimits() {
+        String csv = "date,metricValue,type\n2025-01-01,1000,LOST_BALLS\n2025-01-02,3,BOGEY\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+        int count = cut.importGMetricData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(1);
+        assertThat(gMetricRepository.findByUserId(TEST_USER).getFirst().getMetricValue()).isEqualTo(3);
     }
 
     @SneakyThrows

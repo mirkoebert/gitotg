@@ -1,5 +1,6 @@
 package com.mirkoebert.export;
 
+import com.mirkoebert.InputLimits;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.golfmetric.GMetricRepository;
 import com.mirkoebert.handicap.HcpRepository;
@@ -61,7 +62,7 @@ public class CsvImportService {
             removeAllOldHcpForUser(userId);
             int count = 0;
             for (HcpScoreEntity bean : beans) {
-                if (bean.getDate() != null && bean.getHcp() != null) {
+                if (bean.getDate() != null && inRange(bean.getHcp(), InputLimits.HCP_MIN, InputLimits.HCP_MAX)) {
                     bean.setId(0);
                     bean.setUserId(userId);
                     hcpRepo.save(bean);
@@ -109,7 +110,10 @@ public class CsvImportService {
             int count = 0;
             removeAllOldEntitiesForUser(userId);
             for (SingleTestResultEntity sre : sres) {
-                if (sre.getDate() != null && sre.getPoints() != null && sre.getTestId() != null && sre.getTestType() != null) {
+                if (sre.getDate() != null
+                        && inRange(sre.getPoints(), InputLimits.SGI_POINTS_MIN, InputLimits.SGI_POINTS_MAX)
+                        && inRange(sre.getTestId(), InputLimits.SGI_TEST_ID_MIN, InputLimits.SGI_TEST_ID_MAX)
+                        && sre.getTestType() != null) {
                     sre.setUserId(userId);
                     Integer computedHcp = pointsToSgiHcpFunction.apply(sre.getTestId(), sre.getPoints());
                     sre.setHcp(computedHcp);
@@ -164,7 +168,9 @@ public class CsvImportService {
             removeAllOldGMetricsForUser(userId);
             int count = 0;
             for (GMetricEntity bean : beans) {
-                if (bean.getDate() != null && bean.getType() != null) {
+                if (bean.getDate() != null
+                        && bean.getType() != null
+                        && inRange(bean.getMetricValue(), InputLimits.METRIC_MIN, InputLimits.METRIC_MAX)) {
                     bean.setId(0);
                     bean.setUserId(userId);
                     gMetricRepo.save(bean);
@@ -198,6 +204,14 @@ public class CsvImportService {
             throw new CsvImportTooManyLinesException(MAX_CSV_LINES);
         }
         return new ByteArrayInputStream(data);
+    }
+
+    static boolean inRange(Number value, int min, int max) {
+        if (value == null) {
+            return false;
+        }
+        double v = value.doubleValue();
+        return v >= min && v <= max;
     }
 
     static int countLines(byte[] data) {

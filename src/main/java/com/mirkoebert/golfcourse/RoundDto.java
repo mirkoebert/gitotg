@@ -1,5 +1,7 @@
 package com.mirkoebert.golfcourse;
 
+import com.mirkoebert.InputLimits;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -25,19 +27,22 @@ public class RoundDto {
     private LocalDate selectedDate;
 
     @NotEmpty
-    private List<@NotNull @Min(1) Integer> holeStrokes;
+    private List<@NotNull @Min(InputLimits.HOLE_STROKES_MIN) @Max(InputLimits.HOLE_STROKES_MAX) Integer> holeStrokes;
 
-    @Min(0)
+    @Min(InputLimits.COUNT_MIN)
+    @Max(InputLimits.COUNT_MAX)
     @NotNull
     @Builder.Default
     private Integer lostBalls = 0;
 
-    @Min(0)
+    @Min(InputLimits.COUNT_MIN)
+    @Max(InputLimits.COUNT_MAX)
     @NotNull
     @Builder.Default
     private Integer doubleBogeys = 0;
 
-    @Min(0)
+    @Min(InputLimits.COUNT_MIN)
+    @Max(InputLimits.COUNT_MAX)
     @NotNull
     @Builder.Default
     private Integer bogeys = 0;

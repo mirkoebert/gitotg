@@ -40,7 +40,11 @@
                 <label class="col-form-label" for="points" th:text="#{sgi.pointsLabel}">Points:</label>
             </div>
             <div class="col-12 col-sm-auto">
-                <input class="form-control" id="points" th:field="*{points}" type="number"/>
+                <input class="form-control" id="points" th:field="*{points}"
+                       th:max="${T(com.mirkoebert.InputLimits).SGI_POINTS_MAX}"
+                       th:min="${T(com.mirkoebert.InputLimits).SGI_POINTS_MIN}"
+                       type="number"/>
+                <div class="text-danger small" th:errors="*{points}"></div>
             </div>
             <div class="col-12 col-sm-auto">
                 <button class="btn btn-primary" th:text="#{common.submit}" type="submit">Submit</button>

@@ -247,7 +247,9 @@
             </div>
             <div class="col-12 col-md-3" th:classappend="${#fields.hasErrors('metricValue')} ? 'is-invalid'">
                 <label class="form-label" for="metricValue" th:text="#{gmetric.valueLabel}">Value</label>
-                <input class="form-control" id="metricValue" min="0" required step="1" th:field="*{metricValue}"
+                <input class="form-control" id="metricValue" required step="1" th:field="*{metricValue}"
+                       th:max="${T(com.mirkoebert.InputLimits).METRIC_MAX}"
+                       th:min="${T(com.mirkoebert.InputLimits).METRIC_MIN}"
                        th:placeholder="#{gmetric.valuePlaceholder}" type="number">
                 <div class="text-danger small" th:errors="*{metricValue}"></div>
             </div>

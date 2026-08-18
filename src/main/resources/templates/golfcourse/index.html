@@ -39,7 +39,9 @@
         <div class="row g-3 mt-3">
             <div class="col-12 col-md-3">
                 <label class="form-label" for="lostBalls" th:text="#{golfcourse.lostBallsLabel}">Lost Balls</label>
-                <input class="form-control" id="lostBalls" min="0" name="lostBalls" required
+                <input class="form-control" id="lostBalls" name="lostBalls" required
+                       th:max="${T(com.mirkoebert.InputLimits).COUNT_MAX}"
+                       th:min="${T(com.mirkoebert.InputLimits).COUNT_MIN}"
                        th:value="${round.lostBalls}" type="number">
             </div>
         </div>
@@ -86,6 +88,8 @@
     const courses = /*[[${courses}]]*/ [];
     const holeLabel = /*[[#{golfcourse.holeLabel}]]*/ 'Hole';
     const parLabel = /*[[#{golfcourse.parLabel}]]*/ 'Par';
+    const holeStrokesMin = /*[[${T(com.mirkoebert.InputLimits).HOLE_STROKES_MIN}]]*/ 1;
+    const holeStrokesMax = /*[[${T(com.mirkoebert.InputLimits).HOLE_STROKES_MAX}]]*/ 20;
 
     const select = document.getElementById('courseName');
     const container = document.getElementById('holesContainer');
@@ -110,7 +114,8 @@
             col.innerHTML =
                 '<label class="form-label">' + holeLabel + ' ' + hole.number +
                 ' <span class="text-muted">(' + parLabel + ' ' + hole.par + ')</span></label>' +
-                '<input class="form-control" type="number" min="1" step="1" required name="holeStrokes">';
+                '<input class="form-control" type="number" min="' + holeStrokesMin +
+                '" max="' + holeStrokesMax + '" step="1" required name="holeStrokes">';
             container.appendChild(col);
         });
         updateTotal();

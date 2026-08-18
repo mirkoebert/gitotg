@@ -1,5 +1,6 @@
 package com.mirkoebert.sgi;
 
+import com.mirkoebert.InputLimits;
 import com.mirkoebert.TestSuite;
 import com.mirkoebert.sgi.calc.PointsToSgiHcpFunction;
 import com.mirkoebert.user.CurrentUserService;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,7 +42,7 @@ public class SgiPrimaryController {
     }
 
     @GetMapping("/sgi/{testId}")
-    public String getShortGameInput(Model m, @PathVariable @Min(1) @Max(8) int testId) {
+    public String getShortGameInput(Model m, @PathVariable @Min(InputLimits.SGI_TEST_ID_MIN) @Max(InputLimits.SGI_TEST_ID_MAX) int testId) {
         log.info("short-game-input {}", testId);
         val u = currentUserService.getCurrentUser();
         m.addAttribute("sgitest", sgiTestRepo.getTestById(testId));
@@ -51,9 +53,18 @@ public class SgiPrimaryController {
     }
 
     @PostMapping("/submit")
-    public String submitForm(@ModelAttribute @Valid final SgiTestScoreDTO score, Model m) {
+    public String submitForm(@ModelAttribute @Valid final SgiTestScoreDTO score,
+                             BindingResult bindingResult,
+                             Model m) {
         log.info("Submit {}", score);
         val u = currentUserService.getCurrentUser();
+        if (bindingResult.hasErrors()) {
+            m.addAttribute("sgitest", sgiTestRepo.getTestById(score.getTestId()));
+            m.addAttribute("sgitest1score", score);
+            m.addAttribute("testId", score.getTestId());
+            m.addAttribute("trend", trendService.getTrend(score.getTestId(), u.id()));
+            return "sgi/input";
+        }
         var s = SingleTestResultEntity
                 .builder()
                 .testType(score.getType())

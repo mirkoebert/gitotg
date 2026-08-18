@@ -1,5 +1,7 @@
 package com.mirkoebert.golfmetric;
 
+import com.mirkoebert.InputLimits;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -18,7 +20,8 @@ public class GMetricDTO {
     @NotNull
     private LocalDate selectedDate;
 
-    @Min(0)
+    @Min(InputLimits.METRIC_MIN)
+    @Max(InputLimits.METRIC_MAX)
     @NotNull
     private Integer metricValue;
 

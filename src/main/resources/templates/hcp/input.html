@@ -108,6 +108,8 @@
             <div class="col-12 col-md-4" th:classappend="${#fields.hasErrors('hcp')} ? 'is-invalid'">
                 <label class="form-label" for="hcp" th:text="#{hcp.label}">Handicap</label>
                 <input class="form-control" id="hcp" required step="0.1" th:field="*{hcp}"
+                       th:max="${T(com.mirkoebert.InputLimits).HCP_MAX}"
+                       th:min="${T(com.mirkoebert.InputLimits).HCP_MIN}"
                        th:placeholder="#{hcp.placeholder}" type="number">
                 <div class="text-danger small" th:errors="*{hcp}"></div>
             </div>
