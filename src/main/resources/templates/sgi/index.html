@@ -24,13 +24,15 @@
                 <span th:text="#{common.import}">Import:</span>
                 <form class="d-flex flex-column flex-sm-row flex-wrap align-items-stretch align-items-sm-center gap-2" enctype="multipart/form-data" id="sgi-import-form" method="post"
                       th:action="@{/api/sgi/import}">
-                    <input accept=".csv" class="form-control form-control-sm" name="file" required style="max-width: 100%; width: min(100%, 220px);"
+                    <input accept=".csv" aria-describedby="sgi-import-limits sgi-import-hint" class="form-control form-control-sm" name="file" required style="max-width: 100%; width: min(100%, 220px);"
                            type="file">
                     <button class="btn btn-primary btn-sm" th:text="#{common.upload}" type="submit">Upload</button>
                 </form>
             </div>
-            <small class="d-block mt-1 text-muted" th:text="#{sgi.importHint}">(CSV with date,points,testId,testType;
-                appends data; max 1MB)</small>
+            <small class="d-block mt-1 fw-semibold" id="sgi-import-limits" th:text="#{common.importLimits}">Max 500 KB /
+                420 lines</small>
+            <small class="d-block mt-1 text-muted" id="sgi-import-hint" th:text="#{sgi.importHint}">(CSV with
+                date,points,testId,testType; replaces existing SGI data; max 500KB / 420 lines)</small>
             <div class="mt-1 small" id="sgi-import-status" style="display:none;"></div>
         </li>
     </ul>
@@ -54,57 +56,17 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>
-
+<script src="/js/csv-import.js"></script>
 <script th:inline="javascript">
-    const i18nUploading = /*[[#{common.uploading}]]*/ 'Uploading...';
-    const i18nErrorPrefix = /*[[#{api.import.errorPrefix}]]*/ 'Error:';
-    const i18nFailedPrefix = /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:';
-
-    (function () {
-        const form = document.getElementById('sgi-import-form');
-        const statusEl = document.getElementById('sgi-import-status');
-        if (!form || !statusEl) return;
-
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const btn = form.querySelector('button[type="submit"]');
-            const originalText = btn ? btn.textContent : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = i18nUploading;
-            }
-            statusEl.style.display = 'none';
-            statusEl.innerHTML = '';
-
-            try {
-                const formData = new FormData(form);
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData
-                });
-                const text = await response.text();
-                if (response.ok) {
-                    statusEl.innerHTML = '<span class="text-success">' + text + '</span>';
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, 1200);
-                } else {
-                    statusEl.innerHTML = '<span class="text-danger">' + i18nErrorPrefix + ' ' + text + '</span>';
-                }
-            } catch (err) {
-                statusEl.innerHTML = '<span class="text-danger">' + i18nFailedPrefix + ' ' + (err.message || err) + '</span>';
-            } finally {
-                statusEl.style.display = 'block';
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = originalText;
-                }
-                const fileInput = form.querySelector('input[type="file"]');
-                if (fileInput) fileInput.value = '';
-            }
-        });
-    })();
+    GitotgCsvImport.bindImportForm('sgi-import-form', 'sgi-import-status', {
+        uploading: /*[[#{common.uploading}]]*/ 'Uploading...',
+        errorPrefix: /*[[#{api.import.errorPrefix}]]*/ 'Error:',
+        failedPrefix: /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:',
+        fileTooLarge: /*[[#{api.import.fileTooLarge}]]*/ 'File too large. Maximum allowed size is 500KB.',
+        tooManyLines: /*[[#{api.import.tooManyLines(420)}]]*/ 'Too many lines. Maximum allowed is 420 lines.'
+    });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>
 </body>
 </html>

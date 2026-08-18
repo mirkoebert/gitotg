@@ -9,7 +9,7 @@ server:
       min-spare: 1
     max-connections: 25
     accept-count: 10
-    max-http-form-post-size: 1MB
+    max-http-form-post-size: 600KB
     mbeanregistry:
       enabled: false
 app:
@@ -65,8 +65,8 @@ spring:
             scope: read:user, user:email
   servlet:
     multipart:
-      max-file-size: 1MB
-      max-request-size: 1MB
+      max-file-size: 500KB
+      max-request-size: 600KB
   thymeleaf:
     cache: true
   web:

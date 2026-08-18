@@ -1,5 +1,6 @@
 package com.mirkoebert.config;
 
+import com.mirkoebert.export.CsvImportTooManyLinesException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -18,5 +19,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException exc) {
         return ResponseEntity.badRequest().body(
                 messageSource.getMessage("api.import.fileTooLarge", null, LocaleContextHolder.getLocale()));
+    }
+
+    @ExceptionHandler(CsvImportTooManyLinesException.class)
+    public ResponseEntity<String> handleTooManyLines(CsvImportTooManyLinesException exc) {
+        return ResponseEntity.badRequest().body(
+                messageSource.getMessage(
+                        "api.import.tooManyLines",
+                        new Object[]{exc.getMaxLines()},
+                        LocaleContextHolder.getLocale()));
     }
 }

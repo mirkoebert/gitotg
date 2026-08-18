@@ -16,6 +16,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -27,6 +29,9 @@ import java.util.Map;
 @Slf4j
 public class CsvImportService {
 
+    /** Maximum CSV records per import, including the header row. */
+    public static final int MAX_CSV_LINES = 420;
+
     private final HcpRepository hcpRepo;
     private final SingleTestResultRepository sgiRepo;
     private final GMetricRepository gMetricRepo;
@@ -34,7 +39,8 @@ public class CsvImportService {
 
     @Transactional
     public int importHcpData(InputStream inputStream, String userId) {
-        try (InputStreamReader reader = new InputStreamReader(inputStream);
+        try (InputStream limited = limitCsvLines(inputStream);
+             InputStreamReader reader = new InputStreamReader(limited);
              CSVReader csvReader = new CSVReader(reader)) {
 
             HeaderColumnNameTranslateMappingStrategy<HcpScoreEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
@@ -65,8 +71,7 @@ public class CsvImportService {
             log.info("Imported {} HCP records for user {}", count, userId);
             return count;
         } catch (Exception e) {
-            log.error("Failed to import HCP CSV for user {}", userId, e);
-            throw new RuntimeException("HCP CSV import failed: " + e.getMessage(), e);
+            throw importFailed(e, userId, "HCP");
         }
     }
 
@@ -78,7 +83,8 @@ public class CsvImportService {
 
     @Transactional
     public int importSgiData(InputStream inputStream, final String userId) {
-        try (InputStreamReader reader = new InputStreamReader(inputStream);
+        try (InputStream limited = limitCsvLines(inputStream);
+             InputStreamReader reader = new InputStreamReader(limited);
              CSVReader csvReader = new CSVReader(reader)) {
 
             HeaderColumnNameTranslateMappingStrategy<SingleTestResultEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
@@ -116,8 +122,7 @@ public class CsvImportService {
             log.info("Imported {} SGI records for user {}", count, userId);
             return count;
         } catch (Exception e) {
-            log.error("Failed to import SGI CSV for user {}", userId, e);
-            throw new RuntimeException("SGI CSV import failed: " + e.getMessage(), e);
+            throw importFailed(e, userId, "SGI");
         }
     }
 
@@ -135,7 +140,8 @@ public class CsvImportService {
 
     @Transactional
     public int importGMetricData(InputStream inputStream, String userId) {
-        try (InputStreamReader reader = new InputStreamReader(inputStream);
+        try (InputStream limited = limitCsvLines(inputStream);
+             InputStreamReader reader = new InputStreamReader(limited);
              CSVReader csvReader = new CSVReader(reader)) {
 
             HeaderColumnNameTranslateMappingStrategy<GMetricEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
@@ -170,8 +176,43 @@ public class CsvImportService {
             log.info("Imported {} gmetric records for user {}", count, userId);
             return count;
         } catch (Exception e) {
-            log.error("Failed to import gmetric CSV for user {}", userId, e);
-            throw new RuntimeException("GMetric CSV import failed: " + e.getMessage(), e);
+            throw importFailed(e, userId, "GMetric");
         }
+    }
+
+    private static RuntimeException importFailed(Exception e, String userId, String kind) {
+        if (e instanceof CsvImportTooManyLinesException tooMany) {
+            throw tooMany;
+        }
+        log.error("Failed to import {} CSV for user {}", kind, userId, e);
+        throw new RuntimeException(kind + " CSV import failed: " + e.getMessage(), e);
+    }
+
+    /**
+     * Rejects the file before OpenCSV parses it so a too-large import never
+     * deletes existing rows. Counts physical lines, including the header.
+     */
+    static InputStream limitCsvLines(InputStream inputStream) throws IOException {
+        byte[] data = inputStream.readAllBytes();
+        if (countLines(data) > MAX_CSV_LINES) {
+            throw new CsvImportTooManyLinesException(MAX_CSV_LINES);
+        }
+        return new ByteArrayInputStream(data);
+    }
+
+    static int countLines(byte[] data) {
+        if (data.length == 0) {
+            return 0;
+        }
+        int lines = 0;
+        for (byte b : data) {
+            if (b == '\n') {
+                lines++;
+            }
+        }
+        if (data[data.length - 1] != '\n') {
+            lines++;
+        }
+        return lines;
     }
 }

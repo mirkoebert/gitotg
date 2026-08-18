@@ -32,13 +32,15 @@
             <form class="d-flex flex-column flex-sm-row flex-wrap align-items-stretch align-items-sm-center gap-2" enctype="multipart/form-data" id="gmetric-import-form"
                   method="post"
                   th:action="@{/api/gmetric/import}">
-                <input accept=".csv" class="form-control form-control-sm" name="file" required style="max-width: 100%; width: min(100%, 220px);"
+                <input accept=".csv" aria-describedby="gmetric-import-limits gmetric-import-hint" class="form-control form-control-sm" name="file" required style="max-width: 100%; width: min(100%, 220px);"
                        type="file">
                 <button class="btn btn-primary btn-sm" th:text="#{common.upload}" type="submit">Upload</button>
             </form>
         </div>
-        <small class="d-block mt-1 text-muted" th:text="#{gmetric.importHint}">(CSV with date,metricValue,type columns;
-            upserts by date+type; max 1MB)</small>
+        <small class="d-block mt-1 fw-semibold" id="gmetric-import-limits" th:text="#{common.importLimits}">Max 500 KB /
+            420 lines</small>
+        <small class="d-block mt-1 text-muted" id="gmetric-import-hint" th:text="#{gmetric.importHint}">(CSV with
+            date,metricValue,type columns; replaces existing metrics; max 500KB / 420 lines)</small>
         <div class="mt-1 small" id="gmetric-import-status" style="display:none;"></div>
     </li>
 </ul>
@@ -71,6 +73,8 @@
     const i18nUploading = /*[[#{common.uploading}]]*/ 'Uploading...';
     const i18nErrorPrefix = /*[[#{api.import.errorPrefix}]]*/ 'Error:';
     const i18nFailedPrefix = /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:';
+    const i18nFileTooLarge = /*[[#{api.import.fileTooLarge}]]*/ 'File too large. Maximum allowed size is 500KB.';
+    const i18nTooManyLines = /*[[#{api.import.tooManyLines(420)}]]*/ 'Too many lines. Maximum allowed is 420 lines.';
     const chartDataUrl = /*[[@{/api/gmetric/chart-data}]]*/ '/api/gmetric/chart-data';
 
     let metricsChart = null;
@@ -259,51 +263,15 @@
     </form>
 </div>
 
+<script src="/js/csv-import.js"></script>
 <script>
-    (function () {
-        const form = document.getElementById('gmetric-import-form');
-        const statusEl = document.getElementById('gmetric-import-status');
-        if (!form || !statusEl) return;
-
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const btn = form.querySelector('button[type="submit"]');
-            const originalText = btn ? btn.textContent : '';
-            if (btn) {
-                btn.disabled = true;
-                btn.textContent = i18nUploading;
-            }
-            statusEl.style.display = 'none';
-            statusEl.innerHTML = '';
-
-            try {
-                const formData = new FormData(form);
-                const response = await fetch(form.action, {
-                    method: 'POST',
-                    body: formData
-                });
-                const text = await response.text();
-                if (response.ok) {
-                    statusEl.innerHTML = '<span class="text-success">' + text + '</span>';
-                    setTimeout(function () {
-                        window.location.reload();
-                    }, 1200);
-                } else {
-                    statusEl.innerHTML = '<span class="text-danger">' + i18nErrorPrefix + ' ' + text + '</span>';
-                }
-            } catch (err) {
-                statusEl.innerHTML = '<span class="text-danger">' + i18nFailedPrefix + ' ' + (err.message || err) + '</span>';
-            } finally {
-                statusEl.style.display = 'block';
-                if (btn) {
-                    btn.disabled = false;
-                    btn.textContent = originalText;
-                }
-                const fileInput = form.querySelector('input[type="file"]');
-                if (fileInput) fileInput.value = '';
-            }
-        });
-    })();
+    GitotgCsvImport.bindImportForm('gmetric-import-form', 'gmetric-import-status', {
+        uploading: i18nUploading,
+        errorPrefix: i18nErrorPrefix,
+        failedPrefix: i18nFailedPrefix,
+        fileTooLarge: i18nFileTooLarge,
+        tooManyLines: i18nTooManyLines
+    });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>

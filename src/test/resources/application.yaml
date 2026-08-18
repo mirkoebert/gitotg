@@ -30,8 +30,8 @@ spring:
             scope: read:user, user:email
   servlet:
     multipart:
-      max-file-size: 1MB
-      max-request-size: 1MB
+      max-file-size: 500KB
+      max-request-size: 600KB
 
 logging:
   level:

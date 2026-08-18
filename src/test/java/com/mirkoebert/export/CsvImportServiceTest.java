@@ -21,7 +21,9 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
 
+import static com.mirkoebert.export.CsvImportService.MAX_CSV_LINES;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 class CsvImportServiceTest {
@@ -426,6 +428,119 @@ class CsvImportServiceTest {
                 .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 3, 1), GMetricType.DOUBLE_BOGEY)
                 .orElseThrow();
         assertThat(saved.getMetricValue()).isEqualTo(7);
+    }
+
+    @Test
+    void countLines_countsHeaderAndDataAndAMissingTrailingNewline() {
+        assertThat(CsvImportService.countLines(new byte[0])).isZero();
+        assertThat(CsvImportService.countLines("date,hcp\n".getBytes())).isEqualTo(1);
+        assertThat(CsvImportService.countLines("date,hcp\n2025-01-01,20.0\n".getBytes())).isEqualTo(2);
+        assertThat(CsvImportService.countLines("date,hcp\n2025-01-01,20.0".getBytes())).isEqualTo(2);
+    }
+
+    @SneakyThrows
+    @Test
+    void importHcpData_acceptsExactlyMaxLinesIncludingHeader() {
+        int dataRows = MAX_CSV_LINES - 1;
+        String csv = hcpCsv(dataRows);
+
+        int count = cut.importHcpData(new ByteArrayInputStream(csv.getBytes()), TEST_USER);
+
+        assertThat(count).isEqualTo(dataRows);
+        assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(dataRows);
+    }
+
+    @SneakyThrows
+    @Test
+    void importHcpData_rejectsOverMaxLinesAndKeepsExistingData() {
+        hcpRepository.save(HcpScoreEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 1, 1))
+                .hcp(30.0)
+                .build());
+
+        String csv = hcpCsv(MAX_CSV_LINES);
+
+        assertThatThrownBy(() -> cut.importHcpData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
+                .isInstanceOf(CsvImportTooManyLinesException.class)
+                .extracting(ex -> ((CsvImportTooManyLinesException) ex).getMaxLines())
+                .isEqualTo(MAX_CSV_LINES);
+
+        List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(1);
+        assertThat(all.getFirst().getHcp()).isEqualTo(30.0);
+    }
+
+    @SneakyThrows
+    @Test
+    void importSgiData_rejectsOverMaxLinesAndKeepsExistingData() {
+        singleTestResultRepository.save(SingleTestResultEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 1, 1))
+                .points(5)
+                .testId(1)
+                .testType(TestSuite.SGI)
+                .hcp(31)
+                .build());
+
+        String csv = sgiCsv(MAX_CSV_LINES);
+
+        assertThatThrownBy(() -> cut.importSgiData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
+                .isInstanceOf(CsvImportTooManyLinesException.class);
+
+        List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
+        assertThat(all).hasSize(1);
+        assertThat(all.getFirst().getPoints()).isEqualTo(5);
+    }
+
+    @SneakyThrows
+    @Test
+    void importGMetricData_rejectsOverMaxLinesAndKeepsExistingData() {
+        gMetricRepository.save(GMetricEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 1, 1))
+                .metricValue(2)
+                .type(GMetricType.LOST_BALLS)
+                .build());
+
+        String csv = gmetricCsv(MAX_CSV_LINES);
+
+        assertThatThrownBy(() -> cut.importGMetricData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
+                .isInstanceOf(CsvImportTooManyLinesException.class);
+
+        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(1);
+        assertThat(all.getFirst().getMetricValue()).isEqualTo(2);
+    }
+
+    private static String hcpCsv(int dataRows) {
+        StringBuilder csv = new StringBuilder("date,hcp\n");
+        for (int i = 0; i < dataRows; i++) {
+            csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
+                    .append(',').append(20 + (i % 10)).append(".0\n");
+        }
+        return csv.toString();
+    }
+
+    private static String sgiCsv(int dataRows) {
+        StringBuilder csv = new StringBuilder("date,points,testId,testType\n");
+        for (int i = 0; i < dataRows; i++) {
+            csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
+                    .append(',').append(i % 10)
+                    .append(',').append((i % 8) + 1)
+                    .append(",SGI\n");
+        }
+        return csv.toString();
+    }
+
+    private static String gmetricCsv(int dataRows) {
+        StringBuilder csv = new StringBuilder("date,metricValue,type\n");
+        for (int i = 0; i < dataRows; i++) {
+            csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
+                    .append(',').append(i % 5)
+                    .append(",LOST_BALLS\n");
+        }
+        return csv.toString();
     }
 
 }
