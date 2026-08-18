@@ -39,6 +39,10 @@ public interface GMetricRepository extends JpaRepository<GMetricEntity, Long> {
     List<GMetricEntity> findByUserIdAndTypeOrderByDateDesc(@NonNull String userId, @NonNull GMetricType type);
 
     @NonNull
+    Optional<GMetricEntity> findFirstByUserIdAndTypeOrderByDateDesc(
+            @NonNull String userId, @NonNull GMetricType type);
+
+    @NonNull
     Optional<GMetricEntity> findByUserIdAndDateAndType(
             @NonNull String userId, @NonNull LocalDate date, @NonNull GMetricType type);
 

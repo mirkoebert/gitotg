@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
@@ -44,5 +45,18 @@ class GMetricServiceTest {
 
         assertThat(result).containsExactly(entity);
         verify(repo).findByUserIdAndTypeOrderByDateDesc("u2", GMetricType.BOGEY);
+    }
+
+    @Test
+    void findLatestByUserIdAndType_delegatesToFirstByDateDesc() {
+        GMetricEntity entity = GMetricEntity.builder()
+                .userId("u3").date(LocalDate.of(2026, 3, 1)).metricValue(4).type(GMetricType.DOUBLE_BOGEY).build();
+        when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY))
+                .thenReturn(Optional.of(entity));
+
+        Optional<GMetricEntity> result = cut.findLatestByUserIdAndType("u3", GMetricType.DOUBLE_BOGEY);
+
+        assertThat(result).contains(entity);
+        verify(repo).findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY);
     }
 }
