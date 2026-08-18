@@ -30,7 +30,7 @@ public class LocaleOAuth2SuccessHandler extends SavedRequestAwareAuthenticationS
             LocaleResolver localeResolver) {
         this.userPreferenceService = userPreferenceService;
         this.localeResolver = localeResolver;
-        setDefaultTargetUrl("/user-page");
+        setDefaultTargetUrl("/");
         setAlwaysUseDefaultTargetUrl(true);
     }
 
