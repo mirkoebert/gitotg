@@ -64,7 +64,8 @@ public class AdvisorService {
             "advisor.other.7",
             "advisor.other.8",
             "advisor.other.9",
-            "advisor.other.10"
+            "advisor.other.10",
+            "advisor.other.11"
     };
     private final HcpRepository hcpRepository;
     private final SingleTestResultRepository singleTestResultRepository;
