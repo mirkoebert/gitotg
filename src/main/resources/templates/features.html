@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{features.title}">Features</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <th:block th:insert="~{fragments/head :: favicons}"></th:block>
+</head>
+<body class="container mt-3 mt-md-5">
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<h1 class="text-center mb-3" th:text="#{features.heading}">Features</h1>
+<p class="text-center text-muted mb-4" th:text="#{features.intro}">The tools that matter most for lowering scores.</p>
+
+<div class="row g-3">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title" th:text="#{features.sgi.title}">Short Game Index</h2>
+                <p class="card-text" th:text="#{features.sgi.text}">Measure wedge, chip, and bunker tests as a short-game handicap.</p>
+                <a class="btn btn-outline-primary btn-sm" th:href="@{/short-game-index}"
+                   th:text="#{features.sgi.cta}">Open Short Game</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title" th:text="#{features.hcp.title}">Handicap</h2>
+                <p class="card-text" th:text="#{features.hcp.text}">Log official handicap entries and watch the monthly trend.</p>
+                <a class="btn btn-outline-primary btn-sm" th:href="@{/handicap/input}"
+                   th:text="#{features.hcp.cta}">Open Handicap</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title" th:text="#{features.goals.title}">Goals</h2>
+                <p class="card-text" th:text="#{features.goals.text}">Checklists for breaking 100, 90, and 80.</p>
+                <a class="btn btn-outline-primary btn-sm" th:href="@{/goal/break100}"
+                   th:text="#{features.goals.cta}">Open Goals</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title" th:text="#{features.metrics.title}">Metrics</h2>
+                <p class="card-text" th:text="#{features.metrics.text}">Count lost balls, bogeys, and double bogeys over time.</p>
+                <a class="btn btn-outline-primary btn-sm" th:href="@{/gmetric}"
+                   th:text="#{features.metrics.cta}">Open Metrics</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title" th:text="#{features.golfcourse.title}">Golf Course</h2>
+                <p class="card-text" th:text="#{features.golfcourse.text}">Save hole-by-hole rounds and lost balls for known courses.</p>
+                <a class="btn btn-outline-primary btn-sm" th:href="@{/golfcourse}"
+                   th:text="#{features.golfcourse.cta}">Open Golf Course</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h2 class="h5 card-title" th:text="#{features.overview.title}">Timeline and Cockpit</h2>
+                <p class="card-text" th:text="#{features.overview.text}">See recent scores in one feed and an at-a-glance overview after login.</p>
+                <a class="btn btn-outline-primary btn-sm" th:href="@{/cockpit}"
+                   th:text="#{features.overview.cta}">Open Cockpit</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>
+</body>
+</html>

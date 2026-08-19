@@ -68,4 +68,10 @@ public class MainPrimaryController {
         return "putting-index";
     }
 
+    @GetMapping("/features")
+    public String getFeatures() {
+        log.info("features page");
+        return "features";
+    }
+
 }
