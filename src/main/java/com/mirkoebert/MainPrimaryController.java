@@ -1,10 +1,5 @@
 package com.mirkoebert;
 
-import com.mirkoebert.advisor.AdvisorService;
-import com.mirkoebert.checklist.ChecklistService;
-import com.mirkoebert.goal.GoalEnum;
-import com.mirkoebert.handicap.HcpService;
-import com.mirkoebert.sgi.SgiHcpAggregatedService;
 import com.mirkoebert.timeline.TimelineRange;
 import com.mirkoebert.timeline.TimelineService;
 import com.mirkoebert.user.CurrentUserService;
@@ -28,31 +23,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 public class MainPrimaryController {
 
     private final TimelineService timeService;
-    private final HcpService hcpService;
-    private final SgiHcpAggregatedService sgiHcpAggregatedService;
-    private final AdvisorService advisorService;
     private final CurrentUserService currentUserService;
-    private final ChecklistService checklistService;
     private final UserStatsService userStatsService;
 
     @Value("${app.version:unknown}")
     private String appVersion;
-
-    @GetMapping("/user-page")
-    public String getUser(Model model) {
-        val u = currentUserService.getCurrentUser();
-        log.debug("Rendering user page for {}", u);
-        model.addAttribute("name", u.name());
-        model.addAttribute("email", u.email());
-        model.addAttribute("lastHCP", hcpService.findLatestByUserId(u.id()).getHcp());
-        model.addAttribute("lastSGHCP", sgiHcpAggregatedService.getLatestSgiHcpAggregated(u.id()));
-        model.addAttribute("advice", advisorService.getAdvise(u.id()));
-        model.addAttribute("picture", u.pictureUrl());
-        model.addAttribute("break100Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK100).percentage());
-        model.addAttribute("break90Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK90).percentage());
-        model.addAttribute("break80Progress", checklistService.getProgress(u.id(), GoalEnum.BREAK80).percentage());
-        return "user";
-    }
 
     @GetMapping("/timeline")
     public String getTimeline(Model m,
