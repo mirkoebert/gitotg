@@ -68,9 +68,4 @@ public class MainPrimaryController {
         return "putting-index";
     }
 
-    @GetMapping("/features")
-    public String getFeatures() {
-        return "redirect:/";
-    }
-
 }
