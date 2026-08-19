@@ -38,8 +38,8 @@ public class LoginSteps {
         loginSuccessHandler.onAuthenticationSuccess(request, response, authentication);
     }
 
-    @Then("the index page is loaded")
-    public void theIndexPageIsLoaded() {
-        assertThat(response.getRedirectedUrl()).isEqualTo("/");
+    @Then("the cockpit page is loaded")
+    public void theCockpitPageIsLoaded() {
+        assertThat(response.getRedirectedUrl()).isEqualTo("/cockpit");
     }
 }
