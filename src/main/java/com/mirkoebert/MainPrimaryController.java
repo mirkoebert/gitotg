@@ -70,8 +70,7 @@ public class MainPrimaryController {
 
     @GetMapping("/features")
     public String getFeatures() {
-        log.info("features page");
-        return "features";
+        return "redirect:/";
     }
 
 }
