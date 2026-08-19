@@ -6,6 +6,13 @@
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
     <th:block th:insert="~{fragments/head :: favicons}"></th:block>
+    <style>
+        .feature-card-img {
+            height: 120px;
+            object-fit: cover;
+            width: 100%;
+        }
+    </style>
 </head>
 <body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
@@ -16,6 +23,8 @@
 <div class="row g-3">
     <div class="col-12 col-md-6 col-lg-4">
         <div class="card h-100">
+            <img alt="Golf wedge" class="card-img-top feature-card-img" src="/images/wedge.jpg"
+                 th:alt="#{features.sgi.alt}">
             <div class="card-body">
                 <h2 class="h5 card-title" th:text="#{features.sgi.title}">Short Game Index</h2>
                 <p class="card-text" th:text="#{features.sgi.text}">Measure wedge, chip, and bunker tests as a short-game handicap.</p>
@@ -26,6 +35,8 @@
     </div>
     <div class="col-12 col-md-6 col-lg-4">
         <div class="card h-100">
+            <img alt="Golf ball" class="card-img-top feature-card-img" src="/images/logo-ball.jpg"
+                 th:alt="#{features.hcp.alt}">
             <div class="card-body">
                 <h2 class="h5 card-title" th:text="#{features.hcp.title}">Handicap</h2>
                 <p class="card-text" th:text="#{features.hcp.text}">Log official handicap entries and watch the monthly trend.</p>
@@ -36,6 +47,8 @@
     </div>
     <div class="col-12 col-md-6 col-lg-4">
         <div class="card h-100">
+            <img alt="Golf glove" class="card-img-top feature-card-img" src="/images/golf-glove.jpg"
+                 th:alt="#{features.goals.alt}">
             <div class="card-body">
                 <h2 class="h5 card-title" th:text="#{features.goals.title}">Goals</h2>
                 <p class="card-text" th:text="#{features.goals.text}">Checklists for breaking 100, 90, and 80.</p>
@@ -46,6 +59,8 @@
     </div>
     <div class="col-12 col-md-6 col-lg-4">
         <div class="card h-100">
+            <img alt="Golf ball" class="card-img-top feature-card-img" src="/images/golfball-favicon-source.jpg"
+                 th:alt="#{features.metrics.alt}">
             <div class="card-body">
                 <h2 class="h5 card-title" th:text="#{features.metrics.title}">Metrics</h2>
                 <p class="card-text" th:text="#{features.metrics.text}">Count lost balls, bogeys, and double bogeys over time.</p>
@@ -56,6 +71,8 @@
     </div>
     <div class="col-12 col-md-6 col-lg-4">
         <div class="card h-100">
+            <img alt="Golf hole" class="card-img-top feature-card-img" src="/images/golf-hole-problem.jpg"
+                 th:alt="#{features.golfcourse.alt}">
             <div class="card-body">
                 <h2 class="h5 card-title" th:text="#{features.golfcourse.title}">Golf Course</h2>
                 <p class="card-text" th:text="#{features.golfcourse.text}">Save hole-by-hole rounds and lost balls for known courses.</p>
@@ -66,6 +83,8 @@
     </div>
     <div class="col-12 col-md-6 col-lg-4">
         <div class="card h-100">
+            <img alt="Made with AI" class="card-img-top feature-card-img" src="/images/made-with-ai.jpg"
+                 th:alt="#{features.overview.alt}">
             <div class="card-body">
                 <h2 class="h5 card-title" th:text="#{features.overview.title}">Timeline and Cockpit</h2>
                 <p class="card-text" th:text="#{features.overview.text}">See recent scores in one feed and an at-a-glance overview after login.</p>
