@@ -39,7 +39,8 @@ public class LocaleOAuth2SuccessHandler extends SavedRequestAwareAuthenticationS
     public void onAuthenticationSuccess(
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
-            Authentication authentication) throws ServletException, IOException {
+            Authentication authentication
+    ) throws ServletException, IOException {
 
         if (authentication.getPrincipal() instanceof OAuth2User oauth2User) {
             CurrentUser user = CurrentUser.from(oauth2User);
