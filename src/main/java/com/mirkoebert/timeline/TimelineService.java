@@ -1,12 +1,9 @@
 package com.mirkoebert.timeline;
 
 import com.mirkoebert.GolfType;
-import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.golfmetric.GMetricRepository;
 import com.mirkoebert.golfmetric.GMetricType;
 import com.mirkoebert.handicap.HcpRepository;
-import com.mirkoebert.handicap.HcpScoreEntity;
-import com.mirkoebert.sgi.SingleTestResultEntity;
 import com.mirkoebert.sgi.SingleTestResultRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

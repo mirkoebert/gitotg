@@ -64,6 +64,12 @@ identities are separate users**; data does not merge across providers even for t
   discriminates the source); `TimelineRange` caps how much history each source query pulls (30/100/all).
 - `checklist` / `goal` — goal-based checklists (e.g. "break 100") with per-user checked-item progress.
 - `advisor` — picks a random localized tip based on how much data the user has and their handicap tier.
+  Tips are **not** listed in Java: `AdviceCatalog` discovers them by convention, scanning the base bundle
+  `messages.properties` for keys shaped `advisor.<bucket>.<n>`. Buckets are `fresh` / `few` (data-point
+  count) plus one per handicap tier — `hh`, `mh`, `lh`, `sfp`, `scratch` — plus `other` (always mixed in).
+  A bucket with no keys is simply silent, so `lh`/`sfp`/`scratch` are wired but currently empty.
+  **Adding a tip means adding one line to `messages.properties` and `messages_de.properties` — nothing else.**
+  `AdviceCatalogTest` guards that every discovered key has a German translation.
 - `export` — CSV export (`HcpCsvExportService`) and import (`CsvImportService`) for HCP, SGI, and GMetric data.
   **Import always fully replaces existing records for that user** (delete-all-then-insert) within a
   `@Transactional` method, so a failed parse can't leave partial data.

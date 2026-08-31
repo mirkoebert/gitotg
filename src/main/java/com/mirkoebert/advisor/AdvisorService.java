@@ -19,60 +19,27 @@ import java.util.*;
 @RequiredArgsConstructor
 public class AdvisorService {
 
-    static final String[] FRESH_KEYS = {
-            "advisor.fresh.0",
-            "advisor.fresh.1",
-            "advisor.fresh.2",
-            "advisor.fresh.3",
-            "advisor.fresh.4",
-            "advisor.fresh.5"
-    };
-    static final String[] FEW_KEYS = {
-            "advisor.few.0",
-            "advisor.few.1",
-            "advisor.few.2",
-            "advisor.few.3"
-    };
-    static final String[] HH_KEYS = {
-            "advisor.hh.0",
-            "advisor.hh.1",
-            "advisor.hh.2",
-            "advisor.hh.3",
-            "advisor.hh.4",
-            "advisor.hh.5",
-            "advisor.hh.6",
-            "advisor.hh.7"
-    };
-    static final String[] MH_KEYS = {
-            "advisor.mh.0",
-            "advisor.mh.1",
-            "advisor.mh.2",
-            "advisor.mh.3",
-            "advisor.mh.4",
-            "advisor.mh.5",
-            "advisor.mh.6",
-            "advisor.mh.7"
-    };
-    static final String[] OTHER_KEYS = {
-            "advisor.other.0",
-            "advisor.other.1",
-            "advisor.other.2",
-            "advisor.other.3",
-            "advisor.other.4",
-            "advisor.other.5",
-            "advisor.other.6",
-            "advisor.other.7",
-            "advisor.other.8",
-            "advisor.other.9",
-            "advisor.other.10",
-            "advisor.other.11",
-            "advisor.other.12",
-            "advisor.other.13"
-    };
+    static final String BUCKET_FRESH = "fresh";
+    static final String BUCKET_FEW = "few";
+    static final String BUCKET_OTHER = "other";
+
+    /**
+     * Handicap tier to advice bucket. Buckets without tips in the message bundle simply stay empty,
+     * so a new tier only needs {@code advisor.<bucket>.<n>} entries in messages.properties.
+     */
+    static final Map<String, String> TIER_BUCKETS = Map.of(
+            HandicapClassifier.HIGH_HANDICAPER, "hh",
+            HandicapClassifier.MID_HANDICAPER, "mh",
+            HandicapClassifier.LOW_HANDICAPER, "lh",
+            HandicapClassifier.SINGLE_FIGURE_PLAYER, "sfp",
+            HandicapClassifier.SCRATCH_PLAYER, "scratch"
+    );
+
     private final HcpRepository hcpRepository;
     private final SingleTestResultRepository singleTestResultRepository;
     private final HandicapClassifier handicapClassifier;
     private final MessageSource messageSource;
+    private final AdviceCatalog adviceCatalog;
     private final Random r = new Random();
 
 
@@ -80,32 +47,40 @@ public class AdvisorService {
         return messageSource.getMessage(key, null, LocaleContextHolder.getLocale());
     }
 
+    private @NonNull List<String> messages(@NonNull final String bucket) {
+        return adviceCatalog.keys(bucket).stream().map(this::message).toList();
+    }
 
-    public @NonNull List<String> getAdviseListAmountOfDataPoints(@NonNull final String userId) {
+
+    private @NonNull List<String> getAdviseListAmountOfDataPoints(@NonNull final String userId) {
         int c = hcpRepository.countByUserId(userId);
         c = c + singleTestResultRepository.countByUserId(userId);
         log.info("data points {}", c);
 
         if (c < 5) {
-            log.info("fresh");
-            return Arrays.stream(FRESH_KEYS).map(this::message).toList();
+            log.info(BUCKET_FRESH);
+            return messages(BUCKET_FRESH);
         } else if (c < 25) {
             log.info("newby");
-            return Arrays.stream(FEW_KEYS).map(this::message).toList();
+            return messages(BUCKET_FEW);
         }
         return Collections.emptyList();
     }
 
-    public String getAdvise(@NonNull final String userId) {
+    public @NonNull String getAdvise(@NonNull final String userId) {
         val resultlist = new ArrayList<String>();
         resultlist.addAll(getAdviseListAmountOfDataPoints(userId));
         resultlist.addAll(getAdviseListHandicap(userId));
         resultlist.addAll(getAdviseOthers());
+        if (resultlist.isEmpty()) {
+            log.warn("no advice available");
+            return "";
+        }
         return resultlist.get(r.nextInt(resultlist.size()));
     }
 
     private @NonNull Collection<String> getAdviseOthers() {
-        return Arrays.stream(OTHER_KEYS).map(this::message).toList();
+        return messages(BUCKET_OTHER);
     }
 
     private @NonNull Collection<String> getAdviseListHandicap(@NonNull String userId) {
@@ -114,13 +89,11 @@ public class AdvisorService {
             return Collections.emptyList();
         }
         String tier = handicapClassifier.apply(hcp.get().getHcp());
-        if (HandicapClassifier.HIGH_HANDICAPER.equals(tier)) {
-            log.info(HandicapClassifier.HIGH_HANDICAPER);
-            return Arrays.stream(HH_KEYS).map(this::message).toList();
-        } else if (HandicapClassifier.MID_HANDICAPER.equals(tier)) {
-            log.info(HandicapClassifier.MID_HANDICAPER);
-            return Arrays.stream(MH_KEYS).map(this::message).toList();
+        String bucket = TIER_BUCKETS.get(tier);
+        if (bucket == null) {
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
+        log.info(tier);
+        return messages(bucket);
     }
 }

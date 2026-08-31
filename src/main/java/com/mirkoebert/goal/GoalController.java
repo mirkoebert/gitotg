@@ -29,7 +29,8 @@ public class GoalController {
     public String getGoal(
             @PathVariable String goalSlug,
             @RequestParam(value = "saved", required = false) Boolean saved,
-            Model model) {
+            Model model
+    ) {
         GoalEnum goal = GoalEnum.fromSlug(goalSlug)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown goal: " + goalSlug));
 
@@ -59,7 +60,8 @@ public class GoalController {
     public String save(
             @PathVariable String goalSlug,
             @ModelAttribute MyForm myForm,
-            RedirectAttributes redirectAttributes) {
+            RedirectAttributes redirectAttributes
+    ) {
         GoalEnum goal = GoalEnum.fromSlug(goalSlug)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown goal: " + goalSlug));
 

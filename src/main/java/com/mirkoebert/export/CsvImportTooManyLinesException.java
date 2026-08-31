@@ -1,9 +1,12 @@
 package com.mirkoebert.export;
 
+import lombok.Getter;
+
 /**
  * Thrown when a CSV import exceeds {@link CsvImportService#MAX_CSV_LINES} records
  * (header plus data rows). Existing user data must not be deleted when this is thrown.
  */
+@Getter
 public class CsvImportTooManyLinesException extends RuntimeException {
 
     private final int maxLines;
@@ -13,7 +16,4 @@ public class CsvImportTooManyLinesException extends RuntimeException {
         this.maxLines = maxLines;
     }
 
-    public int getMaxLines() {
-        return maxLines;
-    }
 }

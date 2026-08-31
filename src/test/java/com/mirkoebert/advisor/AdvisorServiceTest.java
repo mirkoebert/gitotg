@@ -11,11 +11,12 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.context.support.ResourceBundleMessageSource;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.Arrays;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -25,7 +26,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@Import({AdvisorService.class, HandicapClassifier.class, AdvisorServiceTest.MessageSourceConfig.class})
+@Import({AdvisorService.class, AdviceCatalog.class, HandicapClassifier.class, AdvisorServiceTest.MessageSourceConfig.class})
+@TestPropertySource(properties = "spring.messages.basename=messages")
 class AdvisorServiceTest {
 
     @Autowired
@@ -34,14 +36,17 @@ class AdvisorServiceTest {
     @Autowired
     private MessageSource messageSource;
 
+    @Autowired
+    private AdviceCatalog adviceCatalog;
+
     @MockitoBean
     private HcpRepository hcpRepository;
 
     @MockitoBean
     private SingleTestResultRepository singleTestResultRepository;
 
-    private String[] resolve(String[] keys) {
-        return Arrays.stream(keys)
+    private String[] resolve(String bucket) {
+        return adviceCatalog.keys(bucket).stream()
                 .map(key -> messageSource.getMessage(key, null, Locale.ENGLISH))
                 .toArray(String[]::new);
     }
@@ -55,8 +60,8 @@ class AdvisorServiceTest {
 
         assertThat(advice).isIn(
                 Stream.concat(
-                        Stream.of(resolve(AdvisorService.FRESH_KEYS)),
-                        Stream.of(resolve(AdvisorService.OTHER_KEYS))
+                        Stream.of(resolve(AdvisorService.BUCKET_FRESH)),
+                        Stream.of(resolve(AdvisorService.BUCKET_OTHER))
                 ).toArray());
 
         verify(hcpRepository).countByUserId("u1");
@@ -72,8 +77,8 @@ class AdvisorServiceTest {
 
         assertThat(advice).isIn(
                 Stream.concat(
-                        Stream.of(resolve(AdvisorService.FEW_KEYS)),
-                        Stream.of(resolve(AdvisorService.OTHER_KEYS))
+                        Stream.of(resolve(AdvisorService.BUCKET_FEW)),
+                        Stream.of(resolve(AdvisorService.BUCKET_OTHER))
                 ).toArray());
     }
 
@@ -84,7 +89,7 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u3");
 
-        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.OTHER_KEYS)).toArray());
+        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.BUCKET_OTHER)).toArray());
     }
 
     @Test
@@ -112,13 +117,13 @@ class AdvisorServiceTest {
 
         assertThat(advice).isIn(
                 Stream.concat(
-                        Stream.of(resolve(AdvisorService.HH_KEYS)),
-                        Stream.of(resolve(AdvisorService.OTHER_KEYS))
+                        Stream.of(resolve("hh")),
+                        Stream.of(resolve(AdvisorService.BUCKET_OTHER))
                 ).toArray());
     }
 
     @Test
-    void getAdvise_returnsOtherMessageForEnoughDataButNotHighHcp() {
+    void getAdvise_returnsLowHandicaperMessageForEnoughDataAndLowHcp() {
         when(hcpRepository.countByUserId("u6")).thenReturn(25);
         when(singleTestResultRepository.countByUserId("u6")).thenReturn(5);
 
@@ -127,7 +132,11 @@ class AdvisorServiceTest {
 
         String advice = cut.getAdvise("u6");
 
-        assertThat(advice).isIn(Stream.of(resolve(AdvisorService.OTHER_KEYS)).toArray());
+        assertThat(advice).isIn(
+                Stream.concat(
+                        Stream.of(resolve("lh")),
+                        Stream.of(resolve(AdvisorService.BUCKET_OTHER))
+                ).toArray());
     }
 
     @Test
@@ -142,13 +151,18 @@ class AdvisorServiceTest {
 
         assertThat(advice).isIn(
                 Stream.concat(
-                        Stream.of(resolve(AdvisorService.MH_KEYS)),
-                        Stream.of(resolve(AdvisorService.OTHER_KEYS))
+                        Stream.of(resolve("mh")),
+                        Stream.of(resolve(AdvisorService.BUCKET_OTHER))
                 ).toArray());
     }
 
     @Configuration
     static class MessageSourceConfig {
+        @Bean
+        static PropertySourcesPlaceholderConfigurer propertySourcesPlaceholderConfigurer() {
+            return new PropertySourcesPlaceholderConfigurer();
+        }
+
         @Bean
         MessageSource messageSource() {
             ResourceBundleMessageSource ms = new ResourceBundleMessageSource();
