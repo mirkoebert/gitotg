@@ -18,7 +18,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoundDto {
+public class PlayedRoundDto {
 
     @NotBlank
     private String courseName;
@@ -39,11 +39,11 @@ public class RoundDto {
     @Max(InputLimits.COUNT_MAX)
     @NotNull
     @Builder.Default
-    private Integer doubleBogeys = 0;
+    private Integer doubleBogeysPlus = 0;
 
     @Min(InputLimits.COUNT_MIN)
     @Max(InputLimits.COUNT_MAX)
     @NotNull
     @Builder.Default
-    private Integer bogeys = 0;
+    private Integer bogeysPlus = 0;
 }

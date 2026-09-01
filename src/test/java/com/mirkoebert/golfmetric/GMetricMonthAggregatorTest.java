@@ -76,9 +76,9 @@ class GMetricMonthAggregatorTest {
     @Test
     void getMetricsForRange_all_windowStartsAtEarliestEntryMonth() {
         LocalDate earliest = YearMonth.now().minusMonths(5).atDay(15);
-        GMetricEntity earliestEntry = metric(earliest, GMetricType.BOGEY, 7);
+        GMetricEntity earliestEntry = metric(earliest, GMetricType.BOGEY_PLUS, 7);
         when(repo.findByUserId("u")).thenReturn(List.of(earliestEntry));
-        when(repo.findByUserIdAndType("u", GMetricType.BOGEY)).thenReturn(List.of(earliestEntry));
+        when(repo.findByUserIdAndType("u", GMetricType.BOGEY_PLUS)).thenReturn(List.of(earliestEntry));
 
         GMetricChartData result = cut.getMetricsForRange("ALL", "u");
 

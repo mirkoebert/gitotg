@@ -12,12 +12,12 @@ import java.util.function.ToIntFunction;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class DoubleBogeyPlusCountFunction implements ToIntFunction<RoundDto> {
+public class DoubleBogeyPlusCountFunction implements ToIntFunction<PlayedRoundDto> {
 
     private final GolfCourseCatalog catalog;
 
     @Override
-    public int applyAsInt(@NonNull final RoundDto round) {
+    public int applyAsInt(@NonNull final PlayedRoundDto round) {
         val course = catalog.findByName(round.getCourseName());
         if (course.isEmpty()) {
             log.warn("Cannot count double bogeys: unknown course {}", round.getCourseName());

@@ -27,11 +27,13 @@ public class GMetricEntity {
     @CsvBindByName(column = "date")
     @CsvDate("yyyy-MM-dd")
     private LocalDate date;
+
     /**
-     * Metric count/score; not named {@code value} (reserved in H2).
+     * not named {@code value} (reserved in H2).
      */
     @CsvBindByName(column = "metricValue")
     private int metricValue;
+
     @CsvBindByName(column = "type")
     @Enumerated(EnumType.STRING)
     private GMetricType type;

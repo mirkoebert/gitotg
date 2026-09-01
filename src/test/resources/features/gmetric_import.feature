@@ -18,22 +18,22 @@ Feature: Golf metrics CSV import
     Given the gmetric CSV has already been imported:
       """
       date,metricValue,type
-      2025-01-21,2,BOGEY
+      2025-01-21,2,BOGEY_PLUS
       2025-01-21,9,LOST_BALLS
       """
     When the user imports the gmetric CSV:
       """
       date,metricValue,type
-      2025-01-21,5,BOGEY
+      2025-01-21,5,BOGEY_PLUS
       """
     Then the user has 1 gmetric record
-    And a gmetric exists with date "2025-01-21", type "BOGEY" and value 5
+    And a gmetric exists with date "2025-01-21", type "BOGEY_PLUS" and value 5
 
   Scenario: Same date with different types creates separate records
     When the user imports the gmetric CSV:
       """
       date,metricValue,type
-      2025-01-21,2,BOGEY
+      2025-01-21,2,BOGEY_PLUS
       2025-01-21,1,LOST_BALLS
       """
     Then the user has 2 gmetric records
@@ -43,8 +43,8 @@ Feature: Golf metrics CSV import
       """
       date,metricValue,type
       2025-01-01,3,
-      ,2,BOGEY
-      2025-01-02,4,DOUBLE_BOGEY
+      ,2,BOGEY_PLUS
+      2025-01-02,4,DOUBLE_BOGEY_PLUS
       """
     Then the user has 1 gmetric record
-    And a gmetric exists with date "2025-01-02", type "DOUBLE_BOGEY" and value 4
+    And a gmetric exists with date "2025-01-02", type "DOUBLE_BOGEY_PLUS" and value 4

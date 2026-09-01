@@ -15,15 +15,15 @@ import java.util.List;
 public class CourseService {
 
     private final GolfCourseCatalog catalog;
-    private final RoundRepository roundRepository;
+    private final PlayedRoundRepository playedRoundRepository;
     private final DoubleBogeyPlusCountFunction doubleBogeyPlusCountFunction;
 
     public @NonNull List<GolfCourse> findAllCourses() {
         return catalog.findAll();
     }
 
-    public @NonNull List<RoundEntity> findRoundsForUser(@NonNull String userId) {
-        return roundRepository.findTop10ByUserIdOrderByDateDesc(userId);
+    public @NonNull List<PlayedRoundEntity> findRoundsForUser(@NonNull String userId) {
+        return playedRoundRepository.findTop10ByUserIdOrderByDateDesc(userId);
     }
 
     public boolean submitRound(
@@ -39,7 +39,7 @@ public class CourseService {
             return false;
         }
 
-        val doubleBogeys = doubleBogeyPlusCountFunction.applyAsInt(RoundDto.builder()
+        val doubleBogeys = doubleBogeyPlusCountFunction.applyAsInt(PlayedRoundDto.builder()
                 .courseName(courseName)
                 .selectedDate(date)
                 .holeStrokes(holeStrokes)
@@ -48,7 +48,7 @@ public class CourseService {
 
         log.info("Saving round: user {}, course {}, date {}, holes {}, lostBalls {}, doubleBogeys {}",
                 userId, courseName, date, holeStrokes.size(), lostBalls, doubleBogeys);
-        val entity = RoundEntity.builder()
+        val entity = PlayedRoundEntity.builder()
                 .userId(userId)
                 .date(date)
                 .courseName(courseName)
@@ -56,15 +56,15 @@ public class CourseService {
                 .lostBalls(lostBalls)
                 .doubleBogeys(doubleBogeys)
                 .build();
-        roundRepository.save(entity);
+        playedRoundRepository.save(entity);
         return true;
     }
 
     public void deleteRound(@NonNull String userId, long id) {
-        roundRepository.findById(id).ifPresent(round -> {
+        playedRoundRepository.findById(id).ifPresent(round -> {
             if (round.getUserId().equals(userId)) {
                 log.info("Deleting round {} for user {}", id, userId);
-                roundRepository.deleteById(id);
+                playedRoundRepository.deleteById(id);
             }
         });
     }

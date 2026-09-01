@@ -38,25 +38,25 @@ class GMetricServiceTest {
     @Test
     void findByUserIdAndType_delegatesToRepositoryWithType() {
         GMetricEntity entity = GMetricEntity.builder()
-                .userId("u2").date(LocalDate.of(2026, 1, 2)).metricValue(1).type(GMetricType.BOGEY).build();
-        when(repo.findByUserIdAndTypeOrderByDateDesc("u2", GMetricType.BOGEY)).thenReturn(List.of(entity));
+                .userId("u2").date(LocalDate.of(2026, 1, 2)).metricValue(1).type(GMetricType.BOGEY_PLUS).build();
+        when(repo.findByUserIdAndTypeOrderByDateDesc("u2", GMetricType.BOGEY_PLUS)).thenReturn(List.of(entity));
 
-        List<GMetricEntity> result = cut.findByUserIdAndType("u2", GMetricType.BOGEY);
+        List<GMetricEntity> result = cut.findByUserIdAndType("u2", GMetricType.BOGEY_PLUS);
 
         assertThat(result).containsExactly(entity);
-        verify(repo).findByUserIdAndTypeOrderByDateDesc("u2", GMetricType.BOGEY);
+        verify(repo).findByUserIdAndTypeOrderByDateDesc("u2", GMetricType.BOGEY_PLUS);
     }
 
     @Test
     void findLatestByUserIdAndType_delegatesToFirstByDateDesc() {
         GMetricEntity entity = GMetricEntity.builder()
-                .userId("u3").date(LocalDate.of(2026, 3, 1)).metricValue(4).type(GMetricType.DOUBLE_BOGEY).build();
-        when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY))
+                .userId("u3").date(LocalDate.of(2026, 3, 1)).metricValue(4).type(GMetricType.DOUBLE_BOGEY_PLUS).build();
+        when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY_PLUS))
                 .thenReturn(Optional.of(entity));
 
-        Optional<GMetricEntity> result = cut.findLatestByUserIdAndType("u3", GMetricType.DOUBLE_BOGEY);
+        Optional<GMetricEntity> result = cut.findLatestByUserIdAndType("u3", GMetricType.DOUBLE_BOGEY_PLUS);
 
         assertThat(result).contains(entity);
-        verify(repo).findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY);
+        verify(repo).findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY_PLUS);
     }
 }

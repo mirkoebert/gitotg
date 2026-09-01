@@ -5,7 +5,7 @@ import com.mirkoebert.checklist.ChecklistProgress;
 import com.mirkoebert.checklist.ChecklistService;
 import com.mirkoebert.goal.GoalEnum;
 import com.mirkoebert.golfcourse.CourseService;
-import com.mirkoebert.golfcourse.RoundEntity;
+import com.mirkoebert.golfcourse.PlayedRoundEntity;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.golfmetric.GMetricService;
 import com.mirkoebert.golfmetric.GMetricType;
@@ -56,8 +56,8 @@ class CockpitServiceTest {
         stubEmptyHcpAndGoals();
         when(singleTestResultRepository.countByUserId(USER)).thenReturn(0);
         when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(Optional.empty());
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY)).thenReturn(Optional.empty());
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY)).thenReturn(Optional.empty());
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS)).thenReturn(Optional.empty());
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(Optional.empty());
         when(courseService.findRoundsForUser(USER)).thenReturn(List.of());
         when(advisorService.getAdvise(USER)).thenReturn("Start a test.");
 
@@ -80,21 +80,21 @@ class CockpitServiceTest {
         when(sgiHcpAggregatedService.getLatestSgiHcpAggregated(USER)).thenReturn(31);
         when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS))
                 .thenReturn(Optional.of(metric(GMetricType.LOST_BALLS, 2)));
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY))
-                .thenReturn(Optional.of(metric(GMetricType.BOGEY, 5)));
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY))
-                .thenReturn(Optional.of(metric(GMetricType.DOUBLE_BOGEY, 1)));
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS))
+                .thenReturn(Optional.of(metric(GMetricType.BOGEY_PLUS, 5)));
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS))
+                .thenReturn(Optional.of(metric(GMetricType.DOUBLE_BOGEY_PLUS, 1)));
         when(checklistService.getProgress(USER, GoalEnum.BREAK100)).thenReturn(ChecklistProgress.of(4, 8));
         when(checklistService.getProgress(USER, GoalEnum.BREAK90)).thenReturn(ChecklistProgress.of(1, 4));
         when(checklistService.getProgress(USER, GoalEnum.BREAK80)).thenReturn(ChecklistProgress.of(0, 2));
         when(courseService.findRoundsForUser(USER)).thenReturn(List.of(
-                RoundEntity.builder()
+                PlayedRoundEntity.builder()
                         .courseName("Fischland")
                         .date(LocalDate.of(2026, 2, 1))
                         .holeStrokes(List.of(5, 4, 2))
                         .lostBalls(1)
                         .build(),
-                RoundEntity.builder()
+                PlayedRoundEntity.builder()
                         .courseName("Tessin")
                         .date(LocalDate.of(2026, 1, 1))
                         .holeStrokes(List.of(4, 5, 3))
@@ -124,8 +124,8 @@ class CockpitServiceTest {
                 .hcp("22.0").date("02. January 2026").trend("stable").build());
         when(singleTestResultRepository.countByUserId(USER)).thenReturn(0);
         when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(Optional.empty());
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY)).thenReturn(Optional.empty());
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY)).thenReturn(Optional.empty());
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS)).thenReturn(Optional.empty());
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(Optional.empty());
         stubEmptyGoals();
         when(courseService.findRoundsForUser(USER)).thenReturn(List.of());
         when(advisorService.getAdvise(USER)).thenReturn("Keep going.");

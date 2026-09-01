@@ -1,6 +1,6 @@
 package com.mirkoebert;
 
-import com.mirkoebert.golfcourse.RoundDto;
+import com.mirkoebert.golfcourse.PlayedRoundDto;
 import com.mirkoebert.golfmetric.GMetricDTO;
 import com.mirkoebert.golfmetric.GMetricType;
 import com.mirkoebert.handicap.HcpScoreDTO;
@@ -51,9 +51,9 @@ class InputLimitsValidationTest {
 
     @Test
     void holeStrokesAndLostBallsMustBeWithinLimits() {
-        RoundDto overStrokes = round(List.of(InputLimits.HOLE_STROKES_MAX + 1), 0);
-        RoundDto overLost = round(List.of(InputLimits.HOLE_STROKES_MIN), InputLimits.COUNT_MAX + 1);
-        RoundDto ok = round(List.of(InputLimits.HOLE_STROKES_MAX), InputLimits.COUNT_MAX);
+        PlayedRoundDto overStrokes = round(List.of(InputLimits.HOLE_STROKES_MAX + 1), 0);
+        PlayedRoundDto overLost = round(List.of(InputLimits.HOLE_STROKES_MIN), InputLimits.COUNT_MAX + 1);
+        PlayedRoundDto ok = round(List.of(InputLimits.HOLE_STROKES_MAX), InputLimits.COUNT_MAX);
 
         assertThat(validator.validate(overStrokes)).isNotEmpty();
         assertThat(validator.validate(overLost)).isNotEmpty();
@@ -75,8 +75,8 @@ class InputLimitsValidationTest {
                 .build();
     }
 
-    private static RoundDto round(List<Integer> strokes, int lostBalls) {
-        return RoundDto.builder()
+    private static PlayedRoundDto round(List<Integer> strokes, int lostBalls) {
+        return PlayedRoundDto.builder()
                 .courseName("Fischland")
                 .selectedDate(LocalDate.of(2026, 1, 1))
                 .holeStrokes(strokes)

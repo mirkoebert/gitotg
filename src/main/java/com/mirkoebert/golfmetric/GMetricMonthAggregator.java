@@ -38,14 +38,14 @@ public class GMetricMonthAggregator {
         return chartForLastYear(userId);
     }
 
-    private @NonNull GMetricChartData chartForLastYear(String userId) {
+    private @NonNull GMetricChartData chartForLastYear(@NonNull final String userId) {
         final YearMonth end = YearMonth.now();
         final YearMonth start = end.minusMonths(LAST_YEAR_MONTHS - 1L);
         // Keep a fixed 12-month window so switching ranges is visible.
         return buildChart(userId, start, end, false);
     }
 
-    private @NonNull GMetricChartData chartForAll(String userId) {
+    private @NonNull GMetricChartData chartForAll(@NonNull final String userId) {
         final List<GMetricEntity> all = repo.findByUserId(userId);
         final YearMonth end = YearMonth.now();
         if (all.isEmpty()) {
@@ -89,8 +89,8 @@ public class GMetricMonthAggregator {
         for (int i = 0; i < months; i++) {
             labels.add(fmt.format(cursor));
             lostBalls.add(byType.get(GMetricType.LOST_BALLS).get(cursor));
-            doubleBogey.add(byType.get(GMetricType.DOUBLE_BOGEY).get(cursor));
-            bogey.add(byType.get(GMetricType.BOGEY).get(cursor));
+            doubleBogey.add(byType.get(GMetricType.DOUBLE_BOGEY_PLUS).get(cursor));
+            bogey.add(byType.get(GMetricType.BOGEY_PLUS).get(cursor));
             cursor = cursor.plusMonths(1);
         }
 

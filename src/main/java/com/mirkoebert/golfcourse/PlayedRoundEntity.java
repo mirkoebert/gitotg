@@ -23,7 +23,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RoundEntity {
+public class PlayedRoundEntity {
 
     @Id
     @GeneratedValue

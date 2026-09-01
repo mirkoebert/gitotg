@@ -10,17 +10,10 @@ mvn clean install
 mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8080
 ```
 ## Deployment
-Start app with config for reduced memory consumption.
+Start app with config
 ```bash
-java -Xms32m -Xmx192m -Xss512k \
-  -XX:MaxMetaspaceSize=192m \
-  -XX:ReservedCodeCacheSize=48m \
-  -XX:CompressedClassSpaceSize=64m \
-  -XX:+UseSerialGC \
-  -jar target/gitotg-0.3.1-SNAPSHOT.jar --spring.profiles.active=local
+java -jar target/gitotg-0.5.0-SNAPSHOT.jar --spring.profiles.active=local
 ```
-If heap OOMs under load, raise `-Xmx` (e.g. `256m`).  
-If you see `OutOfMemoryError: Metaspace`, raise `-XX:MaxMetaspaceSize` and `-XX:CompressedClassSpaceSize` (heap `-Xmx` does not help).
 
 ## Testing / Local run
 - Set credentials (environment variables)

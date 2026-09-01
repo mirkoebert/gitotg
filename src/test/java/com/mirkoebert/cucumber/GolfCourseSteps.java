@@ -1,8 +1,8 @@
 package com.mirkoebert.cucumber;
 
 import com.mirkoebert.golfcourse.CourseService;
-import com.mirkoebert.golfcourse.RoundEntity;
-import com.mirkoebert.golfcourse.RoundRepository;
+import com.mirkoebert.golfcourse.PlayedRoundEntity;
+import com.mirkoebert.golfcourse.PlayedRoundRepository;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,17 +20,17 @@ public class GolfCourseSteps {
     private CourseService courseService;
 
     @Autowired
-    private RoundRepository roundRepository;
+    private PlayedRoundRepository playedRoundRepository;
 
     private String userId;
     private boolean lastSubmitResult;
     private long lastRoundId;
-    private List<RoundEntity> lastRounds;
+    private List<PlayedRoundEntity> lastRounds;
 
     @Given("a clean golfcourse user {string}")
     public void aCleanGolfcourseUser(String userId) {
         this.userId = userId;
-        roundRepository.findByUserId(userId).forEach(roundRepository::delete);
+        playedRoundRepository.findByUserId(userId).forEach(playedRoundRepository::delete);
     }
 
     @Given("the user has submitted a round for course {string} on {string} with hole strokes {string} and {int} lost ball(s)")
@@ -42,7 +42,7 @@ public class GolfCourseSteps {
                 .toList();
         lastSubmitResult = courseService.submitRound(userId, courseName, LocalDate.parse(date), holeStrokes, lostBalls);
 
-        List<RoundEntity> rounds = courseService.findRoundsForUser(userId);
+        List<PlayedRoundEntity> rounds = courseService.findRoundsForUser(userId);
         if (!rounds.isEmpty()) {
             lastRoundId = rounds.get(0).getId();
         }
@@ -65,14 +65,14 @@ public class GolfCourseSteps {
 
     @Then("the latest round has total strokes {int}")
     public void theLatestRoundHasTotalStrokes(int expectedTotal) {
-        List<RoundEntity> rounds = courseService.findRoundsForUser(userId);
+        List<PlayedRoundEntity> rounds = courseService.findRoundsForUser(userId);
         assertThat(rounds).isNotEmpty();
         assertThat(rounds.get(0).getTotalStrokes()).isEqualTo(expectedTotal);
     }
 
     @Then("the latest round has {int} double bogey(s)")
     public void theLatestRoundHasDoubleBogeys(int expectedCount) {
-        List<RoundEntity> rounds = courseService.findRoundsForUser(userId);
+        List<PlayedRoundEntity> rounds = courseService.findRoundsForUser(userId);
         assertThat(rounds).isNotEmpty();
         assertThat(rounds.get(0).getDoubleBogeys()).isEqualTo(expectedCount);
     }
@@ -85,13 +85,13 @@ public class GolfCourseSteps {
     @Then("the rounds are ordered by course {string}, {string}")
     public void theRoundsAreOrderedByCourse(String first, String second) {
         assertThat(lastRounds)
-                .extracting(RoundEntity::getCourseName)
+                .extracting(PlayedRoundEntity::getCourseName)
                 .containsExactly(first, second);
     }
 
     @When("the user deletes their round for course {string}")
     public void theUserDeletesTheirRoundForCourse(String courseName) {
-        RoundEntity round = courseService.findRoundsForUser(userId).stream()
+        PlayedRoundEntity round = courseService.findRoundsForUser(userId).stream()
                 .filter(r -> r.getCourseName().equals(courseName))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("No round for course " + courseName));

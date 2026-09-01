@@ -7,11 +7,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface RoundRepository extends JpaRepository<RoundEntity, Long> {
+public interface PlayedRoundRepository extends JpaRepository<PlayedRoundEntity, Long> {
 
     @NonNull
-    List<RoundEntity> findByUserId(@NonNull String userId);
+    List<PlayedRoundEntity> findByUserId(@NonNull String userId);
 
     @NonNull
-    List<RoundEntity> findTop10ByUserIdOrderByDateDesc(@NonNull String userId);
+    List<PlayedRoundEntity> findTop10ByUserIdOrderByDateDesc(@NonNull String userId);
 }

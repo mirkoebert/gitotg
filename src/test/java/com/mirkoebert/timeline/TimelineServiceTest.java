@@ -94,7 +94,7 @@ class TimelineServiceTest {
                         .userId("user-123")
                         .date(LocalDate.of(2026, 7, 26))
                         .metricValue(2)
-                        .type(GMetricType.BOGEY)
+                        .type(GMetricType.BOGEY_PLUS)
                         .build()
         ));
 
@@ -206,7 +206,7 @@ class TimelineServiceTest {
                 .userId("user-123")
                 .date(LocalDate.now())
                 .metricValue(4)
-                .type(GMetricType.DOUBLE_BOGEY)
+                .type(GMetricType.DOUBLE_BOGEY_PLUS)
                 .build();
 
         when(gMetricRepository.findById(55L)).thenReturn(Optional.of(entry));
@@ -223,7 +223,7 @@ class TimelineServiceTest {
                 .userId("user-123")
                 .date(LocalDate.now())
                 .metricValue(4)
-                .type(GMetricType.DOUBLE_BOGEY)
+                .type(GMetricType.DOUBLE_BOGEY_PLUS)
                 .build();
 
         when(gMetricRepository.findById(55L)).thenReturn(Optional.of(entry));

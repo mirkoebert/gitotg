@@ -143,7 +143,7 @@ public class CsvImportService {
     }
 
     @Transactional
-    public int importGMetricData(InputStream inputStream, String userId) {
+    public int importGMetricData(InputStream inputStream,final String userId) {
         try (InputStream limited = limitCsvLines(inputStream);
              InputStreamReader reader = new InputStreamReader(limited);
              CSVReader csvReader = new CSVReader(reader)) {

@@ -1,5 +1,6 @@
 package com.mirkoebert.golfcourse;
 
+import com.mirkoebert.user.CurrentUser;
 import com.mirkoebert.user.CurrentUserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +24,14 @@ public class GolfCoursePrimaryController {
     private final CourseService courseService;
     private final CurrentUserService currentUserService;
 
-    private static RoundDto emptyForm() {
-        return RoundDto.builder().selectedDate(LocalDate.now()).build();
+    private static PlayedRoundDto emptyForm() {
+        return PlayedRoundDto.builder().selectedDate(LocalDate.now()).build();
     }
 
     @GetMapping("/golfcourse")
     public String getPage(final Model model) {
-        log.info("Get golfcourse page");
-        val u = currentUserService.getCurrentUser();
+        log.info("Get golf course page");
+        final CurrentUser u = currentUserService.getCurrentUser();
         model.addAttribute("courses", courseService.findAllCourses());
         model.addAttribute("round", emptyForm());
         model.addAttribute("rounds", courseService.findRoundsForUser(u.id()));
@@ -39,7 +40,7 @@ public class GolfCoursePrimaryController {
 
     @PostMapping("/golfcourse/submit")
     public String submitForm(
-            @ModelAttribute("round") @Valid final RoundDto form,
+            @ModelAttribute("round") @Valid final PlayedRoundDto form,
             BindingResult bindingResult,
             final Model model
     ) {
@@ -59,7 +60,7 @@ public class GolfCoursePrimaryController {
     @PostMapping("/golfcourse/delete")
     public String deleteRound(@RequestParam final long id) {
         val u = currentUserService.getCurrentUser();
-        log.info("Delete round request: id {}", id);
+        log.info("Delete played round: id {}", id);
         courseService.deleteRound(u.id(), id);
         return "redirect:/golfcourse";
     }

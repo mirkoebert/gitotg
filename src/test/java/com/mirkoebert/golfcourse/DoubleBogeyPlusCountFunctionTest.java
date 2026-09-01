@@ -18,8 +18,8 @@ class DoubleBogeyPlusCountFunctionTest {
     @Autowired
     private DoubleBogeyPlusCountFunction cut;
 
-    private static RoundDto round(final String courseName, final Integer... strokes) {
-        return RoundDto.builder()
+    private static PlayedRoundDto round(final String courseName, final Integer... strokes) {
+        return PlayedRoundDto.builder()
                 .courseName(courseName)
                 .selectedDate(LocalDate.of(2026, 1, 1))
                 .holeStrokes(List.of(strokes))

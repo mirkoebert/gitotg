@@ -1,7 +1,7 @@
 package com.mirkoebert.cockpit;
 
 import com.mirkoebert.checklist.ChecklistProgress;
-import com.mirkoebert.golfcourse.RoundEntity;
+import com.mirkoebert.golfcourse.PlayedRoundEntity;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.handicap.HcpScoreOutFormatedDTO;
 
@@ -34,7 +34,7 @@ public record CockpitView(
     }
 
     public record RoundSnapshot(String courseName, LocalDate date, int totalStrokes, int lostBalls) {
-        static RoundSnapshot from(RoundEntity round) {
+        static RoundSnapshot from(PlayedRoundEntity round) {
             if (round == null) {
                 return null;
             }

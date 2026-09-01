@@ -28,7 +28,7 @@ class CourseServiceTest {
     private GolfCourseCatalog catalog;
 
     @MockitoBean
-    private RoundRepository roundRepository;
+    private PlayedRoundRepository playedRoundRepository;
 
     private static GolfCourse course(final String name, final int... pars) {
         return GolfCourse.builder()
@@ -48,9 +48,9 @@ class CourseServiceTest {
 
     @Test
     void findRoundsForUser_delegatesToRepositoryOrderedByDateDesc() {
-        RoundEntity round = RoundEntity.builder().userId("u1").date(LocalDate.of(2026, 1, 1))
+        PlayedRoundEntity round = PlayedRoundEntity.builder().userId("u1").date(LocalDate.of(2026, 1, 1))
                 .courseName("Fischland").holeStrokes(List.of(5, 4)).build();
-        when(roundRepository.findTop10ByUserIdOrderByDateDesc("u1")).thenReturn(List.of(round));
+        when(playedRoundRepository.findTop10ByUserIdOrderByDateDesc("u1")).thenReturn(List.of(round));
 
         assertThat(cut.findRoundsForUser("u1")).containsExactly(round);
     }
@@ -63,7 +63,7 @@ class CourseServiceTest {
         boolean result = cut.submitRound("u1", "Fischland", LocalDate.of(2026, 1, 1), List.of(7, 4), 2);
 
         assertThat(result).isTrue();
-        verify(roundRepository).save(RoundEntity.builder()
+        verify(playedRoundRepository).save(PlayedRoundEntity.builder()
                 .userId("u1")
                 .date(LocalDate.of(2026, 1, 1))
                 .courseName("Fischland")
@@ -80,7 +80,7 @@ class CourseServiceTest {
         boolean result = cut.submitRound("u1", "Unknown", LocalDate.of(2026, 1, 1), List.of(5, 4), 0);
 
         assertThat(result).isFalse();
-        verify(roundRepository, never()).save(any());
+        verify(playedRoundRepository, never()).save(any());
     }
 
     @Test
@@ -90,35 +90,35 @@ class CourseServiceTest {
         boolean result = cut.submitRound("u1", "Fischland", LocalDate.of(2026, 1, 1), List.of(5), 0);
 
         assertThat(result).isFalse();
-        verify(roundRepository, never()).save(any());
+        verify(playedRoundRepository, never()).save(any());
     }
 
     @Test
     void deleteRound_deletes_whenRoundBelongsToUser() {
-        RoundEntity round = RoundEntity.builder().id(42L).userId("u1").build();
-        when(roundRepository.findById(42L)).thenReturn(Optional.of(round));
+        PlayedRoundEntity round = PlayedRoundEntity.builder().id(42L).userId("u1").build();
+        when(playedRoundRepository.findById(42L)).thenReturn(Optional.of(round));
 
         cut.deleteRound("u1", 42L);
 
-        verify(roundRepository).deleteById(42L);
+        verify(playedRoundRepository).deleteById(42L);
     }
 
     @Test
     void deleteRound_doesNotDelete_whenRoundBelongsToAnotherUser() {
-        RoundEntity round = RoundEntity.builder().id(42L).userId("someoneElse").build();
-        when(roundRepository.findById(42L)).thenReturn(Optional.of(round));
+        PlayedRoundEntity round = PlayedRoundEntity.builder().id(42L).userId("someoneElse").build();
+        when(playedRoundRepository.findById(42L)).thenReturn(Optional.of(round));
 
         cut.deleteRound("u1", 42L);
 
-        verify(roundRepository, never()).deleteById(any());
+        verify(playedRoundRepository, never()).deleteById(any());
     }
 
     @Test
     void deleteRound_doesNotDelete_whenRoundNotFound() {
-        when(roundRepository.findById(42L)).thenReturn(Optional.empty());
+        when(playedRoundRepository.findById(42L)).thenReturn(Optional.empty());
 
         cut.deleteRound("u1", 42L);
 
-        verify(roundRepository, never()).deleteById(any());
+        verify(playedRoundRepository, never()).deleteById(any());
     }
 }

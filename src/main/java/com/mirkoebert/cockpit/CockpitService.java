@@ -41,9 +41,9 @@ public class CockpitService {
                 CockpitView.MetricSnapshot.from(
                         gMetricService.findLatestByUserIdAndType(userId, GMetricType.LOST_BALLS).orElse(null)),
                 CockpitView.MetricSnapshot.from(
-                        gMetricService.findLatestByUserIdAndType(userId, GMetricType.BOGEY).orElse(null)),
+                        gMetricService.findLatestByUserIdAndType(userId, GMetricType.BOGEY_PLUS).orElse(null)),
                 CockpitView.MetricSnapshot.from(
-                        gMetricService.findLatestByUserIdAndType(userId, GMetricType.DOUBLE_BOGEY).orElse(null)),
+                        gMetricService.findLatestByUserIdAndType(userId, GMetricType.DOUBLE_BOGEY_PLUS).orElse(null)),
                 checklistService.getProgress(userId, GoalEnum.BREAK100),
                 checklistService.getProgress(userId, GoalEnum.BREAK90),
                 checklistService.getProgress(userId, GoalEnum.BREAK80),
