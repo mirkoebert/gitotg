@@ -2,7 +2,7 @@ package com.mirkoebert.goal;
 
 import com.mirkoebert.checklist.ChecklistProgress;
 import com.mirkoebert.checklist.ChecklistService;
-import com.mirkoebert.checklist.GolfCheckListItem;
+import com.mirkoebert.checklist.ChecklistItem;
 import com.mirkoebert.user.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +39,7 @@ public class GoalController {
         String userId = user.id();
         log.info("for user {}", userId);
 
-        final List<GolfCheckListItem> allOptions = checklistService.getForGoal(goal);
+        final List<ChecklistItem> allOptions = checklistService.getForGoal(goal);
         final List<Long> selectedIds = checklistService.getSelectedItemIds(userId, goal);
         final ChecklistProgress progress = ChecklistProgress.of(selectedIds.size(), allOptions.size());
 
@@ -50,7 +50,7 @@ public class GoalController {
         model.addAttribute("allOptions", allOptions);
         model.addAttribute("progress", progress);
         model.addAttribute("goal", goal);
-        model.addAttribute("goalTitle", goal.getFull());
+        model.addAttribute("goalTitleKey", goal.getTitleKey());
         model.addAttribute("goalSlug", goal.getSlug());
         model.addAttribute("saved", Boolean.TRUE.equals(saved));
         return "goal/break100";

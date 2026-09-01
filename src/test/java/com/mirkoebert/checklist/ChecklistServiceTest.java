@@ -25,22 +25,22 @@ class ChecklistServiceTest {
     private ChecklistService cut;
 
     @MockitoBean
-    private GolfCheckListItemRepository golfCheckListItemRepository;
+    private ChecklistCatalog checklistCatalog;
 
     @MockitoBean
     private GolfCheckEntityRepository golfCheckEntityRepository;
 
-    private static GolfCheckListItem item(Long id, String name) {
-        return GolfCheckListItem.builder().id(id).name(name).goal(GoalEnum.BREAK100.name()).build();
+    private static ChecklistItem item(long id, String slug) {
+        return new ChecklistItem(id, "checklist." + slug + "." + id + ".name", null);
     }
 
     @Test
     void getSelectedItemIds_returnsOnlyCheckedItemsForGoal() {
-        when(golfCheckListItemRepository.findByGoal(GoalEnum.BREAK100.name()))
+        when(checklistCatalog.items(GoalEnum.BREAK100))
                 .thenReturn(List.of(
-                        item(1L, "Grip"),
-                        item(2L, "Warm up"),
-                        item(3L, "Range first")
+                        item(1L, "break100"),
+                        item(2L, "break100"),
+                        item(3L, "break100")
                 ));
         when(golfCheckEntityRepository.findByUserIdAndCheckListItemIdIn(eq("user-1"), any()))
                 .thenReturn(List.of(
@@ -55,10 +55,10 @@ class ChecklistServiceTest {
 
     @Test
     void saveSelected_replacesChecksAndIgnoresIdsOutsideGoal() {
-        when(golfCheckListItemRepository.findByGoal(GoalEnum.BREAK90.name()))
+        when(checklistCatalog.items(GoalEnum.BREAK90))
                 .thenReturn(List.of(
-                        item(10L, "Preshot routine"),
-                        item(11L, "Consistency is king")
+                        item(10L, "break90"),
+                        item(11L, "break90")
                 ));
 
         cut.saveSelected("user-1", GoalEnum.BREAK90, List.of(10L, 999L));
@@ -80,8 +80,8 @@ class ChecklistServiceTest {
 
     @Test
     void saveSelected_withEmptySelection_clearsAllChecksForGoal() {
-        when(golfCheckListItemRepository.findByGoal(GoalEnum.BREAK100.name()))
-                .thenReturn(List.of(item(1L, "Grip"), item(2L, "Warm up")));
+        when(checklistCatalog.items(GoalEnum.BREAK100))
+                .thenReturn(List.of(item(1L, "break100"), item(2L, "break100")));
 
         cut.saveSelected("user-1", GoalEnum.BREAK100, List.of());
 
@@ -92,12 +92,12 @@ class ChecklistServiceTest {
 
     @Test
     void getProgress_returnsPercentageOfCheckedItems() {
-        when(golfCheckListItemRepository.findByGoal(GoalEnum.BREAK100.name()))
+        when(checklistCatalog.items(GoalEnum.BREAK100))
                 .thenReturn(List.of(
-                        item(1L, "Grip"),
-                        item(2L, "Warm up"),
-                        item(3L, "Range first"),
-                        item(4L, "Short putts")
+                        item(1L, "break100"),
+                        item(2L, "break100"),
+                        item(3L, "break100"),
+                        item(4L, "break100")
                 ));
         when(golfCheckEntityRepository.findByUserIdAndCheckListItemIdIn(eq("user-1"), any()))
                 .thenReturn(List.of(
@@ -114,7 +114,7 @@ class ChecklistServiceTest {
 
     @Test
     void getProgress_returnsZeroWhenChecklistIsEmpty() {
-        when(golfCheckListItemRepository.findByGoal(GoalEnum.BREAK90.name()))
+        when(checklistCatalog.items(GoalEnum.BREAK90))
                 .thenReturn(List.of());
 
         ChecklistProgress progress = cut.getProgress("user-1", GoalEnum.BREAK90);

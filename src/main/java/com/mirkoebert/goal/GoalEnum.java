@@ -5,15 +5,13 @@ import java.util.Optional;
 
 public enum GoalEnum {
 
-    BREAK100("Break 100", "break100"),
-    BREAK90("Break 90", "break90"),
-    BREAK80("Break 80", "break80");
+    BREAK100("break100"),
+    BREAK90("break90"),
+    BREAK80("break80");
 
-    private final String full;
     private final String slug;
 
-    GoalEnum(String full, String slug) {
-        this.full = full;
+    GoalEnum(String slug) {
         this.slug = slug;
     }
 
@@ -23,8 +21,11 @@ public enum GoalEnum {
                 .findFirst();
     }
 
-    public String getFull() {
-        return full;
+    /**
+     * Key of the localized goal title in the message bundle.
+     */
+    public String getTitleKey() {
+        return "goal." + slug + ".title";
     }
 
     public String getSlug() {

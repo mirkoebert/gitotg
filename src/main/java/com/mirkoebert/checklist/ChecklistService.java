@@ -15,15 +15,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChecklistService {
 
-    private final GolfCheckListItemRepository golfCheckListItemRepository;
+    private final ChecklistCatalog checklistCatalog;
     private final GolfCheckEntityRepository golfCheckEntityRepository;
 
-    public List<GolfCheckListItem> getForGoal(final GoalEnum goal) {
-        return switch (goal) {
-            case BREAK100 -> golfCheckListItemRepository.findByGoal(GoalEnum.BREAK100.name());
-            case BREAK90 -> golfCheckListItemRepository.findByGoal(GoalEnum.BREAK90.name());
-            case BREAK80 -> golfCheckListItemRepository.findByGoal(GoalEnum.BREAK80.name());
-        };
+    public List<ChecklistItem> getForGoal(final GoalEnum goal) {
+        return checklistCatalog.items(goal);
     }
 
     public List<Long> getSelectedItemIds(final String userId, final GoalEnum goal) {
@@ -86,8 +82,7 @@ public class ChecklistService {
 
     private List<Long> itemIdsForGoal(final GoalEnum goal) {
         return getForGoal(goal).stream()
-                .map(GolfCheckListItem::getId)
-                .filter(Objects::nonNull)
+                .map(ChecklistItem::id)
                 .toList();
     }
 

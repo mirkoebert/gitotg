@@ -63,6 +63,12 @@ identities are separate users**; data does not merge across providers even for t
 - `timeline` — merges HCP, SGI, and GMetric records into one reverse-chronological feed (`GolfType` enum
   discriminates the source); `TimelineRange` caps how much history each source query pulls (30/100/all).
 - `checklist` / `goal` — goal-based checklists (e.g. "break 100") with per-user checked-item progress.
+  Like the advisor, the items are **not** listed in Java: `ChecklistCatalog` discovers them by convention from
+  the base bundle `messages.properties`, keys shaped `checklist.<goalSlug>.<id>.name` plus an optional
+  `.desc`. Only the per-user checkmarks live in the DB (`GolfCheckEntity.checkListItemId` references those
+  ids, so ids must stay stable). **Adding a checklist item means adding two lines to `messages.properties`
+  and `messages_de.properties` — nothing else.** `ChecklistCatalogTest` guards German coverage,
+  `GoalControllerLocalizationTest` renders the page in both languages.
 - `advisor` — picks a random localized tip based on how much data the user has and their handicap tier.
   Tips are **not** listed in Java: `AdviceCatalog` discovers them by convention, scanning the base bundle
   `messages.properties` for keys shaped `advisor.<bucket>.<n>`. Buckets are `fresh` / `few` (data-point
