@@ -20,8 +20,6 @@ spring:
   jmx:
     enabled: false
   main:
-    # Defer non-web beans until first use (lower idle RSS; first request slightly slower)
-    lazy-initialization: true
     banner-mode: "off"
   datasource:
     # CACHE_SIZE is KB of H2 page cache (default ~16MB)
