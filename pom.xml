@@ -178,6 +178,10 @@
                                 <requireJavaVersion>
                                     <version>[25,)</version>
                                 </requireJavaVersion>
+                                <!-- A transitive dependency must not pull a version newer than the one
+                                     resolved - the CVE pins above make that skew easy to introduce. -->
+                                <requireUpperBoundDeps/>
+                                <banDuplicatePomDependencyVersions/>
                             </rules>
                             <fail>true</fail>
                         </configuration>
