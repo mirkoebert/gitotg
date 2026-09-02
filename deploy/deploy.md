@@ -8,7 +8,7 @@ mvn clean package
 
 ## Deploy on remote server
 Copy package to remote server
-scp target/gitotg-0.4.0-SNAPSHOT.jar root@159.223.29.176:/root/
+scp target/gitotg-0.5.0-SNAPSHOT.jar golf@192.168.10.93:/home/golf
 
 
 ## Setup remote machine to run the application as service
@@ -18,14 +18,14 @@ sudo useradd --system --home /opt/gitotg --shell /usr/sbin/nologin gitotg
 
 ### Setup dir
 sudo mkdir -p /opt/gitotg/{db,logs}
-sudo cp gitotg-0.2.0-SNAPSHOT.jar /opt/gitotg/gitotg.jar
+sudo cp gitotg-0.5.0-SNAPSHOT.jar /opt/gitotg/gitotg.jar
 sudo chown -R gitotg:gitotg /opt/gitotg
 
 ### Setup config for the daemon run
 sudo vi /etc/systemd/system/gitotg.service
 
 ### Make changes available
-systemctl daemon-reload
+sudo systemctl daemon-reload
 
 ### Start service by hand
 sudo systemctl start gitotg
