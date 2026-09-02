@@ -32,10 +32,19 @@ mvn test -Dtest=CucumberTest
 # real Google/GitHub OAuth app credentials are required, see README.md)
 mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8080
 
-# Mutation testing (PIT) and OWASP dependency vulnerability scan are bound as plugins in pom.xml
+# Mutation testing (PIT) — declared in pom.xml but bound to no execution, so it only runs on demand
 mvn org.pitest:pitest-maven:mutationCoverage
-mvn dependency-check:check
+
+# Quality reports on the Maven site: Surefire, JaCoCo, dependency-check, Cucumber.
+# Must be "test site" — JaCoCo, Surefire and Cucumber all read artifacts the test phase wrote,
+# and a bare "mvn site" silently omits them. Output: target/site/index.html
+mvn test site
 ```
+
+**`mvn clean install` currently fails.** OWASP dependency-check is bound to `verify` and version 13
+rejects an empty NVD API key (`NvdApiException: Invalid API Key, length of 0`). CI is unaffected
+because it runs `mvn -B package`, which stops before `verify` — which also means the CVE gate has
+never actually run in CI. Use `mvn clean test` until an `nvdApiKey` is configured.
 
 Tests use an in-memory H2 DB (`src/test/resources/application.yaml`) with `features.load-dummy-data: true` and
 fake OAuth client credentials — no real network/OAuth calls happen in tests.
@@ -59,7 +68,7 @@ identities are separate users**; data does not merge across providers even for t
   `sgi/calc` holds one `SgiTestNHcpFunction` per test id (1–5,7,8) converting raw points → an HCP-equivalent
   score; `PointsToSgiHcpFunction` dispatches to the right one by `testId`. `sgi/chart` aggregates SGI + HCP
   together for charting.
-- `golfmetric` (gmetric) — simple counted metrics (`GMetricType`: LOST_BALLS, BOGEY, DOUBLE_BOGEY) per date.
+- `golfmetric` (gmetric) — simple counted metrics (`GMetricType`: LOST_BALLS, DOUBLE_BOGEY_PLUS, BOGEY_PLUS) per date.
 - `timeline` — merges HCP, SGI, and GMetric records into one reverse-chronological feed (`GolfType` enum
   discriminates the source); `TimelineRange` caps how much history each source query pulls (30/100/all).
 - `checklist` / `goal` — goal-based checklists (e.g. "break 100") with per-user checked-item progress.
@@ -79,6 +88,11 @@ identities are separate users**; data does not merge across providers even for t
 - `export` — CSV export (`HcpCsvExportService`) and import (`CsvImportService`) for HCP, SGI, and GMetric data.
   **Import always fully replaces existing records for that user** (delete-all-then-insert) within a
   `@Transactional` method, so a failed parse can't leave partial data.
+- `golfcourse` — hole-by-hole scoring for a played round. `GolfCourseCatalog` hardcodes the courses and
+  their pars in Java; `PlayedRoundEntity` references a course by **name string**, so renaming a course
+  orphans existing rounds. `DoubleBogeyPlusCountFunction` derives gmetric counts from a round.
+- `cockpit` — the landing dashboard: aggregates latest HCP, SGI, the three gmetric snapshots, progress
+  on all three goal checklists, the last played round and an advisor tip into one `CockpitView` record.
 - `user` — `CurrentUser`/`CurrentUserService` (identity) plus `UserPreferenceEntity`/Service (e.g. locale) and
   stats.
 - `config` — security filter chain (`WebSecurityConfig`), locale resolution from user prefs
@@ -102,5 +116,27 @@ debt or narrow the exception types unless explicitly asked.
 definitions in `src/test/java/com/mirkoebert/cucumber/`, run through the JUnit Platform Suite engine
 (`CucumberTest`), wired to the full Spring context (`CucumberSpringConfiguration`).
 
+Thymeleaf expressions are not type-checked and fail silently at runtime, so a template change needs a
+test that actually renders the page — see `GoalControllerLocalizationTest`. Two traps there:
+`@AutoConfigureMockMvc` is **not** on this classpath (Spring Boot 4.1 moved it to a module the project
+does not depend on), so build MockMvc with `MockMvcBuilders.webAppContextSetup(webApplicationContext)`
+and mock `CurrentUserService` rather than fighting the OAuth2 filter chain; and locale is switched with
+the `lang` request parameter, not `Accept-Language`, because the app uses a `SessionLocaleResolver`.
+
+Surefire's `argLine` carries both the Mockito javaagent and `@{jacocoArgLine}`. Dropping either
+silently disables inline mocks or zeroes out coverage while the build stays green.
+
+**Persistence caveat:** `ddl-auto: update` on file-based H2 with no Flyway or Liquibase — nothing is ever
+dropped, renamed, or migrated. Renaming an `@Entity`, an `@Enumerated(EnumType.STRING)` constant, or a
+checklist item id silently strands existing rows with no migration path. The drift already in the
+database is known and accepted; do not re-raise it.
+
+**Build quality gates:** `maven-enforcer-plugin` checks Maven/Java versions plus `requireUpperBoundDeps`
+and `banDuplicatePomDependencyVersions` at `validate`. JaCoCo reports coverage during `test`
+(currently ~78% lines; the controllers are the gap). CSV import/export must name
+`StandardCharsets.UTF_8` explicitly at every byte/char boundary.
+
 **CI:** GitHub Actions runs `mvn -B package` on push/PR to `main` (`.github/workflows/maven.yml`) plus a
-Qodana static-analysis scan (`.github/workflows/qodana_code_quality.yml`).
+Qodana static-analysis scan on the `qodana.recommended` profile
+(`.github/workflows/qodana_code_quality.yml`). That profile is likely to flag the intentional broad
+`catch` blocks; add the inspection id to the `exclude` list in `qodana.yaml` rather than changing the code.
