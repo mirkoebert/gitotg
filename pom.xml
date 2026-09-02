@@ -44,6 +44,8 @@
         <!-- CVE-2026-66299: ahead of the 11.0.24 managed by Spring Boot 4.1.1 -->
         <tomcat.version>11.0.25</tomcat.version>
         <jacoco.version>0.8.14</jacoco.version>
+        <dependency-check.version>13.0.0</dependency-check.version>
+        <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
         <!-- Filled in by jacoco:prepare-agent; empty default keeps surefire working without it -->
         <jacocoArgLine/>
     </properties>
@@ -162,6 +164,11 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>${maven-site-plugin.version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <version>3.6.3</version>
                 <executions>
@@ -258,7 +265,7 @@
             <plugin>
                 <groupId>org.owasp</groupId>
                 <artifactId>dependency-check-maven</artifactId>
-                <version>13.0.0</version>
+                <version>${dependency-check.version}</version>
                 <executions>
                     <execution>
                         <goals>
@@ -309,5 +316,52 @@
             </plugin>
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <!-- Pinned: the site plugin pulls this in implicitly with an empty version -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.9.0</version>
+            </plugin>
+            <plugin>
+                <!-- Coverage on the generated site. Reads target/jacoco.exec, so the tests must have
+                     run first: mvn test site (plain "mvn site" reports nothing). -->
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <plugin>
+                <!-- The CVE report on the site. The build already runs the same analysis via the
+                     check goal, so mvn test site scans twice - the second pass reuses the local
+                     NVD cache, but it is not free. -->
+                <groupId>org.owasp</groupId>
+                <artifactId>dependency-check-maven</artifactId>
+                <version>${dependency-check.version}</version>
+                <configuration>
+                    <!-- Without an NVD API key the feed update throws, which would abort the whole
+                         site. The analysis still runs against the local NVD cache, so the report is
+                         produced - just possibly missing the newest CVEs. The build-side check goal
+                         keeps failOnError at its default, so the security gate itself is unchanged. -->
+                    <failOnError>false</failOnError>
+                </configuration>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>check</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+        </plugins>
+    </reporting>
 
 </project>
