@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/DECORATION/1.8.1"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/DECORATION/1.8.1 https://maven.apache.org/xsd/decoration-1.8.1.xsd"
+         name="gitotg">
+    <!-- Required once a custom descriptor exists: the plugin only falls back to its
+         default skin when there is no site.xml at all -->
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>2.0.0-M9</version>
+    </skin>
+    <body>
+        <!-- Keep the generated Project Information / Project Reports menus -->
+        <menu ref="reports"/>
+        <menu name="BDD">
+            <!-- Written by the Cucumber HTML formatter during the test phase, not by a report plugin,
+                 so it needs an explicit menu entry -->
+            <item name="Cucumber" href="cucumber.html"/>
+        </menu>
+    </body>
+</project>

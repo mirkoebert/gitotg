@@ -12,6 +12,8 @@ import static io.cucumber.junit.platform.engine.Constants.PLUGIN_PROPERTY_NAME;
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.mirkoebert.cucumber")
-@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty")
+// html goes straight into the site output dir so mvn test site publishes it;
+// like the JaCoCo and surefire reports it is simply absent if the tests did not run
+@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, html:target/site/cucumber.html")
 public class CucumberTest {
 }
