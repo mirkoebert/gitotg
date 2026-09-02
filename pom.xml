@@ -45,6 +45,7 @@
         <tomcat.version>11.0.25</tomcat.version>
         <jacoco.version>0.8.14</jacoco.version>
         <dependency-check.version>13.0.0</dependency-check.version>
+        <surefire.version>3.5.5</surefire.version>
         <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
         <!-- Filled in by jacoco:prepare-agent; empty default keeps surefire working without it -->
         <jacocoArgLine/>
@@ -210,7 +211,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.5.5</version>
+                <version>${surefire.version}</version>
                 <configuration>
                     <!-- Load Mockito as a Java agent so inline mocks work without dynamic attach (JDK 21+).
                          @{jacocoArgLine} is late-replaced with the JaCoCo agent; setting argLine here would
@@ -335,6 +336,21 @@
                     <reportSet>
                         <reports>
                             <report>report</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+            <plugin>
+                <!-- Test results on the site. report-only reads the XML that surefire already
+                     wrote, so the tests are not run a second time - which also means mvn site
+                     alone reports nothing. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-report-plugin</artifactId>
+                <version>${surefire.version}</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>report-only</report>
                         </reports>
                     </reportSet>
                 </reportSets>
