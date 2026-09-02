@@ -18,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -466,6 +467,33 @@ class CsvImportServiceTest {
                 .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 3, 1), GMetricType.DOUBLE_BOGEY_PLUS)
                 .orElseThrow();
         assertThat(saved.getMetricValue()).isEqualTo(7);
+    }
+
+    @Test
+    void stripUtf8Bom_removesOnlyALeadingBom() {
+        byte[] bom = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
+        byte[] plain = "date,hcp".getBytes(StandardCharsets.UTF_8);
+        byte[] withBom = new byte[bom.length + plain.length];
+        System.arraycopy(bom, 0, withBom, 0, bom.length);
+        System.arraycopy(plain, 0, withBom, bom.length, plain.length);
+
+        assertThat(CsvImportService.stripUtf8Bom(withBom)).isEqualTo(plain);
+        assertThat(CsvImportService.stripUtf8Bom(plain)).isEqualTo(plain);
+        assertThat(CsvImportService.stripUtf8Bom(new byte[0])).isEmpty();
+    }
+
+    @SneakyThrows
+    @Test
+    void importHcpData_readsUtf8AndIgnoresTheSpreadsheetBom() {
+        // "CSV UTF-8" from a spreadsheet: BOM first, and non-ASCII text in the file
+        final String csv = "\uFEFFdate,hcp\n2025-01-31,25.5\n";
+        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
+
+        int count = cut.importHcpData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(1);
+        assertThat(hcpRepository.findByUserId(TEST_USER).getFirst().getDate())
+                .isEqualTo(LocalDate.of(2025, 1, 31));
     }
 
     @Test

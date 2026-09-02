@@ -21,6 +21,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,7 @@ public class CsvImportService {
     @Transactional
     public int importHcpData(InputStream inputStream, String userId) {
         try (InputStream limited = limitCsvLines(inputStream);
-             InputStreamReader reader = new InputStreamReader(limited);
+             InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
              CSVReader csvReader = new CSVReader(reader)) {
 
             HeaderColumnNameTranslateMappingStrategy<HcpScoreEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
@@ -85,7 +87,7 @@ public class CsvImportService {
     @Transactional
     public int importSgiData(InputStream inputStream, final String userId) {
         try (InputStream limited = limitCsvLines(inputStream);
-             InputStreamReader reader = new InputStreamReader(limited);
+             InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
              CSVReader csvReader = new CSVReader(reader)) {
 
             HeaderColumnNameTranslateMappingStrategy<SingleTestResultEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
@@ -145,7 +147,7 @@ public class CsvImportService {
     @Transactional
     public int importGMetricData(InputStream inputStream,final String userId) {
         try (InputStream limited = limitCsvLines(inputStream);
-             InputStreamReader reader = new InputStreamReader(limited);
+             InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
              CSVReader csvReader = new CSVReader(reader)) {
 
             HeaderColumnNameTranslateMappingStrategy<GMetricEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
@@ -197,13 +199,25 @@ public class CsvImportService {
     /**
      * Rejects the file before OpenCSV parses it so a too-large import never
      * deletes existing rows. Counts physical lines, including the header.
+     * Also drops a UTF-8 BOM, which spreadsheets add when saving as "CSV UTF-8"
+     * and which would otherwise become part of the first column name.
      */
     static InputStream limitCsvLines(InputStream inputStream) throws IOException {
-        byte[] data = inputStream.readAllBytes();
+        byte[] data = stripUtf8Bom(inputStream.readAllBytes());
         if (countLines(data) > MAX_CSV_LINES) {
             throw new CsvImportTooManyLinesException(MAX_CSV_LINES);
         }
         return new ByteArrayInputStream(data);
+    }
+
+    static byte[] stripUtf8Bom(byte[] data) {
+        if (data.length >= 3
+                && (data[0] & 0xFF) == 0xEF
+                && (data[1] & 0xFF) == 0xBB
+                && (data[2] & 0xFF) == 0xBF) {
+            return Arrays.copyOfRange(data, 3, data.length);
+        }
+        return data;
     }
 
     static boolean inRange(Number value, int min, int max) {

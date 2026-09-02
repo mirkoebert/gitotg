@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+
 @RestController
 @Slf4j
 @RequiredArgsConstructor
@@ -35,10 +38,7 @@ public class CsvExportPrimaryRestController {
         val u = currentUserService.getCurrentUser();
         final String userId = u.id();
         String csv = hcpCsvExportService.exportAllHcpDataToCsv(userId);
-        response.setContentType("text/csv");
-        String filename = csvFileNameService.generateHcpExportFileName();
-        response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-        response.getOutputStream().print(csv);
+        writeCsv(response, csvFileNameService.generateHcpExportFileName(), csv);
     }
 
 
@@ -49,10 +49,7 @@ public class CsvExportPrimaryRestController {
         val u = currentUserService.getCurrentUser();
         final String userId = u.id();
         String csv = hcpCsvExportService.exportAllSgiDataToCsv(userId);
-        response.setContentType("text/csv");
-        String filename = csvFileNameService.generateSgiExportFileName();
-        response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-        response.getOutputStream().print(csv);
+        writeCsv(response, csvFileNameService.generateSgiExportFileName(), csv);
     }
 
     @SneakyThrows
@@ -62,10 +59,7 @@ public class CsvExportPrimaryRestController {
         val u = currentUserService.getCurrentUser();
         final String userId = u.id();
         String csv = hcpCsvExportService.exportAllGMetricDataToCsv(userId);
-        response.setContentType("text/csv");
-        String filename = csvFileNameService.generateGMetricExportFileName();
-        response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-        response.getOutputStream().print(csv);
+        writeCsv(response, csvFileNameService.generateGMetricExportFileName(), csv);
     }
 
     @SneakyThrows
@@ -76,8 +70,7 @@ public class CsvExportPrimaryRestController {
         final String userId = u.id();
         byte[] zip = allDataCsvExportService.exportAllDataAsZip(userId);
         response.setContentType("application/zip");
-        String filename = csvFileNameService.generateAllDataExportFileName();
-        response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+        attach(response, csvFileNameService.generateAllDataExportFileName());
         response.getOutputStream().write(zip);
     }
 
@@ -114,4 +107,19 @@ public class CsvExportPrimaryRestController {
                 "api.import.gmetric", new Object[]{count}, LocaleContextHolder.getLocale()));
     }
 
+    /**
+     * Writes the CSV as UTF-8 and says so in the content type. {@code ServletOutputStream.print}
+     * would encode as ISO-8859-1 and reject anything above U+00FF.
+     */
+    private static void writeCsv(final HttpServletResponse response, final String filename, final String csv)
+            throws IOException {
+        response.setContentType("text/csv");
+        response.setCharacterEncoding(StandardCharsets.UTF_8);
+        attach(response, filename);
+        response.getOutputStream().write(csv.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private static void attach(final HttpServletResponse response, final String filename) {
+        response.addHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+    }
 }
