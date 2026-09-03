@@ -15,11 +15,4 @@ public class Constants {
 
     public static final short HCP_Epsilon = 1;
 
-    /**
-     * Enum values for login types.
-     */
-    public enum LoginType {
-        PRIMARY,
-        SECONDARY
-    }
 }

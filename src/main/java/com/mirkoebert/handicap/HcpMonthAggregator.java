@@ -32,7 +32,7 @@ class HcpMonthAggregator {
                 ));
     }
 
-    @SuppressWarnings("SequencedCollectionMethodCanBeUsed")
+    @SuppressWarnings({"SequencedCollectionMethodCanBeUsed", "ConditionalBreakInInfiniteLoop"})
     HcpData getHcpForLastMonth(int i, String userId) {
         Map<YearMonth, Double> ghcp = getLastOfMonth(userId);
 

@@ -6,6 +6,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 
@@ -29,7 +30,7 @@ class ChecklistCatalogTest {
     void items_areOrderedByIdAndCarryTheirMessageKeys() {
         List<ChecklistItem> items = cut.items(GoalEnum.BREAK100);
 
-        assertThat(items).isSortedAccordingTo((a, b) -> Long.compare(a.id(), b.id()));
+        assertThat(items).isSortedAccordingTo(Comparator.comparingLong(ChecklistItem::id));
         assertThat(items).extracting(ChecklistItem::nameKey)
                 .allSatisfy(key -> assertThat(key).startsWith("checklist.break100.").endsWith(".name"));
         assertThat(items.getFirst().id()).isEqualTo(1L);

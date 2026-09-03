@@ -44,7 +44,7 @@ public class GolfCourseSteps {
 
         List<PlayedRoundEntity> rounds = courseService.findRoundsForUser(userId);
         if (!rounds.isEmpty()) {
-            lastRoundId = rounds.get(0).getId();
+            lastRoundId = rounds.getFirst().getId();
         }
     }
 
@@ -67,14 +67,14 @@ public class GolfCourseSteps {
     public void theLatestRoundHasTotalStrokes(int expectedTotal) {
         List<PlayedRoundEntity> rounds = courseService.findRoundsForUser(userId);
         assertThat(rounds).isNotEmpty();
-        assertThat(rounds.get(0).getTotalStrokes()).isEqualTo(expectedTotal);
+        assertThat(rounds.getFirst().getTotalStrokes()).isEqualTo(expectedTotal);
     }
 
     @Then("the latest round has {int} double bogey(s)")
     public void theLatestRoundHasDoubleBogeys(int expectedCount) {
         List<PlayedRoundEntity> rounds = courseService.findRoundsForUser(userId);
         assertThat(rounds).isNotEmpty();
-        assertThat(rounds.get(0).getDoubleBogeys()).isEqualTo(expectedCount);
+        assertThat(rounds.getFirst().getDoubleBogeys()).isEqualTo(expectedCount);
     }
 
     @When("the rounds are listed for the user")

@@ -33,6 +33,7 @@ public class LocalePreferenceInterceptor implements HandlerInterceptor {
     private final UserPreferenceService userPreferenceService;
     private final CurrentUserService currentUserService;
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean isOAuth2Authenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null

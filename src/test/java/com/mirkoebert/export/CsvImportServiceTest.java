@@ -336,7 +336,7 @@ class CsvImportServiceTest {
                 .build());
         assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
 
-        final String csv = "date,metricValue,type\n2025-01-21,5,BOGEY_PLUS\n";
+        final String csv = "date,metricValue,type\n2025-01-21,5,DOUBLE_BOGEY_PLUS\n";
         @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
 
         int count = cut.importGMetricData(is, TEST_USER);
@@ -346,7 +346,7 @@ class CsvImportServiceTest {
         assertThat(all).hasSize(1);
         assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
         assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
-        assertThat(all.getFirst().getType()).isEqualTo(GMetricType.BOGEY_PLUS);
+        assertThat(all.getFirst().getType()).isEqualTo(GMetricType.DOUBLE_BOGEY_PLUS);
         assertThat(gMetricRepository
                 .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2024, 1, 1), GMetricType.LOST_BALLS))
                 .isEmpty();
