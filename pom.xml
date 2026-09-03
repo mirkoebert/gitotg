@@ -120,6 +120,15 @@
             <version>5.12.0</version>
         </dependency>
         <dependency>
+            <!-- Declared because AdvisorService uses CircularFifoQueue directly; it also arrives
+                 transitively via opencsv. A direct declaration wins Maven's nearest-wins mediation,
+                 so keep this version in step when bumping opencsv - otherwise a newer opencsv would
+                 silently resolve back to this one and fail at runtime, not at build time. -->
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.5.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.jspecify</groupId>
             <artifactId>jspecify</artifactId>
             <version>1.0.1</version>
