@@ -20,7 +20,7 @@ import java.util.List;
 @Controller
 @Slf4j
 @RequiredArgsConstructor
-public class GoalController {
+public class GoalPrimaryController {
 
     private final ChecklistService checklistService;
     private final CurrentUserService currentUserService;
