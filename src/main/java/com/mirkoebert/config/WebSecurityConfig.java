@@ -17,7 +17,7 @@ public class WebSecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/login**", "/error", "/about", "/putting-index").permitAll()
-                        .requestMatchers("/images/**", "/css/**", "/js/**").permitAll()
+                        .requestMatchers("/images/**", "/css/**", "/js/**", "/favicon.ico", "/favicon-*.png").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
