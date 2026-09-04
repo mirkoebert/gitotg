@@ -74,7 +74,7 @@ public class GolfCourseSteps {
     public void theLatestRoundHasDoubleBogeys(int expectedCount) {
         List<PlayedRoundEntity> rounds = courseService.findRoundsForUser(userId);
         assertThat(rounds).isNotEmpty();
-        assertThat(rounds.getFirst().getDoubleBogeys()).isEqualTo(expectedCount);
+        assertThat(rounds.getFirst().getDoubleBogeysPlus()).isEqualTo(expectedCount);
     }
 
     @When("the rounds are listed for the user")

@@ -286,6 +286,9 @@
                 <configuration>
                     <skip>false</skip>
                     <failBuildOnCVSS>7</failBuildOnCVSS>
+                    <suppressionFiles>
+                        <suppressionFile>suppress.xml</suppressionFile>
+                    </suppressionFiles>
                 </configuration>
             </plugin>
             <plugin>
@@ -372,11 +375,10 @@
                 <artifactId>dependency-check-maven</artifactId>
                 <version>${dependency-check.version}</version>
                 <configuration>
-                    <!-- Without an NVD API key the feed update throws, which would abort the whole
-                         site. The analysis still runs against the local NVD cache, so the report is
-                         produced - just possibly missing the newest CVEs. The build-side check goal
-                         keeps failOnError at its default, so the security gate itself is unchanged. -->
                     <failOnError>false</failOnError>
+                    <suppressionFiles>
+                        <suppressionFile>suppress.xml</suppressionFile>
+                    </suppressionFiles>
                 </configuration>
                 <reportSets>
                     <reportSet>

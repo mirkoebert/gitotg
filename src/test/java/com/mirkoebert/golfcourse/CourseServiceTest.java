@@ -18,21 +18,20 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@Import({CourseService.class, DoubleBogeyPlusCountFunction.class})
+@Import({CourseService.class, DoubleBogeyPlusCountFunction.class, BogeyPlusCountFunction.class})
 class CourseServiceTest {
 
     @Autowired
     private CourseService cut;
-
     @MockitoBean
     private GolfCourseCatalog catalog;
-
     @MockitoBean
     private PlayedRoundRepository playedRoundRepository;
 
-    private static GolfCourse course(final String name, final int... pars) {
-        return GolfCourse.builder()
-                .name(name)
+    private static GolfCourse course(final int... pars) {
+        return GolfCourse
+                .builder()
+                .name("Fischland")
                 .holes(List.of(Hole.builder().number(1).par(pars[0]).build(),
                         Hole.builder().number(2).par(pars.length > 1 ? pars[1] : pars[0]).build()))
                 .build();
@@ -40,7 +39,7 @@ class CourseServiceTest {
 
     @Test
     void findAllCourses_delegatesToCatalog() {
-        List<GolfCourse> courses = List.of(course("Fischland", 5, 4));
+        List<GolfCourse> courses = List.of(course( 5, 4));
         when(catalog.findAll()).thenReturn(courses);
 
         assertThat(cut.findAllCourses()).isEqualTo(courses);
@@ -57,19 +56,21 @@ class CourseServiceTest {
 
     @Test
     void submitRound_savesAndReturnsTrue_whenHoleCountMatchesCourse() {
-        when(catalog.findByName("Fischland")).thenReturn(Optional.of(course("Fischland", 5, 4)));
+        when(catalog.findByName("Fischland")).thenReturn(Optional.of(course(5, 4)));
 
         // hole1: 7 strokes on a par 5 (+2, double bogey), hole2: 4 strokes on a par 4 (0)
         boolean result = cut.submitRound("u1", "Fischland", LocalDate.of(2026, 1, 1), List.of(7, 4), 2);
 
         assertThat(result).isTrue();
-        verify(playedRoundRepository).save(PlayedRoundEntity.builder()
+        verify(playedRoundRepository).save(PlayedRoundEntity
+                .builder()
                 .userId("u1")
                 .date(LocalDate.of(2026, 1, 1))
                 .courseName("Fischland")
                 .holeStrokes(List.of(7, 4))
                 .lostBalls(2)
-                .doubleBogeys(1)
+                .doubleBogeysPlus(1)
+                .bogeysPlus(1)
                 .build());
     }
 
@@ -85,7 +86,7 @@ class CourseServiceTest {
 
     @Test
     void submitRound_returnsFalseAndDoesNotSave_whenHoleCountMismatches() {
-        when(catalog.findByName("Fischland")).thenReturn(Optional.of(course("Fischland", 5, 4)));
+        when(catalog.findByName("Fischland")).thenReturn(Optional.of(course(5, 4)));
 
         boolean result = cut.submitRound("u1", "Fischland", LocalDate.of(2026, 1, 1), List.of(5), 0);
 

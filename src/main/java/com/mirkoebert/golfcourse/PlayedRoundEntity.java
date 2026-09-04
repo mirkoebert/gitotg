@@ -36,10 +36,10 @@ public class PlayedRoundEntity {
     private int lostBalls;
 
     @ColumnDefault("0")
-    private int doubleBogeys;
+    private int doubleBogeysPlus;
 
     @ColumnDefault("0")
-    private int bogeys;
+    private int bogeysPlus;
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "round_hole_strokes", joinColumns = @JoinColumn(name = "round_id"))

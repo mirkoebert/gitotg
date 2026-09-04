@@ -16,21 +16,22 @@ public class CourseService {
 
     private final GolfCourseCatalog catalog;
     private final PlayedRoundRepository playedRoundRepository;
+    private final BogeyPlusCountFunction bogeyPlusCountFunction;
     private final DoubleBogeyPlusCountFunction doubleBogeyPlusCountFunction;
 
     public @NonNull List<GolfCourse> findAllCourses() {
         return catalog.findAll();
     }
 
-    public @NonNull List<PlayedRoundEntity> findRoundsForUser(@NonNull String userId) {
+    public @NonNull List<PlayedRoundEntity> findRoundsForUser(@NonNull final String userId) {
         return playedRoundRepository.findTop10ByUserIdOrderByDateDesc(userId);
     }
 
     public boolean submitRound(
-            @NonNull String userId,
-            @NonNull String courseName,
-            @NonNull LocalDate date,
-            @NonNull List<Integer> holeStrokes,
+            @NonNull final String userId,
+            @NonNull final String courseName,
+            @NonNull final LocalDate date,
+            @NonNull final List<Integer> holeStrokes,
             int lostBalls
     ) {
         val course = catalog.findByName(courseName);
@@ -39,28 +40,31 @@ public class CourseService {
             return false;
         }
 
-        val doubleBogeys = doubleBogeyPlusCountFunction.applyAsInt(PlayedRoundDto.builder()
+        final PlayedRoundDto playedRoundDto = PlayedRoundDto.builder()
                 .courseName(courseName)
                 .selectedDate(date)
                 .holeStrokes(holeStrokes)
                 .lostBalls(lostBalls)
-                .build());
+                .build();
+        val doubleBogeysPlus = doubleBogeyPlusCountFunction.applyAsInt(playedRoundDto);
+        val bogeysPlus = bogeyPlusCountFunction.applyAsInt(playedRoundDto);
 
-        log.info("Saving round: user {}, course {}, date {}, holes {}, lostBalls {}, doubleBogeys {}",
-                userId, courseName, date, holeStrokes.size(), lostBalls, doubleBogeys);
+
         val entity = PlayedRoundEntity.builder()
                 .userId(userId)
                 .date(date)
                 .courseName(courseName)
                 .holeStrokes(holeStrokes)
                 .lostBalls(lostBalls)
-                .doubleBogeys(doubleBogeys)
+                .doubleBogeysPlus(doubleBogeysPlus)
+                .bogeysPlus(bogeysPlus)
                 .build();
+        log.info("Saving played round:  {}", entity);
         playedRoundRepository.save(entity);
         return true;
     }
 
-    public void deleteRound(@NonNull String userId, long id) {
+    public void deleteRound(@NonNull final String userId, long id) {
         playedRoundRepository.findById(id).ifPresent(round -> {
             if (round.getUserId().equals(userId)) {
                 log.info("Deleting round {} for user {}", id, userId);

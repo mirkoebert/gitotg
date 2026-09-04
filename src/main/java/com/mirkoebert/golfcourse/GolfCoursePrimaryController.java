@@ -44,8 +44,8 @@ public class GolfCoursePrimaryController {
             BindingResult bindingResult,
             final Model model
     ) {
+        log.info("Submit golf course results");
         val u = currentUserService.getCurrentUser();
-
         if (bindingResult.hasErrors()
                 || !courseService.submitRound(u.id(), form.getCourseName(), form.getSelectedDate(), form.getHoleStrokes(), form.getLostBalls())) {
             model.addAttribute("error", "golfcourse.error.mismatch");
@@ -58,10 +58,11 @@ public class GolfCoursePrimaryController {
     }
 
     @PostMapping("/golfcourse/delete")
-    public String deleteRound(@RequestParam final long id) {
+    public String deleteRound(@RequestParam final long roundId) {
+        log.info("Delete golf course result {}", roundId);
         val u = currentUserService.getCurrentUser();
-        log.info("Delete played round: id {}", id);
-        courseService.deleteRound(u.id(), id);
+        log.info("Delete played round: roundId {}", roundId);
+        courseService.deleteRound(u.id(), roundId);
         return "redirect:/golfcourse";
     }
 }
