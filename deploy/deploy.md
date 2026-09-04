@@ -3,7 +3,7 @@ Describes a deployment on a normal Linux machine.
 
 ## Build
 Build a package with all needed config files.
-mvn clean package
+mvn clean package -DnvdApiKey=$NVD_API_KEY
 
 
 ## Deploy on remote server
