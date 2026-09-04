@@ -23,14 +23,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * ({@code #{__${option.nameKey}__}}), so only a rendered page proves the wiring works.
  */
 @SpringBootTest
-class GoalControllerLocalizationTest {
+class GoalControllerLocalizationIT {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
-
     @MockitoBean
     private CurrentUserService currentUserService;
-
     private MockMvc mockMvc;
 
     @BeforeEach

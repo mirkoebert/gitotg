@@ -57,11 +57,11 @@ public class GolfCoursePrimaryController {
         return "golfcourse/index";
     }
 
+    // TODO why not method delete
     @PostMapping("/golfcourse/delete")
     public String deleteRound(@RequestParam final long roundId) {
-        log.info("Delete golf course result {}", roundId);
-        val u = currentUserService.getCurrentUser();
         log.info("Delete played round: roundId {}", roundId);
+        val u = currentUserService.getCurrentUser();
         courseService.deleteRound(u.id(), roundId);
         return "redirect:/golfcourse";
     }

@@ -18,7 +18,6 @@ public class GolfCourseSteps {
 
     @Autowired
     private CourseService courseService;
-
     @Autowired
     private PlayedRoundRepository playedRoundRepository;
 

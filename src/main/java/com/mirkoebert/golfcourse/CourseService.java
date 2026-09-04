@@ -11,6 +11,9 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+
+import static org.springframework.data.util.ClassUtils.ifPresent;
 
 @Service
 @Slf4j
@@ -87,11 +90,12 @@ public class CourseService {
     }
 
     public void deleteRound(@NonNull final String userId, long id) {
-        playedRoundRepository.findById(id).ifPresent(round -> {
-            if (round.getUserId().equals(userId)) {
-                log.info("Deleting round {} for user {}", id, userId);
-                playedRoundRepository.deleteById(id);
-            }
-        });
+        final Optional<PlayedRoundEntity> playerRound = playedRoundRepository.findById(id);
+        if (playerRound.isPresent() && playerRound.get().getUserId().equals(userId)){
+            log.info("Deleting round {} for user {}", id, userId);
+            playedRoundRepository.deleteById(id);
+        } else {
+            log.warn("Deleting no round. No round found with id {} for user {}", id, userId);
+        }
     }
 }

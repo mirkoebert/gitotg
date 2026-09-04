@@ -38,26 +38,21 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * would make the body assertions vacuous.
  */
 @SpringBootTest
-class CsvExportCharsetTest {
+class CsvExportCharsetIT {
 
     private static final String TEST_USER = "csv-export-test-user";
     private static final LocalDate DATE = LocalDate.of(2026, 3, 14);
 
     @Autowired
     private WebApplicationContext webApplicationContext;
-
     @Autowired
     private HcpRepository hcpRepository;
-
     @Autowired
     private SingleTestResultRepository singleTestResultRepository;
-
     @Autowired
     private GMetricRepository gMetricRepository;
-
     @MockitoBean
     private CurrentUserService currentUserService;
-
     private MockMvc mockMvc;
 
     static Stream<Arguments> exports() {

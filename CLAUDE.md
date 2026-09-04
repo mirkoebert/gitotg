@@ -77,7 +77,7 @@ identities are separate users**; data does not merge across providers even for t
   `.desc`. Only the per-user checkmarks live in the DB (`GolfCheckEntity.checkListItemId` references those
   ids, so ids must stay stable). **Adding a checklist item means adding two lines to `messages.properties`
   and `messages_de.properties` — nothing else.** `ChecklistCatalogTest` guards German coverage,
-  `GoalControllerLocalizationTest` renders the page in both languages.
+  `GoalControllerLocalizationIT` renders the page in both languages.
 - `advisor` — picks a random localized tip based on how much data the user has and their handicap tier.
   Tips are **not** listed in Java: `AdviceCatalog` discovers them by convention, scanning the base bundle
   `messages.properties` for keys shaped `advisor.<bucket>.<n>`. Buckets are `fresh` / `few` (data-point
@@ -117,7 +117,7 @@ definitions in `src/test/java/com/mirkoebert/cucumber/`, run through the JUnit P
 (`CucumberTest`), wired to the full Spring context (`CucumberSpringConfiguration`).
 
 Thymeleaf expressions are not type-checked and fail silently at runtime, so a template change needs a
-test that actually renders the page — see `GoalControllerLocalizationTest`. Two traps there:
+test that actually renders the page — see `GoalControllerLocalizationIT`. Two traps there:
 `@AutoConfigureMockMvc` is **not** on this classpath (Spring Boot 4.1 moved it to a module the project
 does not depend on), so build MockMvc with `MockMvcBuilders.webAppContextSetup(webApplicationContext)`
 and mock `CurrentUserService` rather than fighting the OAuth2 filter chain; and locale is switched with

@@ -59,7 +59,7 @@ units; `@SpringBootTest` when you need the real repositories.
 
 For anything that renders a template, write a test that actually renders it — Thymeleaf
 expressions are not type-checked and fail silently in production. Follow
-`GoalControllerLocalizationTest`. Note that `@AutoConfigureMockMvc` is **not** on this
+`GoalControllerLocalizationIT`. Note that `@AutoConfigureMockMvc` is **not** on this
 classpath (Spring Boot 4.1 moved it to a module the project does not depend on), so
 build MockMvc with `MockMvcBuilders.webAppContextSetup(webApplicationContext)` and mock
 `CurrentUserService` instead of dealing with the OAuth2 filter chain.

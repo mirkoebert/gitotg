@@ -69,7 +69,7 @@ JSpecify annotations, transaction boundaries, resource leaks.
 - `XxxPrimaryController` serves Thymeleaf views, `XxxPrimaryRestController` serves JSON.
 - New services and components get a colocated test under `src/test/java`.
 - Thymeleaf expressions fail silently at runtime and are not type-checked, so a changed
-  template needs a render test — follow `GoalControllerLocalizationTest`.
+  template needs a render test — follow `GoalControllerLocalizationIT`.
 - Surefire's `argLine` carries both the Mockito javaagent and `@{jacocoArgLine}`.
   Editing it can silently disable inline mocks or zero out coverage while the build
   stays green.
