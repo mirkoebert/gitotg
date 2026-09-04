@@ -1,5 +1,6 @@
 package com.mirkoebert.golfcourse;
 
+import com.mirkoebert.golfmetric.GMetricRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
-@Import({CourseService.class, DoubleBogeyPlusCountFunction.class, BogeyPlusCountFunction.class})
+@Import({CourseService.class, DoubleBogeyPlusCountFunction.class, BogeyPlusCountFunction.class, GMetricRepository.class})
 class CourseServiceTest {
 
     @Autowired
@@ -27,19 +28,22 @@ class CourseServiceTest {
     private GolfCourseCatalog catalog;
     @MockitoBean
     private PlayedRoundRepository playedRoundRepository;
+    @MockitoBean
+    private GMetricRepository repo;
 
-    private static GolfCourse course(final int... pars) {
+    private static GolfCourse course() {
         return GolfCourse
                 .builder()
                 .name("Fischland")
-                .holes(List.of(Hole.builder().number(1).par(pars[0]).build(),
-                        Hole.builder().number(2).par(pars.length > 1 ? pars[1] : pars[0]).build()))
+                .holes(List.of(
+                        Hole.builder().number(1).par(5).build(),
+                        Hole.builder().number(2).par(4).build()))
                 .build();
     }
 
     @Test
     void findAllCourses_delegatesToCatalog() {
-        List<GolfCourse> courses = List.of(course( 5, 4));
+        List<GolfCourse> courses = List.of(course());
         when(catalog.findAll()).thenReturn(courses);
 
         assertThat(cut.findAllCourses()).isEqualTo(courses);
@@ -56,7 +60,7 @@ class CourseServiceTest {
 
     @Test
     void submitRound_savesAndReturnsTrue_whenHoleCountMatchesCourse() {
-        when(catalog.findByName("Fischland")).thenReturn(Optional.of(course(5, 4)));
+        when(catalog.findByName("Fischland")).thenReturn(Optional.of(course()));
 
         // hole1: 7 strokes on a par 5 (+2, double bogey), hole2: 4 strokes on a par 4 (0)
         boolean result = cut.submitRound("u1", "Fischland", LocalDate.of(2026, 1, 1), List.of(7, 4), 2);
@@ -86,7 +90,7 @@ class CourseServiceTest {
 
     @Test
     void submitRound_returnsFalseAndDoesNotSave_whenHoleCountMismatches() {
-        when(catalog.findByName("Fischland")).thenReturn(Optional.of(course(5, 4)));
+        when(catalog.findByName("Fischland")).thenReturn(Optional.of(course()));
 
         boolean result = cut.submitRound("u1", "Fischland", LocalDate.of(2026, 1, 1), List.of(5), 0);
 

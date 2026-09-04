@@ -1,5 +1,8 @@
 package com.mirkoebert.golfcourse;
 
+import com.mirkoebert.golfmetric.GMetricEntity;
+import com.mirkoebert.golfmetric.GMetricRepository;
+import com.mirkoebert.golfmetric.GMetricType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
@@ -18,6 +21,7 @@ public class CourseService {
     private final PlayedRoundRepository playedRoundRepository;
     private final BogeyPlusCountFunction bogeyPlusCountFunction;
     private final DoubleBogeyPlusCountFunction doubleBogeyPlusCountFunction;
+    private final GMetricRepository repo;
 
     public @NonNull List<GolfCourse> findAllCourses() {
         return catalog.findAll();
@@ -61,6 +65,24 @@ public class CourseService {
                 .build();
         log.info("Saving played round:  {}", entity);
         playedRoundRepository.save(entity);
+
+        log.info("Create metric entries");
+        var gme = GMetricEntity
+                .builder()
+                .date(date)
+                .metricValue(doubleBogeysPlus)
+                .type(GMetricType.DOUBLE_BOGEY_PLUS)
+                .userId(userId)
+                .build();
+        repo.save(gme);
+        gme = GMetricEntity
+                .builder()
+                .date(date)
+                .metricValue(bogeysPlus)
+                .type(GMetricType.BOGEY_PLUS)
+                .userId(userId)
+                .build();
+        repo.save(gme);
         return true;
     }
 
