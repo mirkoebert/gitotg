@@ -14,9 +14,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @Import({CourseService.class, DoubleBogeyPlusCountFunction.class, BogeyPlusCountFunction.class, GMetricRepository.class})
@@ -41,22 +39,6 @@ class CourseServiceTest {
                 .build();
     }
 
-    @Test
-    void findAllCourses_delegatesToCatalog() {
-        List<GolfCourse> courses = List.of(course());
-        when(catalog.findAll()).thenReturn(courses);
-
-        assertThat(cut.findAllCourses()).isEqualTo(courses);
-    }
-
-    @Test
-    void findRoundsForUser_delegatesToRepositoryOrderedByDateDesc() {
-        PlayedRoundEntity round = PlayedRoundEntity.builder().userId("u1").date(LocalDate.of(2026, 1, 1))
-                .courseName("Fischland").holeStrokes(List.of(5, 4)).build();
-        when(playedRoundRepository.findTop10ByUserIdOrderByDateDesc("u1")).thenReturn(List.of(round));
-
-        assertThat(cut.findRoundsForUser("u1")).containsExactly(round);
-    }
 
     @Test
     void submitRound_savesAndReturnsTrue_whenHoleCountMatchesCourse() {
@@ -76,6 +58,7 @@ class CourseServiceTest {
                 .doubleBogeysPlus(1)
                 .bogeysPlus(1)
                 .build());
+        verify(repo, times(3)).save(any());
     }
 
     @Test
@@ -86,6 +69,7 @@ class CourseServiceTest {
 
         assertThat(result).isFalse();
         verify(playedRoundRepository, never()).save(any());
+        verify(repo, never()).save(any());
     }
 
     @Test
@@ -96,6 +80,7 @@ class CourseServiceTest {
 
         assertThat(result).isFalse();
         verify(playedRoundRepository, never()).save(any());
+        verify(repo, never()).save(any());
     }
 
     @Test

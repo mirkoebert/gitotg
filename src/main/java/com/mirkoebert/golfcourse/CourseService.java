@@ -13,8 +13,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import static org.springframework.data.util.ClassUtils.ifPresent;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -83,6 +81,14 @@ public class CourseService {
                 .date(date)
                 .metricValue(bogeysPlus)
                 .type(GMetricType.BOGEY_PLUS)
+                .userId(userId)
+                .build();
+        repo.save(gme);
+        gme = GMetricEntity
+                .builder()
+                .date(date)
+                .metricValue(lostBalls)
+                .type(GMetricType.LOST_BALLS)
                 .userId(userId)
                 .build();
         repo.save(gme);
