@@ -25,12 +25,12 @@ public class CockpitService {
     private final CourseService courseService;
     private final AdvisorService advisorService;
 
-    public @NonNull CockpitView load(@NonNull String userId) {
+    public @NonNull CockpitView load(@NonNull final  String userId) {
         Integer sgiHcp = singleTestResultRepository.countByUserId(userId) > 0
                 ? sgiHcpAggregatedService.getLatestSgiHcpAggregated(userId)
                 : null;
 
-        var lastRound = courseService.findRoundsForUser(userId).stream()
+        final CockpitView.RoundSnapshot lastRound = courseService.findRoundsForUser(userId).stream()
                 .findFirst()
                 .map(CockpitView.RoundSnapshot::from)
                 .orElse(null);
@@ -38,12 +38,9 @@ public class CockpitService {
         return new CockpitView(
                 hcpService.findLatestByUserId(userId),
                 sgiHcp,
-                CockpitView.MetricSnapshot.from(
-                        gMetricService.findLatestByUserIdAndType(userId, GMetricType.LOST_BALLS).orElse(null)),
-                CockpitView.MetricSnapshot.from(
-                        gMetricService.findLatestByUserIdAndType(userId, GMetricType.BOGEY_PLUS).orElse(null)),
-                CockpitView.MetricSnapshot.from(
-                        gMetricService.findLatestByUserIdAndType(userId, GMetricType.DOUBLE_BOGEY_PLUS).orElse(null)),
+                CockpitView.MetricSnapshot.from(gMetricService.findLatestByUserIdAndType(userId, GMetricType.LOST_BALLS).orElse(null)),
+                CockpitView.MetricSnapshot.from(gMetricService.findLatestByUserIdAndType(userId, GMetricType.BOGEY_PLUS).orElse(null)),
+                CockpitView.MetricSnapshot.from(gMetricService.findLatestByUserIdAndType(userId, GMetricType.DOUBLE_BOGEY_PLUS).orElse(null)),
                 checklistService.getProgress(userId, GoalEnum.BREAK100),
                 checklistService.getProgress(userId, GoalEnum.BREAK90),
                 checklistService.getProgress(userId, GoalEnum.BREAK80),

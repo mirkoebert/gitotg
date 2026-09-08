@@ -35,7 +35,6 @@ class CockpitServiceTest {
 
     @Autowired
     private CockpitService cut;
-
     @MockitoBean
     private HcpService hcpService;
     @MockitoBean
@@ -74,16 +73,12 @@ class CockpitServiceTest {
 
     @Test
     void load_populatedUser_mapsLatestValuesAndLastRound() {
-        when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormatedDTO.builder()
-                .hcp("18.4").date("01. January 2026").trend("improving").build());
+        when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormatedDTO.builder().hcp("18.4").date("01. January 2026").trend("improving").build());
         when(singleTestResultRepository.countByUserId(USER)).thenReturn(3);
         when(sgiHcpAggregatedService.getLatestSgiHcpAggregated(USER)).thenReturn(31);
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS))
-                .thenReturn(Optional.of(metric(GMetricType.LOST_BALLS, 2)));
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS))
-                .thenReturn(Optional.of(metric(GMetricType.BOGEY_PLUS, 5)));
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS))
-                .thenReturn(Optional.of(metric(GMetricType.DOUBLE_BOGEY_PLUS, 1)));
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(Optional.of(metric(GMetricType.LOST_BALLS, 2)));
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS)).thenReturn(Optional.of(metric(GMetricType.BOGEY_PLUS, 5)));
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(Optional.of(metric(GMetricType.DOUBLE_BOGEY_PLUS, 1)));
         when(checklistService.getProgress(USER, GoalEnum.BREAK100)).thenReturn(ChecklistProgress.of(4, 8));
         when(checklistService.getProgress(USER, GoalEnum.BREAK90)).thenReturn(ChecklistProgress.of(1, 4));
         when(checklistService.getProgress(USER, GoalEnum.BREAK80)).thenReturn(ChecklistProgress.of(0, 2));

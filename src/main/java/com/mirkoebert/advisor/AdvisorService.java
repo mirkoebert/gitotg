@@ -40,11 +40,7 @@ public class AdvisorService {
     /** Chance of showing the same tip again, so a tip stays put long enough to be read. */
     private static final double REPEAT_PROBABILITY = 0.4;
 
-    /**
-     * Cap on remembered users. Far above the real user count of this personal app, but it bounds
-     * the one piece of process-lifetime state on a deliberately memory-tuned JVM. Evicting a user
-     * costs nothing: their next visit simply draws a fresh tip.
-     */
+
     static final int MAX_REMEMBERED_USERS = 500;
 
     private final HcpRepository hcpRepository;
