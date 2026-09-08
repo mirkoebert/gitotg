@@ -39,6 +39,7 @@ public class CourseService {
             @NonNull final List<Integer> holeStrokes,
             int lostBalls
     ) {
+        log.info("submitRound");
         val course = catalog.findByName(courseName);
         if (course.isEmpty() || course.get().getHoles().size() != holeStrokes.size()) {
             log.warn("Round submission mismatch: course {}, holes {}", courseName, holeStrokes.size());
@@ -65,7 +66,8 @@ public class CourseService {
                 .bogeysPlus(bogeysPlus)
                 .build();
         log.info("Saving played round:  {}", entity);
-        playedRoundRepository.save(entity);
+        PlayedRoundEntity e = playedRoundRepository.save(entity);
+        log.info("Saving played round:  {}", e);
 
         log.info("Create metric entries");
         var gme = GMetricEntity

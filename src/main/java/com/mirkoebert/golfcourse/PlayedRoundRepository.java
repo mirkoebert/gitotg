@@ -14,4 +14,7 @@ public interface PlayedRoundRepository extends JpaRepository<PlayedRoundEntity, 
 
     @NonNull
     List<PlayedRoundEntity> findTop10ByUserIdOrderByDateDesc(@NonNull String userId);
+
+    @NonNull
+    List<PlayedRoundEntity> findAllByUserIdAndCourseName(String userId, String courseNAme);
 }
