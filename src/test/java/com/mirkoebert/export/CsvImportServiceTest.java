@@ -636,6 +636,27 @@ class CsvImportServiceTest {
         assertThat(all.getFirst().getMetricValue()).isEqualTo(2);
     }
 
+    @SneakyThrows
+    @Test
+    void importPlayedRoundData_rejectsOverMaxLinesAndKeepsExistingData() {
+        playedRoundRepository.save(PlayedRoundEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 1, 1))
+                .courseName("Fischland")
+                .holeStrokes(List.of(5, 4, 2, 5, 3, 4, 4, 3, 4))
+                .lostBalls(1)
+                .build());
+
+        String csv = playedRoundCsv(MAX_CSV_LINES);
+
+        assertThatThrownBy(() -> cut.importPlayedRoundData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
+                .isInstanceOf(CsvImportTooManyLinesException.class);
+
+        List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(1);
+        assertThat(all.getFirst().getLostBalls()).isEqualTo(1);
+    }
+
     private static String hcpCsv(int dataRows) {
         StringBuilder csv = new StringBuilder("date,hcp\n");
         for (int i = 0; i < dataRows; i++) {
@@ -662,6 +683,15 @@ class CsvImportServiceTest {
             csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
                     .append(',').append(i % 5)
                     .append(",LOST_BALLS\n");
+        }
+        return csv.toString();
+    }
+
+    private static String playedRoundCsv(int dataRows) {
+        StringBuilder csv = new StringBuilder("DATE,HOLE_1,HOLE_2,HOLE_3,HOLE_4,HOLE_5,HOLE_6,HOLE_7,HOLE_8,HOLE_9,LOST_BALLS\n");
+        for (int i = 0; i < dataRows; i++) {
+            csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
+                    .append(",5,4,2,5,3,4,4,3,4,0\n");
         }
         return csv.toString();
     }

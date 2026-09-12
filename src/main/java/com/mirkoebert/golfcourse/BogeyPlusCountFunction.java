@@ -12,7 +12,7 @@ import java.util.function.ToIntFunction;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-class BogeyPlusCountFunction implements ToIntFunction<PlayedRoundDto> {
+public class BogeyPlusCountFunction implements ToIntFunction<PlayedRoundDto> {
 
     private final GolfCourseCatalog catalog;
 

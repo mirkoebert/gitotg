@@ -50,6 +50,28 @@
     </form>
 </div>
 
+<ul class="list-group my-4">
+    <li class="list-group-item">
+        <div class="d-flex flex-column flex-sm-row flex-wrap align-items-sm-center gap-2">
+            <span th:text="#{common.import}">Import:</span>
+            <form class="d-flex flex-column flex-sm-row flex-wrap align-items-stretch align-items-sm-center gap-2"
+                  enctype="multipart/form-data" id="golfcourse-import-form" method="post"
+                  th:action="@{/api/golfcourse/import}">
+                <input accept=".csv" aria-describedby="golfcourse-import-limits golfcourse-import-hint"
+                       class="form-control form-control-sm" name="file" required
+                       style="max-width: 100%; width: min(100%, 220px);" type="file">
+                <button class="btn btn-primary btn-sm" th:text="#{common.upload}" type="submit">Upload</button>
+            </form>
+        </div>
+        <small class="d-block mt-1 fw-semibold" id="golfcourse-import-limits" th:text="#{common.importLimits}">Max 500 KB /
+            420 lines</small>
+        <small class="d-block mt-1 text-muted" id="golfcourse-import-hint" th:text="#{golfcourse.importHint}">(CSV with
+            DATE, HOLE_1…HOLE_9, LOST_BALLS; course defaults to Fischland; incomplete rows skipped; replaces existing
+            rounds)</small>
+        <div class="mt-1 small" id="golfcourse-import-status" style="display:none;"></div>
+    </li>
+</ul>
+
 <div class="my-5" th:if="${rounds != null and !rounds.isEmpty()}">
     <h2 th:text="#{golfcourse.recentHeading}">Recent Rounds</h2>
     <table class="table">
@@ -124,6 +146,17 @@
     select.addEventListener('change', renderHoles);
     container.addEventListener('input', updateTotal);
     renderHoles();
+</script>
+
+<script src="/js/csv-import.js"></script>
+<script th:inline="javascript">
+    GitotgCsvImport.bindImportForm('golfcourse-import-form', 'golfcourse-import-status', {
+        uploading: /*[[#{common.uploading}]]*/ 'Uploading...',
+        errorPrefix: /*[[#{api.import.errorPrefix}]]*/ 'Error:',
+        failedPrefix: /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:',
+        fileTooLarge: /*[[#{api.import.fileTooLarge}]]*/ 'File too large. Maximum allowed size is 500KB.',
+        tooManyLines: /*[[#{api.import.tooManyLines(420)}]]*/ 'Too many lines. Maximum allowed is 420 lines.'
+    });
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" defer></script>

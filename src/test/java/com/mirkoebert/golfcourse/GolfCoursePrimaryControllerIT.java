@@ -51,6 +51,21 @@ class GolfCoursePrimaryControllerIT {
 
     @SneakyThrows
     @Test
+    void index_rendersImportForm() {
+        String html = mockMvc.perform(get("/golfcourse"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(html).contains("id=\"golfcourse-import-form\"");
+        assertThat(html).contains("/api/golfcourse/import");
+        assertThat(html).contains("name=\"file\"");
+        assertThat(html).contains("csv-import.js");
+    }
+
+    @SneakyThrows
+    @Test
     void deleteRound() {
         mockMvc.perform(post("/golfcourse/delete").param("roundId", "1"))
                 .andExpect(status().isFound()) // 302
