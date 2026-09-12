@@ -188,6 +188,11 @@ public class CsvImportService {
         }
     }
 
+    @Transactional
+    public int importPlayedRoundData(InputStream inputStream, String userId) {
+        throw new UnsupportedOperationException("Played-round CSV import not implemented");
+    }
+
     private static RuntimeException importFailed(Exception e, String userId, String kind) {
         if (e instanceof CsvImportTooManyLinesException tooMany) {
             throw tooMany;
