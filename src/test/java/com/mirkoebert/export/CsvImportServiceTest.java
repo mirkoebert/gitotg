@@ -493,6 +493,19 @@ class CsvImportServiceTest {
                 .orElseThrow();
         assertThat(april8.getHoleStrokes()).containsExactly(6, 5, 3, 7, 5, 5, 5, 6, 5);
         assertThat(april8.getLostBalls()).isZero();
+        assertThat(april8.getBogeysPlus()).isEqualTo(9);
+        assertThat(april8.getDoubleBogeysPlus()).isEqualTo(3);
+
+        // submitRound also writes the three derived gmetric snapshots
+        assertThat(gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.BOGEY_PLUS)
+                .orElseThrow().getMetricValue()).isEqualTo(9);
+        assertThat(gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.DOUBLE_BOGEY_PLUS)
+                .orElseThrow().getMetricValue()).isEqualTo(3);
+        assertThat(gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.LOST_BALLS)
+                .orElseThrow().getMetricValue()).isZero();
 
         PlayedRoundEntity aug12 = all.stream()
                 .filter(e -> e.getDate().equals(LocalDate.of(2026, 8, 12)))

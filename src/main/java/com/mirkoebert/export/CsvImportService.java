@@ -1,9 +1,7 @@
 package com.mirkoebert.export;
 
 import com.mirkoebert.InputLimits;
-import com.mirkoebert.golfcourse.BogeyPlusCountFunction;
-import com.mirkoebert.golfcourse.DoubleBogeyPlusCountFunction;
-import com.mirkoebert.golfcourse.PlayedRoundDto;
+import com.mirkoebert.golfcourse.CourseService;
 import com.mirkoebert.golfcourse.PlayedRoundEntity;
 import com.mirkoebert.golfcourse.PlayedRoundRepository;
 import com.mirkoebert.golfmetric.GMetricEntity;
@@ -47,9 +45,8 @@ public class CsvImportService {
     private final SingleTestResultRepository sgiRepo;
     private final GMetricRepository gMetricRepo;
     private final PlayedRoundRepository playedRoundRepo;
+    private final CourseService courseService;
     private final PointsToSgiHcpFunction pointsToSgiHcpFunction;
-    private final BogeyPlusCountFunction bogeyPlusCountFunction;
-    private final DoubleBogeyPlusCountFunction doubleBogeyPlusCountFunction;
 
     @Transactional
     public int importHcpData(InputStream inputStream, String userId) {
@@ -268,24 +265,12 @@ public class CsvImportService {
             return false;
         }
 
-        PlayedRoundDto forCounts = PlayedRoundDto.builder()
-                .courseName(DEFAULT_PLAYED_ROUND_COURSE)
-                .selectedDate(row.getDate())
-                .holeStrokes(holeStrokes)
-                .lostBalls(lostBalls)
-                .build();
-
-        PlayedRoundEntity entity = PlayedRoundEntity.builder()
-                .userId(userId)
-                .date(row.getDate())
-                .courseName(DEFAULT_PLAYED_ROUND_COURSE)
-                .holeStrokes(holeStrokes)
-                .lostBalls(lostBalls)
-                .bogeysPlus(bogeyPlusCountFunction.applyAsInt(forCounts))
-                .doubleBogeysPlus(doubleBogeyPlusCountFunction.applyAsInt(forCounts))
-                .build();
-        playedRoundRepo.save(entity);
-        return true;
+        boolean saved = courseService.submitRound(
+                userId, DEFAULT_PLAYED_ROUND_COURSE, row.getDate(), holeStrokes, lostBalls);
+        if (!saved) {
+            log.warn("Ignore played-round line rejected by CourseService {}", row);
+        }
+        return saved;
     }
 
     private static RuntimeException importFailed(Exception e, String userId, String kind) {
