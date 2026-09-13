@@ -83,8 +83,8 @@ class EclecticByYearTest {
         courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 22), played, 0);
 
         Iterable<? extends HcpScoreDTO> expectedList = List.of(
-                new HcpScoreDTO(LocalDate.of(2026, 1, 1), new Double(1)),
-                new HcpScoreDTO(LocalDate.of(2025, 1, 1), new Double(0))
+                new HcpScoreDTO(LocalDate.of(2026, 1, 1), (double) 1),
+                new HcpScoreDTO(LocalDate.of(2025, 1, 1), (double) 0)
         );
 
         assertThat(cut.getEclecticHcpTimeline(testCourseName, testUser)).containsExactlyElementsOf(expectedList);

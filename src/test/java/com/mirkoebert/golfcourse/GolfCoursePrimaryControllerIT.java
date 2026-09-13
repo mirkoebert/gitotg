@@ -1,10 +1,5 @@
 package com.mirkoebert.golfcourse;
 
-import com.mirkoebert.TestSuite;
-import com.mirkoebert.golfmetric.GMetricEntity;
-import com.mirkoebert.golfmetric.GMetricType;
-import com.mirkoebert.handicap.HcpScoreEntity;
-import com.mirkoebert.sgi.SingleTestResultEntity;
 import com.mirkoebert.user.CurrentUser;
 import com.mirkoebert.user.CurrentUserService;
 import lombok.SneakyThrows;
@@ -12,16 +7,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;

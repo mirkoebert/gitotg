@@ -1,11 +1,13 @@
 package com.mirkoebert.timeline;
 
+import lombok.Getter;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 /**
  * How many timeline entries to show. Limits are applied after merging sources.
  */
+@Getter
 public enum TimelineRange {
     LAST_30("last30", 30),
     LAST_100("last100", 100),
@@ -17,17 +19,6 @@ public enum TimelineRange {
     TimelineRange(String param, Integer limit) {
         this.param = param;
         this.limit = limit;
-    }
-
-    public String getParam() {
-        return param;
-    }
-
-    /**
-     * Max entries after merge, or {@code null} for unlimited.
-     */
-    public Integer getLimit() {
-        return limit;
     }
 
     /**

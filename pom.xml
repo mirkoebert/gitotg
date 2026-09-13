@@ -221,6 +221,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${surefire.version}</version>
+                <!--suppress MavenModelInspection -->
                 <configuration>
                     <!-- Load Mockito as a Java agent so inline mocks work without dynamic attach (JDK 21+).
                          @{jacocoArgLine} is late-replaced with the JaCoCo agent; setting argLine here would

@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-class SgiTestScoreDTO {
+public class SgiTestScoreDTO {
 
 
     @Min(InputLimits.SGI_POINTS_MIN)
