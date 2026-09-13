@@ -32,8 +32,7 @@ public class PlayedRoundEntity {
     private LocalDate date;
     private String courseName;
 
-    @ColumnDefault("0")
-    private int lostBalls;
+    private Integer lostBalls;
 
     @ColumnDefault("0")
     private int doubleBogeysPlus;

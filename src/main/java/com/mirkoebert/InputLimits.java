@@ -1,8 +1,11 @@
 package com.mirkoebert;
 
+import lombok.experimental.UtilityClass;
+
 /**
  * Inclusive min/max for user-entered numeric fields (forms and CSV import).
  */
+@UtilityClass
 public final class InputLimits {
 
     public static final int HCP_MIN = -20;
@@ -20,8 +23,6 @@ public final class InputLimits {
     public static final int HOLE_STROKES_MAX = 20;
 
     public static final int COUNT_MIN = 0;
-    public static final int COUNT_MAX = 99;
+    public static final int COUNT_MAX = 42;
 
-    private InputLimits() {
-    }
 }

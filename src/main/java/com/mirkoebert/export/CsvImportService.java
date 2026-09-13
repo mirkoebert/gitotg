@@ -247,7 +247,7 @@ public class CsvImportService {
         return columnMapping;
     }
 
-    private boolean savePlayedRoundIfValid(PlayedRoundCsvRow row, String userId) {
+    private boolean savePlayedRoundIfValid(final PlayedRoundCsvRow row, final String userId) {
         List<Integer> holeStrokes = row.holeStrokesOrNullIfIncomplete();
         if (row.getDate() == null || holeStrokes == null) {
             log.warn("Ignore played-round line with incomplete data {}", row);
@@ -259,14 +259,13 @@ public class CsvImportService {
                 return false;
             }
         }
-        int lostBalls = row.getLostBalls() == null ? 0 : row.getLostBalls();
-        if (!inRange(lostBalls, InputLimits.COUNT_MIN, InputLimits.COUNT_MAX)) {
-            log.warn("Ignore played-round line with out-of-range lost balls {}", row);
-            return false;
+        final Integer lostBalls = row.getLostBalls();
+        if ((lostBalls != null) && (!inRange(lostBalls, InputLimits.COUNT_MIN, InputLimits.COUNT_MAX))) {
+                log.warn("Ignore played-round line with out-of-range lost balls {}", row);
+                return false;
         }
 
-        boolean saved = courseService.submitRound(
-                userId, DEFAULT_PLAYED_ROUND_COURSE, row.getDate(), holeStrokes, lostBalls);
+        boolean saved = courseService.submitRound(userId, DEFAULT_PLAYED_ROUND_COURSE, row.getDate(), holeStrokes, lostBalls);
         if (!saved) {
             log.warn("Ignore played-round line rejected by CourseService {}", row);
         }
