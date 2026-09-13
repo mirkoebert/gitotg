@@ -33,7 +33,7 @@ public record CockpitView(
         }
     }
 
-    public record RoundSnapshot(String courseName, LocalDate date, int totalStrokes, int lostBalls) {
+    public record RoundSnapshot(String courseName, LocalDate date, int totalStrokes, Integer lostBalls) {
         static RoundSnapshot from(PlayedRoundEntity round) {
             if (round == null) {
                 return null;

@@ -37,7 +37,7 @@ public class CourseService {
             @NonNull final String courseName,
             @NonNull final LocalDate date,
             @NonNull final List<Integer> holeStrokes,
-            int lostBalls
+            Integer lostBalls
     ) {
         log.info("submitRound");
         val course = catalog.findByName(courseName);
@@ -46,7 +46,8 @@ public class CourseService {
             return false;
         }
 
-        final PlayedRoundDto playedRoundDto = PlayedRoundDto.builder()
+        final PlayedRoundDto playedRoundDto = PlayedRoundDto
+                .builder()
                 .courseName(courseName)
                 .selectedDate(date)
                 .holeStrokes(holeStrokes)
@@ -56,7 +57,8 @@ public class CourseService {
         val bogeysPlus = bogeyPlusCountFunction.applyAsInt(playedRoundDto);
 
 
-        val entity = PlayedRoundEntity.builder()
+        val entity = PlayedRoundEntity
+                .builder()
                 .userId(userId)
                 .date(date)
                 .courseName(courseName)
@@ -86,14 +88,16 @@ public class CourseService {
                 .userId(userId)
                 .build();
         repo.save(gme);
-        gme = GMetricEntity
-                .builder()
-                .date(date)
-                .metricValue(lostBalls)
-                .type(GMetricType.LOST_BALLS)
-                .userId(userId)
-                .build();
-        repo.save(gme);
+        if (lostBalls != null) {
+            gme = GMetricEntity
+                    .builder()
+                    .date(date)
+                    .metricValue(lostBalls)
+                    .type(GMetricType.LOST_BALLS)
+                    .userId(userId)
+                    .build();
+            repo.save(gme);
+        }
         return true;
     }
 

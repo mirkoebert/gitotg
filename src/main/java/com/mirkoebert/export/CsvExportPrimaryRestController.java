@@ -107,6 +107,17 @@ public class CsvExportPrimaryRestController {
                 "api.import.gmetric", new Object[]{count}, LocaleContextHolder.getLocale()));
     }
 
+    @SneakyThrows
+    @PostMapping(value = "/api/golfcourse/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<String> importPlayedRoundCsv(@RequestParam("file") MultipartFile file) {
+        log.info("played-round import csv");
+        val u = currentUserService.getCurrentUser();
+        final String userId = u.id();
+        int count = csvImportService.importPlayedRoundData(file.getInputStream(), userId);
+        return ResponseEntity.ok(messageSource.getMessage(
+                "api.import.golfcourse", new Object[]{count}, LocaleContextHolder.getLocale()));
+    }
+
     /**
      * Writes the CSV as UTF-8 and says so in the content type. {@code ServletOutputStream.print}
      * would encode as ISO-8859-1 and reject anything above U+00FF.

@@ -1,6 +1,8 @@
 package com.mirkoebert.export;
 
 import com.mirkoebert.TestSuite;
+import com.mirkoebert.golfcourse.PlayedRoundEntity;
+import com.mirkoebert.golfcourse.PlayedRoundRepository;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.golfmetric.GMetricRepository;
 import com.mirkoebert.golfmetric.GMetricType;
@@ -39,6 +41,8 @@ class CsvImportServiceTest {
     @Autowired
     private GMetricRepository gMetricRepository;
     @Autowired
+    private PlayedRoundRepository playedRoundRepository;
+    @Autowired
     private PointsToSgiHcpFunction pointsToSgiHcpFunction;
 
     @BeforeEach
@@ -46,6 +50,7 @@ class CsvImportServiceTest {
         hcpRepository.findByUserId(TEST_USER).forEach(hcpRepository::delete);
         singleTestResultRepository.findAllByUserId(TEST_USER).forEach(singleTestResultRepository::delete);
         gMetricRepository.findByUserId(TEST_USER).forEach(gMetricRepository::delete);
+        playedRoundRepository.findByUserId(TEST_USER).forEach(playedRoundRepository::delete);
     }
 
     // HCP tests
@@ -454,6 +459,68 @@ class CsvImportServiceTest {
         assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(5);
     }
 
+    // Played-round tests
+
+    @SneakyThrows
+    @Test
+    void importPlayedRoundData_loadsGolfResultsCsvFromClasspath() {
+        playedRoundRepository.save(PlayedRoundEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2020, 1, 1))
+                .courseName("Tessin")
+                .holeStrokes(List.of(4, 5, 3, 4, 4, 5, 4, 4, 3))
+                .lostBalls(0)
+                .build());
+        assertThat(playedRoundRepository.findByUserId(TEST_USER)).hasSize(1);
+
+        @Cleanup InputStream is = getClass().getClassLoader().getResourceAsStream("Golf_Results.csv");
+        assertThat(is).isNotNull();
+
+        int count = cut.importPlayedRoundData(is, TEST_USER);
+
+        assertThat(count).isEqualTo(16);
+
+        List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(16);
+        assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
+        assertThat(all).allMatch(e -> "Fischland".equals(e.getCourseName()));
+        assertThat(all).noneMatch(e -> e.getDate().equals(LocalDate.of(2020, 1, 1)));
+        assertThat(all).noneMatch(e -> e.getDate().equals(LocalDate.of(2026, 6, 10)));
+
+        PlayedRoundEntity april8 = all.stream()
+                .filter(e -> e.getDate().equals(LocalDate.of(2026, 4, 8)))
+                .findFirst()
+                .orElseThrow();
+        assertThat(april8.getHoleStrokes()).containsExactly(6, 5, 3, 7, 5, 5, 5, 6, 5);
+        assertThat(april8.getLostBalls()).isNull();
+        assertThat(april8.getBogeysPlus()).isEqualTo(9);
+        assertThat(april8.getDoubleBogeysPlus()).isEqualTo(3);
+
+        // submitRound also writes the three derived gmetric snapshots
+        assertThat(gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.BOGEY_PLUS)
+                .get().getMetricValue()).isEqualTo(9);
+        assertThat(gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.DOUBLE_BOGEY_PLUS)
+                .get().getMetricValue()).isEqualTo(3);
+
+
+        PlayedRoundEntity aug12 = all.stream()
+                .filter(e -> e.getDate().equals(LocalDate.of(2026, 8, 12)))
+                .findFirst()
+                .orElseThrow();
+        assertThat(aug12.getHoleStrokes()).containsExactly(7, 6, 4, 6, 6, 6, 8, 4, 5);
+        assertThat(aug12.getLostBalls()).isEqualTo(2);
+
+        assertThat(all.stream().filter(e -> e.getDate().equals(LocalDate.of(2026, 5, 16))).count()).isEqualTo(2);
+
+        @Cleanup InputStream again = getClass().getClassLoader().getResourceAsStream("Golf_Results.csv");
+        assertThat(again).isNotNull();
+        int secondCount = cut.importPlayedRoundData(again, TEST_USER);
+        assertThat(secondCount).isEqualTo(16);
+        assertThat(playedRoundRepository.findByUserId(TEST_USER)).hasSize(16);
+    }
+
     @SneakyThrows
     @Test
     void importGMetricData_acceptsUppercaseHeaders() {
@@ -579,6 +646,27 @@ class CsvImportServiceTest {
         assertThat(all.getFirst().getMetricValue()).isEqualTo(2);
     }
 
+    @SneakyThrows
+    @Test
+    void importPlayedRoundData_rejectsOverMaxLinesAndKeepsExistingData() {
+        playedRoundRepository.save(PlayedRoundEntity.builder()
+                .userId(TEST_USER)
+                .date(LocalDate.of(2024, 1, 1))
+                .courseName("Fischland")
+                .holeStrokes(List.of(5, 4, 2, 5, 3, 4, 4, 3, 4))
+                .lostBalls(1)
+                .build());
+
+        String csv = playedRoundCsv(MAX_CSV_LINES);
+
+        assertThatThrownBy(() -> cut.importPlayedRoundData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
+                .isInstanceOf(CsvImportTooManyLinesException.class);
+
+        List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
+        assertThat(all).hasSize(1);
+        assertThat(all.getFirst().getLostBalls()).isEqualTo(1);
+    }
+
     private static String hcpCsv(int dataRows) {
         StringBuilder csv = new StringBuilder("date,hcp\n");
         for (int i = 0; i < dataRows; i++) {
@@ -605,6 +693,15 @@ class CsvImportServiceTest {
             csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
                     .append(',').append(i % 5)
                     .append(",LOST_BALLS\n");
+        }
+        return csv.toString();
+    }
+
+    private static String playedRoundCsv(int dataRows) {
+        StringBuilder csv = new StringBuilder("DATE,HOLE_1,HOLE_2,HOLE_3,HOLE_4,HOLE_5,HOLE_6,HOLE_7,HOLE_8,HOLE_9,LOST_BALLS\n");
+        for (int i = 0; i < dataRows; i++) {
+            csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
+                    .append(",5,4,2,5,3,4,4,3,4,0\n");
         }
         return csv.toString();
     }

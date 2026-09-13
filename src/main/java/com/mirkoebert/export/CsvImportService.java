@@ -1,6 +1,9 @@
 package com.mirkoebert.export;
 
 import com.mirkoebert.InputLimits;
+import com.mirkoebert.golfcourse.CourseService;
+import com.mirkoebert.golfcourse.PlayedRoundEntity;
+import com.mirkoebert.golfcourse.PlayedRoundRepository;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.golfmetric.GMetricRepository;
 import com.mirkoebert.handicap.HcpRepository;
@@ -35,9 +38,14 @@ public class CsvImportService {
     /** Maximum CSV records per import, including the header row. */
     public static final int MAX_CSV_LINES = 420;
 
+    /** Default course when the CSV has no course column (9-hole Fischland layout). */
+    static final String DEFAULT_PLAYED_ROUND_COURSE = "Fischland";
+
     private final HcpRepository hcpRepo;
     private final SingleTestResultRepository sgiRepo;
     private final GMetricRepository gMetricRepo;
+    private final PlayedRoundRepository playedRoundRepo;
+    private final CourseService courseService;
     private final PointsToSgiHcpFunction pointsToSgiHcpFunction;
 
     @Transactional
@@ -186,6 +194,82 @@ public class CsvImportService {
         } catch (Exception e) {
             throw importFailed(e, userId, "GMetric");
         }
+    }
+
+    @Transactional
+    public int importPlayedRoundData(InputStream inputStream, String userId) {
+        try (InputStream limited = limitCsvLines(inputStream);
+             InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
+             CSVReader csvReader = new CSVReader(reader)) {
+
+            HeaderColumnNameTranslateMappingStrategy<PlayedRoundCsvRow> strategy =
+                    new HeaderColumnNameTranslateMappingStrategy<>();
+            strategy.setType(PlayedRoundCsvRow.class);
+            strategy.setColumnMapping(playedRoundColumnMapping());
+
+            CsvToBean<PlayedRoundCsvRow> csvToBean = new CsvToBeanBuilder<PlayedRoundCsvRow>(csvReader)
+                    .withMappingStrategy(strategy)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .build();
+
+            List<PlayedRoundCsvRow> rows = csvToBean.parse();
+            removeAllOldPlayedRoundsForUser(userId);
+            int count = 0;
+            for (PlayedRoundCsvRow row : rows) {
+                if (savePlayedRoundIfValid(row, userId)) {
+                    count++;
+                }
+            }
+            log.info("Imported {} played-round records for user {}", count, userId);
+            return count;
+        } catch (Exception e) {
+            throw importFailed(e, userId, "PlayedRound");
+        }
+    }
+
+    private void removeAllOldPlayedRoundsForUser(final String userId) {
+        final List<PlayedRoundEntity> toRemove = playedRoundRepo.findByUserId(userId);
+        log.info("Remove {} old played-round records from db for user {}.", toRemove.size(), userId);
+        playedRoundRepo.deleteAll(toRemove);
+    }
+
+    private static Map<String, String> playedRoundColumnMapping() {
+        Map<String, String> columnMapping = new HashMap<>();
+        columnMapping.put("date", "date");
+        columnMapping.put("DATE", "date");
+        for (int i = 1; i <= 9; i++) {
+            columnMapping.put("hole_" + i, "hole" + i);
+            columnMapping.put("HOLE_" + i, "hole" + i);
+        }
+        columnMapping.put("lostBalls", "lostBalls");
+        columnMapping.put("LOST_BALLS", "lostBalls");
+        columnMapping.put("lost_balls", "lostBalls");
+        return columnMapping;
+    }
+
+    private boolean savePlayedRoundIfValid(final PlayedRoundCsvRow row, final String userId) {
+        List<Integer> holeStrokes = row.holeStrokesOrNullIfIncomplete();
+        if (row.getDate() == null || holeStrokes == null) {
+            log.warn("Ignore played-round line with incomplete data {}", row);
+            return false;
+        }
+        for (Integer strokes : holeStrokes) {
+            if (!inRange(strokes, InputLimits.HOLE_STROKES_MIN, InputLimits.HOLE_STROKES_MAX)) {
+                log.warn("Ignore played-round line with out-of-range hole strokes {}", row);
+                return false;
+            }
+        }
+        final Integer lostBalls = row.getLostBalls();
+        if ((lostBalls != null) && (!inRange(lostBalls, InputLimits.COUNT_MIN, InputLimits.COUNT_MAX))) {
+                log.warn("Ignore played-round line with out-of-range lost balls {}", row);
+                return false;
+        }
+
+        boolean saved = courseService.submitRound(userId, DEFAULT_PLAYED_ROUND_COURSE, row.getDate(), holeStrokes, lostBalls);
+        if (!saved) {
+            log.warn("Ignore played-round line rejected by CourseService {}", row);
+        }
+        return saved;
     }
 
     private static RuntimeException importFailed(Exception e, String userId, String kind) {
