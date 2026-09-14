@@ -49,3 +49,6 @@ sudo systemctl start gitotg
 
 ### Check if the service is aup and running
 sudo systemctl status gitotg
+
+### Run service after reboot
+sudo systemctl enable gitotg
