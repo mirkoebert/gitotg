@@ -2,7 +2,7 @@ package com.mirkoebert.golfmetric;
 
 import com.mirkoebert.user.CurrentUser;
 import com.mirkoebert.user.CurrentUserService;
-import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +37,7 @@ public class GMetricRestController {
 
     @GetMapping("/api/gmetric/chart-data")
     public ResponseEntity<GMetricChartDataDto> getChartData(
-            @RequestParam(defaultValue = GMetricMonthAggregator.RANGE_LAST_YEAR) @Max(42) String range
+            @RequestParam(defaultValue = GMetricMonthAggregator.RANGE_LAST_YEAR) @Size(max = 88) String range
     ) {
         log.info("gmetric getChartData range={}", range);
         final CurrentUser u = currentUserService.getCurrentUser();

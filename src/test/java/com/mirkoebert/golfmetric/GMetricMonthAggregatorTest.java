@@ -7,21 +7,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GMetricMonthAggregatorTest {
 
     private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("MM-yyyy");
-
+    private static final DateTimeFormatter FMT_YEAR = DateTimeFormatter.ofPattern("yyyy");
     @Mock
     private GMetricRepository repo;
-
     private GMetricMonthAggregator cut;
 
     @BeforeEach
@@ -29,7 +30,7 @@ class GMetricMonthAggregatorTest {
         cut = new GMetricMonthAggregator(repo);
         // default: no data for any type unless a test overrides it
         for (GMetricType type : GMetricType.values()) {
-            when(repo.findByUserIdAndType("u", type)).thenReturn(List.of());
+            lenient().when(repo.findByUserIdAndType("u", type)).thenReturn(List.of());
         }
     }
 
@@ -65,16 +66,16 @@ class GMetricMonthAggregatorTest {
     }
 
     @Test
-    void getMetricsForRange_all_emptyRepo_fallsBackTo12MonthWindow() {
+    void getMetricsForRange_all_emptyRepo_fallsBackTo3YearWindow() {
         when(repo.findByUserId("u")).thenReturn(List.of());
 
         GMetricChartDataDto result = cut.getMetricsForRange("all", "u");
 
-        assertThat(result.labels()).hasSize(12);
+        assertThat(result.labels()).hasSize(3);
     }
 
     @Test
-    void getMetricsForRange_all_windowStartsAtEarliestEntryMonth() {
+    void getMetricsForRange_all() {
         LocalDate earliest = YearMonth.now().minusMonths(5).atDay(15);
         GMetricEntity earliestEntry = metric(earliest, GMetricType.BOGEY_PLUS, 7);
         when(repo.findByUserId("u")).thenReturn(List.of(earliestEntry));
@@ -83,9 +84,9 @@ class GMetricMonthAggregatorTest {
         GMetricChartDataDto result = cut.getMetricsForRange("ALL", "u");
 
         // 5 months ago through the current month inclusive
-        assertThat(result.labels()).hasSize(6);
-        assertThat(result.labels().getFirst()).isEqualTo(FMT.format(YearMonth.from(earliest)));
-        assertThat(result.labels().getLast()).isEqualTo(FMT.format(YearMonth.now()));
+        assertThat(result.labels()).hasSize(1);
+        assertThat(result.labels().getFirst()).isEqualTo(FMT_YEAR.format(Year.from(earliest)));
+        assertThat(result.labels().getLast()).isEqualTo(FMT_YEAR.format(Year.now()));
         assertThat(result.bogey().getFirst()).isEqualTo(7.0);
     }
 }
