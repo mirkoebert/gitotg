@@ -39,7 +39,7 @@ class GMetricMonthAggregatorTest {
 
     @Test
     void getMetricsForRange_nullRange_defaultsTo12MonthWindowWithNoData() {
-        GMetricChartData result = cut.getMetricsForRange(null, "u");
+        GMetricChartDataDto result = cut.getMetricsForRange(null, "u");
 
         assertThat(result.labels()).hasSize(12);
         assertThat(result.lostBalls()).hasSize(12).containsOnlyNulls();
@@ -57,7 +57,7 @@ class GMetricMonthAggregatorTest {
                 metric(currentMonth.atEndOfMonth(), GMetricType.LOST_BALLS, 4)
         ));
 
-        GMetricChartData result = cut.getMetricsForRange("lastYear", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange("lastYear", "u");
 
         assertThat(result.lostBalls().getLast()).isEqualTo(3.0);
         assertThat(result.doubleBogey().getLast()).isNull();
@@ -68,7 +68,7 @@ class GMetricMonthAggregatorTest {
     void getMetricsForRange_all_emptyRepo_fallsBackTo12MonthWindow() {
         when(repo.findByUserId("u")).thenReturn(List.of());
 
-        GMetricChartData result = cut.getMetricsForRange("all", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange("all", "u");
 
         assertThat(result.labels()).hasSize(12);
     }
@@ -80,7 +80,7 @@ class GMetricMonthAggregatorTest {
         when(repo.findByUserId("u")).thenReturn(List.of(earliestEntry));
         when(repo.findByUserIdAndType("u", GMetricType.BOGEY_PLUS)).thenReturn(List.of(earliestEntry));
 
-        GMetricChartData result = cut.getMetricsForRange("ALL", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange("ALL", "u");
 
         // 5 months ago through the current month inclusive
         assertThat(result.labels()).hasSize(6);

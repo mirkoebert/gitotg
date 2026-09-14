@@ -31,26 +31,26 @@ public class GMetricMonthAggregator {
      *
      * @param range {@value #RANGE_LAST_YEAR} (default) or {@value #RANGE_ALL}
      */
-    public @NonNull GMetricChartData getMetricsForRange(String range, String userId) {
+    public @NonNull GMetricChartDataDto getMetricsForRange(final String range, final String userId) {
         if (RANGE_ALL.equalsIgnoreCase(range)) {
             return chartForAll(userId);
         }
         return chartForLastYear(userId);
     }
 
-    private @NonNull GMetricChartData chartForLastYear(@NonNull final String userId) {
+    private @NonNull GMetricChartDataDto chartForLastYear(@NonNull final String userId) {
         final YearMonth end = YearMonth.now();
         final YearMonth start = end.minusMonths(LAST_YEAR_MONTHS - 1L);
         // Keep a fixed 12-month window so switching ranges is visible.
-        return buildChart(userId, start, end, false);
+        return buildChartData(userId, start, end, false);
     }
 
-    private @NonNull GMetricChartData chartForAll(@NonNull final String userId) {
+    private @NonNull GMetricChartDataDto chartForAll(@NonNull final String userId) {
         final List<GMetricEntity> all = repo.findByUserId(userId);
         final YearMonth end = YearMonth.now();
         if (all.isEmpty()) {
             final YearMonth start = end.minusMonths(LAST_YEAR_MONTHS - 1L);
-            return buildChart(userId, start, end, false);
+            return buildChartData(userId, start, end, false);
         }
         final LocalDate earliest = all.stream()
                 .map(GMetricEntity::getDate)
@@ -62,17 +62,18 @@ public class GMetricMonthAggregator {
         if (span > MAX_ALL_MONTHS) {
             start = end.minusMonths(MAX_ALL_MONTHS - 1L);
         }
-        return buildChart(userId, start, end, true);
+        return buildChartData(userId, start, end, true);
     }
 
     /**
      * @param trimLeading when true, drop empty months before the first value (useful for "all")
      */
-    private @NonNull GMetricChartData buildChart(
-            String userId,
+    private @NonNull GMetricChartDataDto buildChartData(
+            final String userId,
             YearMonth start,
             YearMonth end,
-            boolean trimLeading) {
+            boolean trimLeading
+    ) {
         final LocalDate fromDate = start.atDay(1);
         final Map<GMetricType, Map<YearMonth, Double>> byType = new EnumMap<>(GMetricType.class);
         for (GMetricType type : GMetricType.values()) {
@@ -99,7 +100,7 @@ public class GMetricMonthAggregator {
         }
 
         log.debug("Chart for user {} months={} labels={}", userId, labels.size(), labels.size());
-        return new GMetricChartData(labels, lostBalls, doubleBogey, bogey);
+        return new GMetricChartDataDto(labels, lostBalls, doubleBogey, bogey);
     }
 
     private Map<YearMonth, Double> monthlyAveragesFrom(String userId, GMetricType type, LocalDate fromDateInclusive) {
@@ -108,6 +109,17 @@ public class GMetricMonthAggregator {
                 .filter(m -> m.getDate() != null && !m.getDate().isBefore(fromDateInclusive))
                 .collect(Collectors.groupingBy(
                         t -> YearMonth.from(t.getDate()),
+                        Collectors.averagingDouble(GMetricEntity::getMetricValue)
+                ));
+    }
+
+    // TODO use it
+    private Map<Integer, Double> yearlyAveragesFrom(String userId, GMetricType type, LocalDate fromDateInclusive) {
+        return repo.findByUserIdAndType(userId, type)
+                .stream()
+                .filter(m -> m.getDate() != null && !m.getDate().isBefore(fromDateInclusive))
+                .collect(Collectors.groupingBy(
+                        t -> t.getDate().getYear(),
                         Collectors.averagingDouble(GMetricEntity::getMetricValue)
                 ));
     }

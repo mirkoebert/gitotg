@@ -1,9 +1,10 @@
 package com.mirkoebert.golfmetric;
 
+import com.mirkoebert.user.CurrentUser;
 import com.mirkoebert.user.CurrentUserService;
+import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.val;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -22,8 +23,9 @@ public class GMetricRestController {
 
     @GetMapping("/api/gmetric")
     public ResponseEntity<List<GMetricEntity>> getGMetrics(
-            @RequestParam(required = false) GMetricType type) {
-        val u = currentUserService.getCurrentUser();
+            @RequestParam(required = false) GMetricType type
+    ) {
+        final CurrentUser u = currentUserService.getCurrentUser();
         final String userId = u.id();
         log.info("getGMetrics for user {} type {}", userId, type);
 
@@ -34,10 +36,11 @@ public class GMetricRestController {
     }
 
     @GetMapping("/api/gmetric/chart-data")
-    public ResponseEntity<GMetricChartData> getChartData(
-            @RequestParam(defaultValue = GMetricMonthAggregator.RANGE_LAST_YEAR) String range) {
+    public ResponseEntity<GMetricChartDataDto> getChartData(
+            @RequestParam(defaultValue = GMetricMonthAggregator.RANGE_LAST_YEAR) @Max(42) String range
+    ) {
         log.info("gmetric getChartData range={}", range);
-        val u = currentUserService.getCurrentUser();
+        final CurrentUser u = currentUserService.getCurrentUser();
         final String userId = u.id();
         log.info("for user {}", userId);
         return ResponseEntity.ok(monthAggregator.getMetricsForRange(range, userId));
