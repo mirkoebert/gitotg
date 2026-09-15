@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class GMetricMonthAggregator {
+class GMetricMonthAggregator {
 
     public static final String RANGE_LAST_YEAR = "lastYear";
     public static final String RANGE_ALL = "all";
@@ -43,7 +43,7 @@ public class GMetricMonthAggregator {
         final YearMonth end = YearMonth.now();
         final YearMonth start = end.minusMonths(LAST_YEAR_MONTHS - 1L);
         // Keep a fixed 12-month window so switching ranges is visible.
-        return buildMonthlyChartData(userId, start, end, false);
+        return buildMonthlyChartData(userId, start, end);
     }
 
     private GMetricChartDataDto chartForAll(@NonNull final String userId) {
@@ -60,7 +60,7 @@ public class GMetricMonthAggregator {
                 .get();
         final Year start = Year.from(earliest);
         final Year end = Year.now();
-        return buildYearlyChartData(userId, start, end, true);
+        return buildYearlyChartData(userId, start, end);
     }
 
     private GMetricChartDataDto emptyMetricsForLast3Years() {
@@ -83,19 +83,14 @@ public class GMetricMonthAggregator {
         return new GMetricChartDataDto(labels, lostBalls, doubleBogey, bogey);
     }
 
-    /**
-     * @param trimLeading when true, drop empty months before the first value (useful for "all")
-     */
     private @NonNull GMetricChartDataDto buildMonthlyChartData(
             final String userId,
-            YearMonth start,
-            YearMonth end,
-            boolean trimLeading
+            final YearMonth start,
+            final YearMonth end
     ) {
-        final LocalDate fromDate = start.atDay(1);
         final Map<GMetricType, Map<YearMonth, Double>> byType = new EnumMap<>(GMetricType.class);
         for (GMetricType type : GMetricType.values()) {
-            byType.put(type, monthlyAveragesFrom(userId, type, fromDate));
+            byType.put(type, monthlyAveragesFrom(userId, type, start));
         }
 
         final int months = (int) ChronoUnit.MONTHS.between(start, end) + 1;
@@ -113,10 +108,6 @@ public class GMetricMonthAggregator {
             cursor = cursor.plusMonths(1);
         }
 
-        if (trimLeading) {
-            trimLeadingEmptyMonths(labels, lostBalls, doubleBogey, bogey);
-        }
-
         log.debug("Chart for user {} months={} labels={}", userId, labels.size(), labels.size());
         return new GMetricChartDataDto(labels, lostBalls, doubleBogey, bogey);
     }
@@ -124,13 +115,11 @@ public class GMetricMonthAggregator {
     private @NonNull GMetricChartDataDto buildYearlyChartData(
             final String userId,
             final Year start,
-            final Year end,
-            boolean trimLeading
+            final Year end
     ) {
-        final LocalDate fromDate = start.atDay(1);
         final Map<GMetricType, Map<Year, Double>> byType = new EnumMap<>(GMetricType.class);
         for (GMetricType type : GMetricType.values()) {
-            byType.put(type, yearlyAveragesFrom(userId, type, fromDate));
+            byType.put(type, yearlyAveragesFrom(userId, type, start));
         }
 
         final int years = (int) ChronoUnit.YEARS.between(start, end) + 1;
@@ -148,43 +137,45 @@ public class GMetricMonthAggregator {
             cursor = cursor.plusYears(1);
         }
 
-        if (trimLeading) {
-            trimLeadingEmptyMonths(labels, lostBalls, doubleBogey, bogey);
-        }
+        trimLeadingEmptyTimeBuckets(labels, lostBalls, doubleBogey, bogey);
 
         log.debug("Chart for user {} years={} labels={}", userId, labels.size(), labels.size());
         return new GMetricChartDataDto(labels, lostBalls, doubleBogey, bogey);
     }
 
-    private Map<YearMonth, Double> monthlyAveragesFrom(String userId, GMetricType type, LocalDate fromDateInclusive) {
+    private Map<YearMonth, Double> monthlyAveragesFrom(final String userId, final GMetricType type, final YearMonth fromDateInclusive) {
         return repo.findByUserIdAndType(userId, type)
                 .stream()
-                .filter(m -> m.getDate() != null && !m.getDate().isBefore(fromDateInclusive))
+                .filter(m -> m.getDate() != null)
+                .filter(m -> !YearMonth.from(m.getDate()).isBefore(fromDateInclusive))
                 .collect(Collectors.groupingBy(
                         t -> YearMonth.from(t.getDate()),
                         Collectors.averagingDouble(GMetricEntity::getMetricValue)
                 ));
     }
 
-    private Map<Year, Double> yearlyAveragesFrom(String userId, GMetricType type, LocalDate fromDateInclusive) {
+    private Map<Year, Double> yearlyAveragesFrom(String userId, GMetricType type, Year fromDateInclusive) {
         return repo.findByUserIdAndType(userId, type)
                 .stream()
-                .filter(m -> m.getDate() != null && !m.getDate().isBefore(fromDateInclusive))
+                .filter(m -> m.getDate() != null)
+                .filter(m -> !Year.from(m.getDate()).isBefore(fromDateInclusive))
                 .collect(Collectors.groupingBy(
                         t -> Year.from(t.getDate()),
                         Collectors.averagingDouble(GMetricEntity::getMetricValue)
                 ));
     }
 
-    private void trimLeadingEmptyMonths(
+    private void trimLeadingEmptyTimeBuckets(
             List<String> labels,
             List<Double> lostBalls,
             List<Double> doubleBogey,
-            List<Double> bogey) {
+            List<Double> bogey
+    ) {
         while (!labels.isEmpty()
                 && lostBalls.getFirst() == null
                 && doubleBogey.getFirst() == null
                 && bogey.getFirst() == null) {
+            log.debug("Remove empty time bucket: {}", labels);
             labels.removeFirst();
             lostBalls.removeFirst();
             doubleBogey.removeFirst();

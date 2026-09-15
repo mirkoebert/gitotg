@@ -50,15 +50,15 @@
                     <span th:if="${cockpit.lostBalls().present()}" th:text="${cockpit.lostBalls().value()}">—</span>
                     <span th:unless="${cockpit.lostBalls().present()}" th:text="#{trend.notEnoughData}">—</span>
                 </p>
-                <p class="mb-1">
-                    <span th:text="#{gmetric.type.bogey}">Bogey</span>:
-                    <span th:if="${cockpit.bogey().present()}" th:text="${cockpit.bogey().value()}">—</span>
-                    <span th:unless="${cockpit.bogey().present()}" th:text="#{trend.notEnoughData}">—</span>
-                </p>
                 <p class="mb-3">
-                    <span th:text="#{gmetric.type.doubleBogey}">Double Bogey</span>:
+                    <span th:text="#{gmetric.type.doubleBogey}">Double Bogey+</span>:
                     <span th:if="${cockpit.doubleBogey().present()}" th:text="${cockpit.doubleBogey().value()}">—</span>
                     <span th:unless="${cockpit.doubleBogey().present()}" th:text="#{trend.notEnoughData}">—</span>
+                </p>
+                <p class="mb-1">
+                    <span th:text="#{gmetric.type.bogey}">Bogey+</span>:
+                    <span th:if="${cockpit.bogey().present()}" th:text="${cockpit.bogey().value()}">—</span>
+                    <span th:unless="${cockpit.bogey().present()}" th:text="#{trend.notEnoughData}">—</span>
                 </p>
                 <a class="btn btn-outline-primary btn-sm" th:href="@{/gmetric}"
                    th:text="#{cockpit.open.metrics}">Open Metrics</a>
