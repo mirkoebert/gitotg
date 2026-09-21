@@ -3,10 +3,10 @@ package com.mirkoebert.golfmetric;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -25,8 +25,8 @@ public class GMetricService {
         return repo.findByUserIdAndTypeOrderByDateDesc(userId, type);
     }
 
-    public @NonNull Optional<GMetricEntity> findLatestByUserIdAndType(
+    public @Nullable GMetricEntity findLatestByUserIdAndType(
             @NonNull String userId, @NonNull GMetricType type) {
-        return repo.findFirstByUserIdAndTypeOrderByDateDesc(userId, type);
+        return repo.findFirstByUserIdAndTypeOrderByDateDesc(userId, type).orElse(null);
     }
 }

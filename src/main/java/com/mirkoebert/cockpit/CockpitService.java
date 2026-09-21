@@ -38,9 +38,9 @@ public class CockpitService {
         return new CockpitView(
                 hcpService.findLatestByUserId(userId),
                 sgiHcp,
-                CockpitView.MetricSnapshot.from(gMetricService.findLatestByUserIdAndType(userId, GMetricType.LOST_BALLS).orElse(null)),
-                CockpitView.MetricSnapshot.from(gMetricService.findLatestByUserIdAndType(userId, GMetricType.BOGEY_PLUS).orElse(null)),
-                CockpitView.MetricSnapshot.from(gMetricService.findLatestByUserIdAndType(userId, GMetricType.DOUBLE_BOGEY_PLUS).orElse(null)),
+                CockpitView.MetricSnapshot.from(gMetricService.findLatestByUserIdAndType(userId, GMetricType.LOST_BALLS)),
+                CockpitView.MetricSnapshot.from(gMetricService.findLatestByUserIdAndType(userId, GMetricType.BOGEY_PLUS)),
+                CockpitView.MetricSnapshot.from(gMetricService.findLatestByUserIdAndType(userId, GMetricType.DOUBLE_BOGEY_PLUS)),
                 checklistService.getProgress(userId, GoalEnum.BREAK100),
                 checklistService.getProgress(userId, GoalEnum.BREAK90),
                 checklistService.getProgress(userId, GoalEnum.BREAK80),

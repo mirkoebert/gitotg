@@ -54,9 +54,19 @@ class GMetricServiceTest {
         when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY_PLUS))
                 .thenReturn(Optional.of(entity));
 
-        Optional<GMetricEntity> result = cut.findLatestByUserIdAndType("u3", GMetricType.DOUBLE_BOGEY_PLUS);
+        GMetricEntity result = cut.findLatestByUserIdAndType("u3", GMetricType.DOUBLE_BOGEY_PLUS);
 
-        assertThat(result).contains(entity);
+        assertThat(result).isEqualTo(entity);
         verify(repo).findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY_PLUS);
+    }
+
+    @Test
+    void findLatestByUserIdAndType_returnsNullWhenNothingStored() {
+        when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.LOST_BALLS))
+                .thenReturn(Optional.empty());
+
+        GMetricEntity result = cut.findLatestByUserIdAndType("u3", GMetricType.LOST_BALLS);
+
+        assertThat(result).isNull();
     }
 }

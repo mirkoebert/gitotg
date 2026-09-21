@@ -22,7 +22,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -54,9 +53,9 @@ class CockpitServiceTest {
     void load_emptyUser_hasNoSgiHcpRoundOrMetrics() {
         stubEmptyHcpAndGoals();
         when(singleTestResultRepository.countByUserId(USER)).thenReturn(0);
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(Optional.empty());
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS)).thenReturn(Optional.empty());
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(Optional.empty());
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(null);
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS)).thenReturn(null);
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(null);
         when(courseService.findRoundsForUser(USER)).thenReturn(List.of());
         when(advisorService.getAdvise(USER)).thenReturn("Start a test.");
 
@@ -76,9 +75,9 @@ class CockpitServiceTest {
         when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormattedDTO.builder().hcp("18.4").date("01. January 2026").trend("improving").build());
         when(singleTestResultRepository.countByUserId(USER)).thenReturn(3);
         when(sgiHcpAggregatedService.getLatestSgiHcpAggregated(USER)).thenReturn(31);
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(Optional.of(metric(GMetricType.LOST_BALLS, 2)));
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS)).thenReturn(Optional.of(metric(GMetricType.BOGEY_PLUS, 5)));
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(Optional.of(metric(GMetricType.DOUBLE_BOGEY_PLUS, 1)));
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(metric(GMetricType.LOST_BALLS, 2));
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS)).thenReturn(metric(GMetricType.BOGEY_PLUS, 5));
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(metric(GMetricType.DOUBLE_BOGEY_PLUS, 1));
         when(checklistService.getProgress(USER, GoalEnum.BREAK100)).thenReturn(ChecklistProgress.of(4, 8));
         when(checklistService.getProgress(USER, GoalEnum.BREAK90)).thenReturn(ChecklistProgress.of(1, 4));
         when(checklistService.getProgress(USER, GoalEnum.BREAK80)).thenReturn(ChecklistProgress.of(0, 2));
@@ -118,9 +117,9 @@ class CockpitServiceTest {
         when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormattedDTO.builder()
                 .hcp("22.0").date("02. January 2026").trend("stable").build());
         when(singleTestResultRepository.countByUserId(USER)).thenReturn(0);
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(Optional.empty());
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS)).thenReturn(Optional.empty());
-        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(Optional.empty());
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(null);
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.BOGEY_PLUS)).thenReturn(null);
+        when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(null);
         stubEmptyGoals();
         when(courseService.findRoundsForUser(USER)).thenReturn(List.of());
         when(advisorService.getAdvise(USER)).thenReturn("Keep going.");
