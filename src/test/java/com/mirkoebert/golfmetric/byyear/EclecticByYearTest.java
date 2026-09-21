@@ -54,24 +54,24 @@ class EclecticByYearTest {
     }
 
     @Test
-    void getEclecicHcpForYearHappyPath() {
+    void getEclecticHcpForYearHappyPath() {
         log.info("Test with one played round");
         List<Integer> played = List.of(5,4,4,4,4,4,4,4,4);
         boolean r = courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 22), played, 0);
         assertTrue(r);
-        assertThat(cut.getEclecicHcpForYear(2025, testCourseName, testUser)).isEqualTo(1);
+        assertThat(cut.getEclecticHcpForYear(2025, testCourseName, testUser)).isEqualTo(1);
 
         log.info("Test with two played rounds");
         played = List.of(4,4,4,4,4,4,4,4,4);
         r = courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 22), played, 0);
         assertTrue(r);
         assertThat(playedRoundRepository.findByUserId(testUser)).isNotEmpty();
-        assertThat(cut.getEclecicHcpForYear(2025, testCourseName, testUser)).isEqualTo(0);
+        assertThat(cut.getEclecticHcpForYear(2025, testCourseName, testUser)).isEqualTo(0);
     }
 
     @Test
-    void getEclecicHcpFor_YearWithoutPlayedRound() {
-        assertNull(cut.getEclecicHcpForYear(1612, testCourseName, testUser));
+    void getEclecticHcpFor_YearWithoutPlayedRound() {
+        assertNull(cut.getEclecticHcpForYear(1612, testCourseName, testUser));
     }
 
     @Test

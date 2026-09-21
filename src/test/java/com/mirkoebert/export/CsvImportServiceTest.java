@@ -257,18 +257,22 @@ class CsvImportServiceTest {
     @SneakyThrows
     @Test
     void importSgiData_loadsShortGameCsvFromClasspath() {
-        SingleTestResultEntity sre = SingleTestResultEntity
-                .builder()
+        singleTestResultRepository.save(SingleTestResultEntity.builder()
                 .date(LocalDate.of(2025, 6, 21))
                 .hcp(pointsToSgiHcpFunction.apply(1, 2))
                 .points(2)
                 .userId(TEST_USER)
                 .testType(TestSuite.SGI)
                 .testId(1)
-                .build();
-        singleTestResultRepository.save(sre);
-        sre.setId(2);
-        singleTestResultRepository.save(sre);
+                .build());
+        singleTestResultRepository.save(SingleTestResultEntity.builder()
+                .date(LocalDate.of(2025, 6, 22))
+                .hcp(pointsToSgiHcpFunction.apply(2, 3))
+                .points(3)
+                .userId(TEST_USER)
+                .testType(TestSuite.SGI)
+                .testId(2)
+                .build());
         assertThat(singleTestResultRepository.countByUserId(TEST_USER)).isEqualTo(2);
 
         @Cleanup InputStream is = getClass().getClassLoader().getResourceAsStream("2026-07-23-short-game.csv");

@@ -21,9 +21,9 @@ public class EclecticByYear {
 
 
     // TODO tech debt two string parameter
-    Double getEclecicHcpForYear(int year, final String courseName, final String userId){
+    Double getEclecticHcpForYear(int year, final String courseName, final String userId){
         try {
-            log.info("getEclecicHcpForYear {} {} {}", year, courseName, userId);
+            log.info("getEclecticHcpForYear {} {} {}", year, courseName, userId);
             final GolfCourse c = catalog.findByName(courseName).get();
             int courseHcp = c.getHoles().stream().mapToInt(Hole::getPar).sum();
             log.info("courseHcp {}", courseHcp);
@@ -68,7 +68,7 @@ public class EclecticByYear {
             eclecticHcpTimeline.add(
                     new HcpScoreDTO(
                             LocalDate.of(yearsWithPlayedRound, 1, 1),
-                            getEclecicHcpForYear(yearsWithPlayedRound, courseName, userId)
+                            getEclecticHcpForYear(yearsWithPlayedRound, courseName, userId)
                     )
             );
         }

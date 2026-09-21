@@ -97,5 +97,3 @@ logging:
       total-size-cap: 50MB
       clean-history-on-start: true
 
-features:
-  load-dummy-data: false

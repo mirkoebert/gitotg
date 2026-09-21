@@ -3,7 +3,7 @@ package com.mirkoebert.cucumber;
 import com.mirkoebert.TestSuite;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
-import com.mirkoebert.handicap.HcpScoreOutFormatedDTO;
+import com.mirkoebert.handicap.HcpScoreOutFormattedDTO;
 import com.mirkoebert.handicap.HcpService;
 import com.mirkoebert.sgi.SingleTestResultEntity;
 import com.mirkoebert.sgi.SingleTestResultRepository;
@@ -37,7 +37,7 @@ public class HcpTrendSteps {
     private SingleTestResultRepository singleTestResultRepository;
 
     private String userId;
-    private HcpScoreOutFormatedDTO lastHcpSummary;
+    private HcpScoreOutFormattedDTO lastHcpSummary;
     private String lastSgiTrend;
 
     @Given("a clean scoring user {string}")

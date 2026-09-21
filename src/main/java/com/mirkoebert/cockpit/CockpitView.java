@@ -3,12 +3,12 @@ package com.mirkoebert.cockpit;
 import com.mirkoebert.checklist.ChecklistProgress;
 import com.mirkoebert.golfcourse.PlayedRoundEntity;
 import com.mirkoebert.golfmetric.GMetricEntity;
-import com.mirkoebert.handicap.HcpScoreOutFormatedDTO;
+import com.mirkoebert.handicap.HcpScoreOutFormattedDTO;
 
 import java.time.LocalDate;
 
 public record CockpitView(
-        HcpScoreOutFormatedDTO handicap,
+        HcpScoreOutFormattedDTO handicap,
         Integer sgiHcp,
         MetricSnapshot lostBalls,
         MetricSnapshot bogey,

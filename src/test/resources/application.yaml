@@ -41,5 +41,3 @@ logging:
   pattern:
     console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{traceId}] - %msg%n"
 
-features:
-  load-dummy-data: true

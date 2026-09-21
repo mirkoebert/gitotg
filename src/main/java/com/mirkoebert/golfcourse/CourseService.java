@@ -102,12 +102,12 @@ public class CourseService {
     }
 
     public void deleteRound(@NonNull final String userId, long id) {
-        final Optional<PlayedRoundEntity> playerRound = playedRoundRepository.findById(id);
-        if (playerRound.isPresent() && playerRound.get().getUserId().equals(userId)){
+        final Optional<PlayedRoundEntity> playedRound = playedRoundRepository.findById(id);
+        if (playedRound.isPresent() && playedRound.get().getUserId().equals(userId)) {
             log.info("Deleting round {} for user {}", id, userId);
             playedRoundRepository.deleteById(id);
         } else {
-            log.warn("Deleting no round. No round found with id {} for user {}", id, userId);
+            log.warn("No round deleted. No round found with id {} for user {}", id, userId);
         }
     }
 }

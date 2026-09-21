@@ -10,18 +10,19 @@ import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static com.mirkoebert.Constants.ME;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class AllDataCsvExportServiceTest {
+
+    private static final String TEST_USER = "export-all-test-user";
 
     @Autowired
     private AllDataCsvExportService cut;
 
     @Test
     void exportAllDataAsZip() throws Exception {
-        byte[] zip = cut.exportAllDataAsZip(ME);
+        byte[] zip = cut.exportAllDataAsZip(TEST_USER);
         assertThat(zip).isNotEmpty();
 
         List<String> entryNames = new ArrayList<>();

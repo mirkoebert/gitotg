@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class HcpScoreOutFormatedDTO {
+public class HcpScoreOutFormattedDTO {
 
     private String date;
     private String hcp;

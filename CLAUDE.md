@@ -46,8 +46,8 @@ rejects an empty NVD API key (`NvdApiException: Invalid API Key, length of 0`). 
 because it runs `mvn -B package`, which stops before `verify` — which also means the CVE gate has
 never actually run in CI. Use `mvn clean test` until an `nvdApiKey` is configured.
 
-Tests use an in-memory H2 DB (`src/test/resources/application.yaml`) with `features.load-dummy-data: true` and
-fake OAuth client credentials — no real network/OAuth calls happen in tests.
+Tests use an in-memory H2 DB (`src/test/resources/application.yaml`) with fake OAuth client credentials —
+no real network/OAuth calls happen in tests.
 
 ## Architecture
 

@@ -41,7 +41,7 @@ class HcpServiceTest {
     void findLatestByUserId_returnsNotEnoughData_whenNoRecords() {
         when(repo.findFirstByUserIdOrderByDateDesc("u1")).thenReturn(Optional.empty());
 
-        HcpScoreOutFormatedDTO result = cut.findLatestByUserId("u1");
+        HcpScoreOutFormattedDTO result = cut.findLatestByUserId("u1");
 
         assertThat(result.getHcp()).isEqualTo("not enough data available");
         assertThat(result.getDate()).isEqualTo("not enough data available");
@@ -59,7 +59,7 @@ class HcpServiceTest {
                 entity(LocalDate.of(2026, 1, 1), 15.0)
         ));
 
-        HcpScoreOutFormatedDTO result = cut.findLatestByUserId("u2");
+        HcpScoreOutFormattedDTO result = cut.findLatestByUserId("u2");
 
         assertThat(result.getHcp()).isEqualTo("10.0");
         assertThat(result.getDate()).isEqualTo("10. January 2026");

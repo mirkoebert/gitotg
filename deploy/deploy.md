@@ -47,7 +47,7 @@ sudo systemctl daemon-reload
 ### Start service by hand
 sudo systemctl start gitotg
 
-### Check if the service is aup and running
+### Check if the service is up and running
 sudo systemctl status gitotg
 
 ### Run service after reboot

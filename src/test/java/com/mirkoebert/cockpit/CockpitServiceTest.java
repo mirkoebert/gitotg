@@ -9,7 +9,7 @@ import com.mirkoebert.golfcourse.PlayedRoundEntity;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.golfmetric.GMetricService;
 import com.mirkoebert.golfmetric.GMetricType;
-import com.mirkoebert.handicap.HcpScoreOutFormatedDTO;
+import com.mirkoebert.handicap.HcpScoreOutFormattedDTO;
 import com.mirkoebert.handicap.HcpService;
 import com.mirkoebert.sgi.SgiHcpAggregatedService;
 import com.mirkoebert.sgi.SingleTestResultRepository;
@@ -73,7 +73,7 @@ class CockpitServiceTest {
 
     @Test
     void load_populatedUser_mapsLatestValuesAndLastRound() {
-        when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormatedDTO.builder().hcp("18.4").date("01. January 2026").trend("improving").build());
+        when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormattedDTO.builder().hcp("18.4").date("01. January 2026").trend("improving").build());
         when(singleTestResultRepository.countByUserId(USER)).thenReturn(3);
         when(sgiHcpAggregatedService.getLatestSgiHcpAggregated(USER)).thenReturn(31);
         when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(Optional.of(metric(GMetricType.LOST_BALLS, 2)));
@@ -115,7 +115,7 @@ class CockpitServiceTest {
 
     @Test
     void load_hcpWithoutSgiOrRounds_leavesThoseCardsEmpty() {
-        when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormatedDTO.builder()
+        when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormattedDTO.builder()
                 .hcp("22.0").date("02. January 2026").trend("stable").build());
         when(singleTestResultRepository.countByUserId(USER)).thenReturn(0);
         when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.LOST_BALLS)).thenReturn(Optional.empty());
@@ -134,7 +134,7 @@ class CockpitServiceTest {
     }
 
     private void stubEmptyHcpAndGoals() {
-        when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormatedDTO.builder()
+        when(hcpService.findLatestByUserId(USER)).thenReturn(HcpScoreOutFormattedDTO.builder()
                 .hcp("not enough data available")
                 .date("not enough data available")
                 .trend("not enough data available")

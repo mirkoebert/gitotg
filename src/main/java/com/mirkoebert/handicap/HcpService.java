@@ -22,14 +22,14 @@ public class HcpService {
     private final HcpRepository repo;
     private final MessageSource messageSource;
 
-    public HcpScoreOutFormatedDTO findLatestByUserId(@NonNull String userId) {
+    public HcpScoreOutFormattedDTO findLatestByUserId(@NonNull String userId) {
         Locale locale = LocaleContextHolder.getLocale();
         DateTimeFormatter df = DateTimeFormatter.ofPattern("dd. MMMM yyyy", locale);
         Optional<HcpScoreEntity> last = repo.findFirstByUserIdOrderByDateDesc(userId);
         if (last.isPresent()) {
             // Trend only needs the latest 4 scores
             List<HcpScoreEntity> recent = repo.findTop4ByUserIdOrderByDateDesc(userId);
-            return HcpScoreOutFormatedDTO
+            return HcpScoreOutFormattedDTO
                     .builder()
                     .hcp(String.format(locale, "%.1f", last.get().getHcp()))
                     .date(df.format(last.get().getDate()))
@@ -37,7 +37,7 @@ public class HcpService {
                     .build();
         }
         String notEnough = msg("trend.notEnoughData");
-        return HcpScoreOutFormatedDTO
+        return HcpScoreOutFormattedDTO
                 .builder()
                 .hcp(notEnough)
                 .date(notEnough)
