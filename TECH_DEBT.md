@@ -139,7 +139,8 @@ Typos `HcpScoreOutFormatedDTO` → `HcpScoreOutFormattedDTO` and `getEclecicHcpF
 ### 19. Advisor / checklist content gaps
 
 - Advisor buckets `lh` / `sfp` / `scratch` are wired but empty in message bundles (by design: silent if no keys).
-- Goal page always returns template `goal/break100` for every slug (works if the template is generic; naming is misleading).
+
+Shared goal template renamed `goal/break100` → `goal/breakX` on 2026-09-21.
 
 ### 20. Docs drift
 

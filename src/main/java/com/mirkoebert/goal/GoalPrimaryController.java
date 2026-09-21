@@ -53,10 +53,10 @@ public class GoalPrimaryController {
         model.addAttribute("goalTitleKey", goal.getTitleKey());
         model.addAttribute("goalSlug", goal.getSlug());
         model.addAttribute("saved", Boolean.TRUE.equals(saved));
-        return "goal/break100";
+        return "goal/breakX";
     }
 
-    @PostMapping("/goal/{goalSlug}/save")
+    @PostMapping("/goal/{goalSlug}")
     public String save(
             @PathVariable String goalSlug,
             @ModelAttribute MyForm myForm,

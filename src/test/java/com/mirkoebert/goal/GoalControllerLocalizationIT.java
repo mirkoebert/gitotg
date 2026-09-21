@@ -43,6 +43,7 @@ class GoalControllerLocalizationIT {
     void goalPage_rendersTheChecklistInEnglish() throws Exception {
         mockMvc.perform(get("/goal/break100").param("lang", "en"))
                 .andExpect(status().isOk())
+                .andExpect(content().string(containsString("action=\"/goal/break100\"")))
                 .andExpect(content().string(containsString("Break 100")))
                 .andExpect(content().string(containsString("Improve your grip")))
                 .andExpect(content().string(containsString("learn the right grip")))
