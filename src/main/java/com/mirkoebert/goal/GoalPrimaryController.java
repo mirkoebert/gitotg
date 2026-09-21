@@ -3,6 +3,7 @@ package com.mirkoebert.goal;
 import com.mirkoebert.checklist.ChecklistProgress;
 import com.mirkoebert.checklist.ChecklistService;
 import com.mirkoebert.checklist.ChecklistItem;
+import com.mirkoebert.user.CurrentUser;
 import com.mirkoebert.user.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,7 @@ public class GoalPrimaryController {
             @RequestParam(value = "saved", required = false) Boolean saved,
             Model model
     ) {
-        GoalEnum goal = GoalEnum.fromSlug(goalSlug)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown goal: " + goalSlug));
+        GoalEnum goal = GoalEnum.fromSlug(goalSlug).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown goal: " + goalSlug));
 
         log.info("page getGoal {}", goal);
         val user = currentUserService.getCurrentUser();
@@ -65,7 +65,7 @@ public class GoalPrimaryController {
         GoalEnum goal = GoalEnum.fromSlug(goalSlug)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown goal: " + goalSlug));
 
-        val user = currentUserService.getCurrentUser();
+        final  CurrentUser user = currentUserService.getCurrentUser();
         checklistService.saveSelected(user.id(), goal, myForm.getSelectedOptions());
         log.info("save goal {} options={}", goal, myForm.getSelectedOptions());
         redirectAttributes.addAttribute("saved", true);
