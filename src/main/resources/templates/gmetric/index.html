@@ -234,7 +234,7 @@
 
 <div class="my-5">
     <h2 th:text="#{gmetric.addHeading}">Add Metric</h2>
-    <form method="post" th:action="@{/gmetric/submit}" th:object="${gMetric}">
+    <form method="post" th:action="@{/gmetric}" th:object="${gMetric}">
         <div class="row g-3 align-items-end">
             <div class="col-12 col-md-3" th:classappend="${#fields.hasErrors('type')} ? 'is-invalid'">
                 <label class="form-label" for="type" th:text="#{gmetric.typeLabel}">Type</label>

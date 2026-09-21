@@ -36,7 +36,7 @@ public class GMetricPrimaryController {
         return "gmetric/index";
     }
 
-    @PostMapping("/gmetric/submit")
+    @PostMapping("/gmetric")
     public String submitForm(
             @ModelAttribute("gMetric") @Valid final GMetricDTO form,
             BindingResult bindingResult,
