@@ -27,12 +27,6 @@ public interface GMetricRepository extends JpaRepository<GMetricEntity, Long> {
     List<GMetricEntity> findByUserIdOrderByDateDesc(@NonNull String userId, Pageable pageable);
 
     @NonNull
-    List<GMetricEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);
-
-    @NonNull
-    List<GMetricEntity> findByType(@NonNull GMetricType type);
-
-    @NonNull
     List<GMetricEntity> findByUserIdAndType(@NonNull String userId, @NonNull GMetricType type);
 
     @NonNull

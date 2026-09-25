@@ -31,9 +31,6 @@ public interface SingleTestResultRepository extends JpaRepository<SingleTestResu
     @NonNull
     List<SingleTestResultEntity> findByUserIdOrderByDateDesc(@NonNull String userId, Pageable pageable);
 
-    @NonNull
-    List<SingleTestResultEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);
-
     int countByUserId(@NonNull String userId);
 
     @Override

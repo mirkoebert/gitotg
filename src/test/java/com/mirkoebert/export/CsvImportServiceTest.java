@@ -13,6 +13,7 @@ import com.mirkoebert.sgi.SingleTestResultRepository;
 import com.mirkoebert.sgi.calc.PointsToSgiHcpFunction;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
+import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -620,7 +621,7 @@ class CsvImportServiceTest {
                 .hcp(31)
                 .build());
 
-        String csv = sgiCsv(MAX_CSV_LINES);
+        String csv = sgiCsv();
 
         assertThatThrownBy(() -> cut.importSgiData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
                 .isInstanceOf(CsvImportTooManyLinesException.class);
@@ -640,7 +641,7 @@ class CsvImportServiceTest {
                 .type(GMetricType.LOST_BALLS)
                 .build());
 
-        String csv = gmetricCsv(MAX_CSV_LINES);
+        String csv = gmetricCsv();
 
         assertThatThrownBy(() -> cut.importGMetricData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
                 .isInstanceOf(CsvImportTooManyLinesException.class);
@@ -661,7 +662,7 @@ class CsvImportServiceTest {
                 .lostBalls(1)
                 .build());
 
-        String csv = playedRoundCsv(MAX_CSV_LINES);
+        String csv = playedRoundCsv();
 
         assertThatThrownBy(() -> cut.importPlayedRoundData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
                 .isInstanceOf(CsvImportTooManyLinesException.class);
@@ -680,9 +681,9 @@ class CsvImportServiceTest {
         return csv.toString();
     }
 
-    private static String sgiCsv(int dataRows) {
-        StringBuilder csv = new StringBuilder("date,points,testId,testType\n");
-        for (int i = 0; i < dataRows; i++) {
+    private static String sgiCsv() {
+        val csv = new StringBuilder("date,points,testId,testType\n");
+        for (int i = 0; i < CsvImportService.MAX_CSV_LINES; i++) {
             csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
                     .append(',').append(i % 10)
                     .append(',').append((i % 8) + 1)
@@ -691,9 +692,9 @@ class CsvImportServiceTest {
         return csv.toString();
     }
 
-    private static String gmetricCsv(int dataRows) {
-        StringBuilder csv = new StringBuilder("date,metricValue,type\n");
-        for (int i = 0; i < dataRows; i++) {
+    private static String gmetricCsv() {
+        val csv = new StringBuilder("date,metricValue,type\n");
+        for (int i = 0; i < CsvImportService.MAX_CSV_LINES; i++) {
             csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
                     .append(',').append(i % 5)
                     .append(",LOST_BALLS\n");
@@ -701,9 +702,9 @@ class CsvImportServiceTest {
         return csv.toString();
     }
 
-    private static String playedRoundCsv(int dataRows) {
-        StringBuilder csv = new StringBuilder("DATE,HOLE_1,HOLE_2,HOLE_3,HOLE_4,HOLE_5,HOLE_6,HOLE_7,HOLE_8,HOLE_9,LOST_BALLS\n");
-        for (int i = 0; i < dataRows; i++) {
+    private static String playedRoundCsv() {
+        val csv = new StringBuilder("DATE,HOLE_1,HOLE_2,HOLE_3,HOLE_4,HOLE_5,HOLE_6,HOLE_7,HOLE_8,HOLE_9,LOST_BALLS\n");
+        for (int i = 0; i < CsvImportService.MAX_CSV_LINES; i++) {
             csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
                     .append(",5,4,2,5,3,4,4,3,4,0\n");
         }
@@ -711,4 +712,3 @@ class CsvImportServiceTest {
     }
 
 }
-

@@ -24,9 +24,6 @@ public interface HcpRepository extends JpaRepository<HcpScoreEntity, Long> {
     List<HcpScoreEntity> findByUserIdOrderByDateDesc(@NonNull String userId, Pageable pageable);
 
     @NonNull
-    List<HcpScoreEntity> findTop12ByUserIdOrderByDateDesc(@NonNull String userId);
-
-    @NonNull
     List<HcpScoreEntity> findTop4ByUserIdOrderByDateDesc(@NonNull String userId);
 
     int countByUserId(@NonNull String userId);
