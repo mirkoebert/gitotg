@@ -14,6 +14,14 @@
             max-width: 100%;
             min-height: 220px;
         }
+
+        .sgi-diagram {
+            display: block;
+            width: 100%;
+            max-width: 900px;
+            height: auto;
+            margin: 1.5rem auto;
+        }
     </style>
 </head>
 <body class="container mt-3 mt-md-5">
@@ -21,6 +29,12 @@
 
 
 <h1 class="text-center mb-4"><span th:text="${sgitest.name}"></span></h1>
+
+<img th:if="${testId == 8}"
+     alt="Top view of a 15-yard pitch over a bunker"
+     class="sgi-diagram"
+     src="/images/lob_over_bunker_top_view.png"
+     th:alt="#{sgi.test8.diagramAlt}">
 
 <ul class="list-group">
     <li class="list-group-item"><span th:text="#{sgi.distance}">Distance:</span> <span

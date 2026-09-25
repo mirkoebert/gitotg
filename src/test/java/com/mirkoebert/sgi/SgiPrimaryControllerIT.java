@@ -14,8 +14,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -39,7 +43,19 @@ class SgiPrimaryControllerIT {
     }
 
     @Test
-    void getShortGameInput() {
+    void getShortGameInput() throws Exception {
+        mockMvc.perform(get("/sgi/8").param("lang", "en"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("src=\"/images/lob_over_bunker_top_view.png\"")))
+                .andExpect(content().string(containsString("Top view of a 15-yard pitch over a bunker onto the green")));
+
+        mockMvc.perform(get("/sgi/8").param("lang", "de"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Draufsicht: 15-Yard-Pitch über den Bunker auf das Grün")));
+
+        mockMvc.perform(get("/sgi/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(not(containsString("lob_over_bunker_top_view.png"))));
     }
 
     @SneakyThrows
