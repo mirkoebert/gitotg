@@ -30,11 +30,48 @@
 
 <h1 class="text-center mb-4"><span th:text="${sgitest.name}"></span></h1>
 
-<img th:if="${testId == 8}"
-     alt="Top view of a 15-yard pitch over a bunker"
-     class="sgi-diagram"
-     src="/images/lob_over_bunker_top_view.png"
-     th:alt="#{sgi.test8.diagramAlt}">
+<th:block th:switch="${testId}">
+    <img th:case="${1}"
+         alt="Top view of a 50-yard wedge shot onto the green"
+         class="sgi-diagram"
+         src="/images/pitch_50yd_top_view.png"
+         th:alt="#{sgi.test1.diagramAlt}">
+    <img th:case="${2}"
+         alt="Top view of a 30-yard wedge shot onto the green"
+         class="sgi-diagram"
+         src="/images/pitch_30yd_top_view.png"
+         th:alt="#{sgi.test2.diagramAlt}">
+    <img th:case="${3}"
+         alt="Top view of an 8-yard sand shot from the bunker onto the green"
+         class="sgi-diagram"
+         src="/images/bunker_8yd_top_view.png"
+         th:alt="#{sgi.test3.diagramAlt}">
+    <img th:case="${4}"
+         alt="Top view of a 15-yard sand shot from the bunker onto the green"
+         class="sgi-diagram"
+         src="/images/bunker_15yd_top_view.png"
+         th:alt="#{sgi.test4.diagramAlt}">
+    <img th:case="${5}"
+         alt="Top view of a 10-yard chip from the fringe onto the green"
+         class="sgi-diagram"
+         src="/images/fringe_10yd_top_view.png"
+         th:alt="#{sgi.test5.diagramAlt}">
+    <img th:case="${6}"
+         alt="Top view of a 20-yard chip from the light rough onto the green"
+         class="sgi-diagram"
+         src="/images/rough_20yd_top_view.png"
+         th:alt="#{sgi.test6.diagramAlt}">
+    <img th:case="${7}"
+         alt="Top view of a 15-yard pitch from the fairway onto the green"
+         class="sgi-diagram"
+         src="/images/fairway_15yd_top_view.png"
+         th:alt="#{sgi.test7.diagramAlt}">
+    <img th:case="${8}"
+         alt="Top view of a 15-yard pitch over a bunker onto the green"
+         class="sgi-diagram"
+         src="/images/lob_over_bunker_top_view.png"
+         th:alt="#{sgi.test8.diagramAlt}">
+</th:block>
 
 <ul class="list-group">
     <li class="list-group-item"><span th:text="#{sgi.distance}">Distance:</span> <span
