@@ -7,7 +7,8 @@ public enum GoalEnum {
 
     BREAK100("break100"),
     BREAK90("break90"),
-    BREAK80("break80");
+    BREAK80("break80"),
+    ALLTIME("alltime");
 
     private final String slug;
 

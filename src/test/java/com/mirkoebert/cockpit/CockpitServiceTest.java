@@ -81,6 +81,7 @@ class CockpitServiceTest {
         when(checklistService.getProgress(USER, GoalEnum.BREAK100)).thenReturn(ChecklistProgress.of(4, 8));
         when(checklistService.getProgress(USER, GoalEnum.BREAK90)).thenReturn(ChecklistProgress.of(1, 4));
         when(checklistService.getProgress(USER, GoalEnum.BREAK80)).thenReturn(ChecklistProgress.of(0, 2));
+        when(checklistService.getProgress(USER, GoalEnum.ALLTIME)).thenReturn(ChecklistProgress.of(2, 14));
         when(courseService.findRoundsForUser(USER)).thenReturn(List.of(
                 PlayedRoundEntity.builder()
                         .courseName("Fischland")
@@ -106,6 +107,7 @@ class CockpitServiceTest {
         assertThat(view.bogey().value()).isEqualTo(5);
         assertThat(view.doubleBogey().value()).isEqualTo(1);
         assertThat(view.break100().percentage()).isEqualTo(50);
+        assertThat(view.alltime().percentage()).isEqualTo(14);
         assertThat(view.lastRound().courseName()).isEqualTo("Fischland");
         assertThat(view.lastRound().totalStrokes()).isEqualTo(11);
         assertThat(view.lastRound().lostBalls()).isEqualTo(1);
@@ -145,6 +147,7 @@ class CockpitServiceTest {
         when(checklistService.getProgress(USER, GoalEnum.BREAK100)).thenReturn(ChecklistProgress.of(0, 8));
         when(checklistService.getProgress(USER, GoalEnum.BREAK90)).thenReturn(ChecklistProgress.of(0, 4));
         when(checklistService.getProgress(USER, GoalEnum.BREAK80)).thenReturn(ChecklistProgress.of(0, 2));
+        when(checklistService.getProgress(USER, GoalEnum.ALLTIME)).thenReturn(ChecklistProgress.of(0, 14));
     }
 
     private static GMetricEntity metric(GMetricType type, int value) {

@@ -78,9 +78,13 @@
                     <span th:text="#{nav.goal.break90}">Break 90</span>:
                     <span th:text="${cockpit.break90().percentage()}">0</span>%
                 </p>
-                <p class="mb-3">
+                <p class="mb-1">
                     <span th:text="#{nav.goal.break80}">Break 80</span>:
                     <span th:text="${cockpit.break80().percentage()}">0</span>%
+                </p>
+                <p class="mb-3">
+                    <span th:text="#{nav.goal.alltime}">All time</span>:
+                    <span th:text="${cockpit.alltime().percentage()}">0</span>%
                 </p>
                 <a class="btn btn-outline-primary btn-sm" th:href="@{/goal/break100}"
                    th:text="#{cockpit.open.goals}">Open Goals</a>

@@ -44,6 +44,7 @@ public class CockpitService {
                 checklistService.getProgress(userId, GoalEnum.BREAK100),
                 checklistService.getProgress(userId, GoalEnum.BREAK90),
                 checklistService.getProgress(userId, GoalEnum.BREAK80),
+                checklistService.getProgress(userId, GoalEnum.ALLTIME),
                 lastRound,
                 advisorService.getAdvise(userId)
         );

@@ -43,6 +43,8 @@ class ChecklistCatalogTest {
         // GolfCheckEntity rows reference these ids - renumbering would silently lose a user's checks
         assertThat(cut.items(GoalEnum.BREAK80)).extracting(ChecklistItem::id)
                 .contains(19L, 20L);
+        assertThat(cut.items(GoalEnum.ALLTIME)).extracting(ChecklistItem::id)
+                .containsExactly(24L, 25L, 26L, 27L, 28L, 29L, 30L, 31L, 32L, 33L, 34L, 35L, 36L, 37L);
     }
 
     @Test

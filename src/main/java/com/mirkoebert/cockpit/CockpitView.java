@@ -16,6 +16,7 @@ public record CockpitView(
         ChecklistProgress break100,
         ChecklistProgress break90,
         ChecklistProgress break80,
+        ChecklistProgress alltime,
         RoundSnapshot lastRound,
         String advice
 ) {

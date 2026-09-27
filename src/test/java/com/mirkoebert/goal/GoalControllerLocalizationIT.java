@@ -60,4 +60,22 @@ class GoalControllerLocalizationIT {
                 .andExpect(content().string(containsString("lerne den richtigen Griff")))
                 .andExpect(content().string(not(containsString("checklist.break100."))));
     }
+
+    @Test
+    void allTimePage_rendersTheChecklistInEnglishAndGerman() throws Exception {
+        mockMvc.perform(get("/goal/alltime").param("lang", "en"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("action=\"/goal/alltime\"")))
+                .andExpect(content().string(containsString("All time")))
+                .andExpect(content().string(containsString("Play St. Andrews")))
+                .andExpect(content().string(containsString("Win a tournament brutto")))
+                .andExpect(content().string(not(containsString("checklist.alltime."))));
+
+        mockMvc.perform(get("/goal/alltime").param("lang", "de"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Allzeit")))
+                .andExpect(content().string(containsString("St. Andrews spielen")))
+                .andExpect(content().string(containsString("Ein Turnier brutto gewinnen")))
+                .andExpect(content().string(not(containsString("checklist.alltime."))));
+    }
 }
