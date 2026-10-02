@@ -20,7 +20,8 @@
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
 <h1 class="text-center mb-4" th:text="#{gmetric.heading}">Golf Metrics</h1>
-
+<div class="row justify-content-center">
+<div class="col-12 col-md-10 col-lg-8">
 <ul class="list-group">
     <li class="list-group-item">
         <span th:text="#{gmetric.export}">Export:</span>
@@ -46,22 +47,18 @@
 </ul>
 
 <div class="mt-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8">
-            <div class="d-flex justify-content-center mb-3">
-                <div class="btn-group" role="group" th:aria-label="#{gmetric.range.label}">
-                    <button class="btn btn-outline-primary active" data-range="lastYear" id="range-lastYear"
-                            th:text="#{gmetric.range.lastYear}" type="button">Last year
-                    </button>
-                    <button class="btn btn-outline-primary" data-range="all" id="range-all"
-                            th:text="#{gmetric.range.all}" type="button">All
-                    </button>
-                </div>
-            </div>
-            <div class="chart-wrap">
-                <canvas id="lineChart"></canvas>
-            </div>
+    <div class="d-flex justify-content-center mb-3">
+        <div class="btn-group" role="group" th:aria-label="#{gmetric.range.label}">
+            <button class="btn btn-outline-primary active" data-range="lastYear" id="range-lastYear"
+                    th:text="#{gmetric.range.lastYear}" type="button">Last year
+            </button>
+            <button class="btn btn-outline-primary" data-range="all" id="range-all"
+                    th:text="#{gmetric.range.all}" type="button">All
+            </button>
         </div>
+    </div>
+    <div class="chart-wrap">
+        <canvas id="lineChart"></canvas>
     </div>
 </div>
 
@@ -263,6 +260,8 @@
             </div>
         </div>
     </form>
+</div>
+</div>
 </div>
 
 <script src="/js/csv-import.js"></script>
