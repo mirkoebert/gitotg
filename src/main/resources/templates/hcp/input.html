@@ -50,6 +50,16 @@
 <div class="mt-5">
     <div class="row justify-content-center">
         <div class="col-12 col-md-10 col-lg-8">
+            <div class="d-flex justify-content-center mb-3">
+                <div class="btn-group" role="group" th:aria-label="#{hcp.range.label}">
+                    <button class="btn btn-outline-primary active" data-range="lastTwoYears" id="range-lastTwoYears"
+                            th:text="#{hcp.range.lastTwoYears}" type="button">Last two years
+                    </button>
+                    <button class="btn btn-outline-primary" data-range="all" id="range-all"
+                            th:text="#{hcp.range.all}" type="button">All
+                    </button>
+                </div>
+            </div>
             <div class="chart-wrap">
                 <canvas id="lineChart"></canvas>
             </div>
@@ -60,46 +70,124 @@
 <script th:inline="javascript">
     const hcpChartLabel = /*[[#{hcp.chartLabel}]]*/ 'HCP';
     const hcpChartTitle = /*[[#{hcp.chartTitle}]]*/ 'Handicap Monthly';
+    const chartDataUrl = /*[[@{/api/handicap/chart-data}]]*/ '/api/handicap/chart-data';
     const i18nUploading = /*[[#{common.uploading}]]*/ 'Uploading...';
     const i18nErrorPrefix = /*[[#{api.import.errorPrefix}]]*/ 'Error:';
     const i18nFailedPrefix = /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:';
     const i18nFileTooLarge = /*[[#{api.import.fileTooLarge}]]*/ 'File too large. Maximum allowed size is 500KB.';
     const i18nTooManyLines = /*[[#{api.import.tooManyLines(420)}]]*/ 'Too many lines. Maximum allowed is 420 lines.';
 
-    // Fetch data from REST API and render chart
-    fetch(/*[[@{/api/handicap/chart-data}]]*/ '/api/handicap/chart-data')
-        .then(response => response.json())
-        .then(data => {
-            const ctx = document.getElementById('lineChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: hcpChartLabel,
-                        data: data.hcp,
-                        borderColor: 'rgba(75, 192, 192, 1)',
-                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                        tension: 0.5,
-                        fill: false,
-                        connectNulls: true,
-                        spanGaps: true
-                    }]
+    let hcpChart = null;
+    let currentRange = 'lastTwoYears';
+    let loadToken = 0;
+
+    function ensureChart() {
+        if (hcpChart) {
+            return hcpChart;
+        }
+        const ctx = document.getElementById('lineChart').getContext('2d');
+        hcpChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: hcpChartLabel,
+                    data: [],
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.5,
+                    fill: false,
+                    connectNulls: true,
+                    spanGaps: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {position: 'top'},
+                    title: {display: true, text: hcpChartTitle}
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {position: 'top'},
-                        title: {display: true, text: hcpChartTitle}
-                    },
-                    scales: {
-                        y: {beginAtZero: true}
+                scales: {
+                    y: {beginAtZero: true},
+                    x: {
+                        ticks: {
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 12
+                        }
                     }
                 }
+            }
+        });
+        return hcpChart;
+    }
+
+    function applyChartData(data) {
+        const chart = ensureChart();
+        chart.data.labels = data.labels || [];
+        chart.data.datasets[0].data = data.hcp || [];
+        chart.update();
+    }
+
+    function setRangeButtonsEnabled(enabled) {
+        document.querySelectorAll('[data-range]').forEach(btn => {
+            btn.disabled = !enabled;
+        });
+    }
+
+    function setActiveRangeButton(range) {
+        document.querySelectorAll('[data-range]').forEach(btn => {
+            const active = btn.getAttribute('data-range') === range;
+            btn.classList.toggle('active', active);
+            btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+        });
+    }
+
+    async function loadChart(range) {
+        const token = ++loadToken;
+        setRangeButtonsEnabled(false);
+        const url = chartDataUrl + (chartDataUrl.includes('?') ? '&' : '?') + 'range=' + encodeURIComponent(range);
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {'Accept': 'application/json'},
+                credentials: 'same-origin'
             });
-        })
-        .catch(error => console.error('Error fetching data:', error));
+            if (!response.ok) {
+                throw new Error('HTTP ' + response.status);
+            }
+            const data = await response.json();
+            if (token !== loadToken) {
+                return;
+            }
+            applyChartData(data);
+        } catch (error) {
+            console.error('Error loading handicap chart for range ' + range + ':', error);
+        } finally {
+            if (token === loadToken) {
+                setRangeButtonsEnabled(true);
+            }
+        }
+    }
+
+    function selectRange(range) {
+        if (!range) {
+            return;
+        }
+        currentRange = range;
+        setActiveRangeButton(range);
+        return loadChart(range);
+    }
+
+    document.querySelectorAll('[data-range]').forEach(btn => {
+        btn.addEventListener('click', function (event) {
+            event.preventDefault();
+            selectRange(this.getAttribute('data-range'));
+        });
+    });
+
+    selectRange(currentRange);
 </script>
 <div class="my-5">
     <h2 th:text="#{hcp.addHeading}">Add Handicap</h2>

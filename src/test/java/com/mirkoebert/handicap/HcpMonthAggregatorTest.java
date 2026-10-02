@@ -61,4 +61,52 @@ class HcpMonthAggregatorTest {
         assertThat(r.labels().getLast()).isEqualTo(FMT.format(YearMonth.now()));
         assertThat(r.labels().getFirst()).isEqualTo(FMT.format(YearMonth.now().minusMonths(11)));
     }
+
+    @Test
+    void getHcpForRange_lastTwoYears_dropsMonthsOlderThan24AndTrimsLeadingGaps() {
+        YearMonth olderThanWindow = YearMonth.now().minusMonths(30);
+        YearMonth insideWindow = YearMonth.now().minusMonths(2);
+        when(repo.findByUserId("u")).thenReturn(List.of(
+                score(olderThanWindow.atDay(1), 40.0),
+                score(insideWindow.atDay(1), 20.0)
+        ));
+
+        HcpData r = cut.getHcpForRange("lastTwoYears", "u");
+
+        assertThat(r.labels()).doesNotContain(FMT.format(olderThanWindow));
+        assertThat(r.labels().getFirst()).isEqualTo(FMT.format(insideWindow));
+        assertThat(r.hcp().getFirst()).isEqualTo(20.0);
+        assertThat(r.labels()).hasSize(3);
+        assertThat(r.labels().getLast()).isEqualTo(FMT.format(YearMonth.now()));
+    }
+
+    @Test
+    void getHcpForRange_all_startsAtTheEarliestMonth() {
+        YearMonth earliest = YearMonth.now().minusMonths(30);
+        when(repo.findByUserId("u")).thenReturn(List.of(
+                score(earliest.atDay(1), 40.0),
+                score(YearMonth.now().atDay(1), 10.0)
+        ));
+
+        HcpData r = cut.getHcpForRange("ALL", "u");
+
+        assertThat(r.labels()).hasSize(31);
+        assertThat(r.labels().getFirst()).isEqualTo(FMT.format(earliest));
+        assertThat(r.hcp().getFirst()).isEqualTo(40.0);
+        assertThat(r.hcp().getLast()).isEqualTo(10.0);
+        assertThat(r.labels().getLast()).isEqualTo(FMT.format(YearMonth.now()));
+    }
+
+    @Test
+    void getHcpForRange_unknownOrEmptyAll_usesA24MonthWindow() {
+        when(repo.findByUserId("u")).thenReturn(List.of());
+
+        HcpData unknown = cut.getHcpForRange(null, "u");
+        HcpData all = cut.getHcpForRange("all", "u");
+
+        assertThat(unknown.labels()).hasSize(24);
+        assertThat(unknown.hcp()).containsOnlyNulls();
+        assertThat(unknown.labels().getFirst()).isEqualTo(FMT.format(YearMonth.now().minusMonths(23)));
+        assertThat(all.labels()).containsExactlyElementsOf(unknown.labels());
+    }
 }
