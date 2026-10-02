@@ -20,6 +20,8 @@
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
 <h1 class="text-center mb-4" th:text="#{hcp.heading}">Handicap</h1>
+<div class="row justify-content-center">
+<div class="col-12 col-md-10 col-lg-8">
 <ul class="list-group">
     <li class="list-group-item"><span th:text="#{common.hcp}">HCP</span>: <span th:text="${lastResult.hcp}"></span></li>
     <li class="list-group-item"><span th:text="#{common.date}">Date</span>: <span th:text="${lastResult.date}"></span>
@@ -48,22 +50,18 @@
 
 
 <div class="mt-5">
-    <div class="row justify-content-center">
-        <div class="col-12 col-md-10 col-lg-8">
-            <div class="d-flex justify-content-center mb-3">
-                <div class="btn-group" role="group" th:aria-label="#{hcp.range.label}">
-                    <button class="btn btn-outline-primary active" data-range="lastTwoYears" id="range-lastTwoYears"
-                            th:text="#{hcp.range.lastTwoYears}" type="button">Last two years
-                    </button>
-                    <button class="btn btn-outline-primary" data-range="all" id="range-all"
-                            th:text="#{hcp.range.all}" type="button">All
-                    </button>
-                </div>
-            </div>
-            <div class="chart-wrap">
-                <canvas id="lineChart"></canvas>
-            </div>
+    <div class="d-flex justify-content-center mb-3">
+        <div class="btn-group" role="group" th:aria-label="#{hcp.range.label}">
+            <button class="btn btn-outline-primary active" data-range="lastTwoYears" id="range-lastTwoYears"
+                    th:text="#{hcp.range.lastTwoYears}" type="button">Last two years
+            </button>
+            <button class="btn btn-outline-primary" data-range="all" id="range-all"
+                    th:text="#{hcp.range.all}" type="button">All
+            </button>
         </div>
+    </div>
+    <div class="chart-wrap">
+        <canvas id="lineChart"></canvas>
     </div>
 </div>
 
@@ -211,6 +209,8 @@
             </div>
         </div>
     </form>
+</div>
+</div>
 </div>
 
 <script src="/js/csv-import.js"></script>
