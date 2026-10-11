@@ -11,6 +11,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -35,6 +36,16 @@ class CourseServiceTest {
                 .holes(List.of(
                         Hole.builder().number(1).par(5).build(),
                         Hole.builder().number(2).par(4).build()))
+                .build();
+    }
+
+    private static GolfCourse courseWithHoles(int holeCount) {
+        return GolfCourse
+                .builder()
+                .name("Fischland")
+                .holes(IntStream.rangeClosed(1, holeCount)
+                        .mapToObj(n -> Hole.builder().number(n).par(4).build())
+                        .toList())
                 .build();
     }
 
@@ -80,6 +91,22 @@ class CourseServiceTest {
         assertThat(result).isFalse();
         verify(playedRoundRepository, never()).save(any());
         verify(repo, never()).save(any());
+    }
+
+    @Test
+    void getNormaizedValue_returnsLostBalls_forNineHoles() {
+        assertThat(cut.getNormaizedValue(3, courseWithHoles(9))).isEqualTo(3f);
+    }
+
+    @Test
+    void getNormaizedValue_halvesLostBallsWithIntegerDivision_forEighteenHoles() {
+        assertThat(cut.getNormaizedValue(4, courseWithHoles(18))).isEqualTo(2f);
+        assertThat(cut.getNormaizedValue(5, courseWithHoles(18))).isEqualTo(2f);
+    }
+
+    @Test
+    void getNormaizedValue_returnsNull_whenHoleCountIsUnsupported() {
+        assertThat(cut.getNormaizedValue(3, courseWithHoles(2))).isNull();
     }
 
     @Test
