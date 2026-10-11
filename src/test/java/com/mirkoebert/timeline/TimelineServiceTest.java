@@ -61,7 +61,7 @@ class TimelineServiceTest {
         MeasurementDTO dto = results.getFirst();
         assertThat(dto.getId()).isEqualTo(7L);
         assertThat(dto.getType()).isEqualTo(GolfType.COUNT);
-        assertThat(dto.getValue()).isEqualTo("3");
+        assertThat(dto.getValue()).isEqualTo("3.0");
         assertThat(dto.getComment()).isEqualTo("Lost Balls");
         assertThat(dto.getDate()).isEqualTo(LocalDate.of(2026, 7, 26));
     }
@@ -107,7 +107,7 @@ class TimelineServiceTest {
     void getLatestResults_last30_limitsTo30Entries() {
         List<HcpScoreEntity> many = IntStream.range(0, 40)
                 .mapToObj(i -> HcpScoreEntity.builder()
-                        .id((long) i)
+                        .id(i)
                         .userId("user-123")
                         .date(LocalDate.of(2026, 1, 1).plusDays(i))
                         .hcp(10.0 + i)
@@ -130,7 +130,7 @@ class TimelineServiceTest {
     void getLatestResults_all_returnsEverything() {
         List<HcpScoreEntity> many = IntStream.range(0, 40)
                 .mapToObj(i -> HcpScoreEntity.builder()
-                        .id((long) i)
+                        .id(i)
                         .userId("user-123")
                         .date(LocalDate.of(2026, 1, 1).plusDays(i))
                         .hcp(10.0 + i)

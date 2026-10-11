@@ -313,7 +313,7 @@ class CsvImportServiceTest {
     @SneakyThrows
     @Test
     void importGMetricData_insertsWhenNoExisting() {
-        final String csv = "date,metricValue,type\n2025-01-31,3,LOST_BALLS\n";
+        final String csv = "date,metricValue,type\n2025-01-31,3,LOST_BALLS_PER_9HOLES\n";
         @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
 
         int count = cut.importGMetricData(is, TEST_USER);
@@ -365,7 +365,7 @@ class CsvImportServiceTest {
     @SneakyThrows
     @Test
     void importGMetricData_replacesPreviousImportCompletely() {
-        String csv1 = "date,metricValue,type\n2025-01-21,2,BOGEY_PLUS\n2025-01-21,1,LOST_BALLS\n";
+        String csv1 = "date,metricValue,type\n2025-01-21,2,BOGEY_PLUS\n2025-01-21,1,LOST_BALLS_PER_9HOLES\n";
         cut.importGMetricData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
         assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
 
@@ -387,7 +387,7 @@ class CsvImportServiceTest {
     @SneakyThrows
     @Test
     void importGMetricData_allowsSameDateDifferentType() {
-        String csv = "date,metricValue,type\n2025-01-21,2,BOGEY_PLUS\n2025-01-21,1,LOST_BALLS\n";
+        String csv = "date,metricValue,type\n2025-01-21,2,BOGEY_PLUS\n2025-01-21,1,LOST_BALLS_PER_9HOLES\n";
         @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
 
         int count = cut.importGMetricData(is, TEST_USER);
@@ -411,7 +411,7 @@ class CsvImportServiceTest {
     @SneakyThrows
     @Test
     void importGMetricData_skipsValuesOutsideNumericLimits() {
-        final String csv = "date,metricValue,type\n2025-01-01,1000,LOST_BALLS\n2025-01-02,3,BOGEY_PLUS\n";
+        final String csv = "date,metricValue,type\n2025-01-01,1000,LOST_BALLS_PER_9HOLES\n2025-01-02,3,BOGEY_PLUS\n";
         @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
 
         int count = cut.importGMetricData(is, TEST_USER);
@@ -498,13 +498,13 @@ class CsvImportServiceTest {
                 .orElseThrow();
         assertThat(april8.getHoleStrokes()).containsExactly(6, 5, 3, 7, 5, 5, 5, 6, 5);
         assertThat(april8.getLostBalls()).isNull();
-        assertThat(april8.getBogeysPlus()).isEqualTo(9);
+        assertThat(april8.getBogeysPlus()).isEqualTo(8);
         assertThat(april8.getDoubleBogeysPlus()).isEqualTo(3);
 
         // submitRound also writes the three derived gmetric snapshots
         assertThat(gMetricRepository
                 .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.BOGEY_PLUS)
-                .get().getMetricValue()).isEqualTo(9);
+                .get().getMetricValue()).isEqualTo(8);
         assertThat(gMetricRepository
                 .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.DOUBLE_BOGEY_PLUS)
                 .get().getMetricValue()).isEqualTo(3);

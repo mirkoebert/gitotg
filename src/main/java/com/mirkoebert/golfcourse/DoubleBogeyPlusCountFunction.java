@@ -27,14 +27,14 @@ public class DoubleBogeyPlusCountFunction implements ToIntFunction<PlayedRoundDt
         List<Hole> holes = course.get().getHoles();
         List<Integer> strokes = round.getHoleStrokes();
         if (holes.size() != strokes.size()) {
-            log.warn("Cannot count double bogeys: hole count mismatch, course {}, holes {}, strokes {}",
-                    round.getCourseName(), holes.size(), strokes.size());
+            log.warn("Cannot count double bogeys: hole count mismatch, course {}, holes {}, strokes {}", round.getCourseName(), holes.size(), strokes.size());
             return 0;
         }
 
         int count = 0;
         for (int i = 0; i < holes.size(); i++) {
             if (strokes.get(i) - holes.get(i).getPar() >= 2) {
+                log.debug("Detect DoubleBogeyPlus on hole {}", i);
                 count++;
             }
         }

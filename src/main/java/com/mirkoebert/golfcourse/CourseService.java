@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -88,11 +89,12 @@ public class CourseService {
                 .userId(userId)
                 .build();
         repo.save(gme);
-        if (lostBalls != null) {
+        Float lostBallNormalized = getNormaizedValue(lostBalls, course.get());
+        if (lostBallNormalized != null) {
             gme = GMetricEntity
                     .builder()
                     .date(date)
-                    .metricValue(lostBalls)
+                    .metricValue(lostBallNormalized)
                     .type(GMetricType.LOST_BALLS_PER_9HOLES)
                     .userId(userId)
                     .build();
@@ -101,11 +103,15 @@ public class CourseService {
         return true;
     }
 
-    Float getNormaizedValue(int lostBalls, GolfCourse course){
+    Float getNormaizedValue(final @Nullable Integer lostBalls, final GolfCourse course){
+        if (lostBalls == null){
+            log.warn("Can't get calc metric {}} because lostball count is null", GMetricType.LOST_BALLS_PER_9HOLES);
+            return null;
+        }
         if (course.getHoles().size() == 9) {
             return (float) lostBalls;
         } else if (course.getHoles().size() == 18) {
-            return (float) (lostBalls / 2);
+            return  ((float)lostBalls / 2);
         }
         log.warn("Can't get calc metric {}} because course {} has unsupported whole count", GMetricType.LOST_BALLS_PER_9HOLES, course);
         return null;

@@ -9,17 +9,17 @@ Feature: Golf metrics CSV import
     When the user imports the gmetric CSV:
       """
       date,metricValue,type
-      2025-01-31,3,LOST_BALLS
+      2025-01-31,3,LOST_BALLS_PER_9HOLES
       """
     Then the user has 1 gmetric record
-    And a gmetric exists with date "2025-01-31", type "LOST_BALLS" and value 3
+    And a gmetric exists with date "2025-01-31", type "LOST_BALLS_PER_9HOLES" and value 3
 
   Scenario: Import replaces all previous metrics for the user
     Given the gmetric CSV has already been imported:
       """
       date,metricValue,type
       2025-01-21,2,BOGEY_PLUS
-      2025-01-21,9,LOST_BALLS
+      2025-01-21,9,LOST_BALLS_PER_9HOLES
       """
     When the user imports the gmetric CSV:
       """
@@ -34,7 +34,7 @@ Feature: Golf metrics CSV import
       """
       date,metricValue,type
       2025-01-21,2,BOGEY_PLUS
-      2025-01-21,1,LOST_BALLS
+      2025-01-21,1,LOST_BALLS_PER_9HOLES
       """
     Then the user has 2 gmetric records
 

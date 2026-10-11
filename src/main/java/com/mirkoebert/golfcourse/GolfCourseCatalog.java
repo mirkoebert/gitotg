@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 public class GolfCourseCatalog {
 
     private static final List<GolfCourse> COURSES = List.of(
-            course("Fischland", 5,4,2,5,3,4,4,3,4),
+            course("Fischland", 5,4,3,5,3,4,4,3,4),
             course("Tessin",    4,5,3,4,4,5,4,4,3),
             course("Grambek",    4,5,3,4,4,4,3,4,4,4,3,4,5,4,5,4,3,4)
     );

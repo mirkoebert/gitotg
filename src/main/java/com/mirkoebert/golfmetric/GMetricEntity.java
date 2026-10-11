@@ -32,7 +32,7 @@ public class GMetricEntity {
      * not named {@code value} (reserved in H2).
      */
     @CsvBindByName(column = "metricValue")
-    private int metricValue;
+    private float metricValue;
 
     @CsvBindByName(column = "type")
     @Enumerated(EnumType.STRING)

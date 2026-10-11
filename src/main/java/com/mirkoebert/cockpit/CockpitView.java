@@ -21,7 +21,7 @@ public record CockpitView(
         String advice
 ) {
 
-    public record MetricSnapshot(Integer value, LocalDate date) {
+    public record MetricSnapshot(Float value, LocalDate date) {
         static MetricSnapshot from(GMetricEntity entity) {
             if (entity == null) {
                 return new MetricSnapshot(null, null);
