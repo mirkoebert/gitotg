@@ -326,7 +326,7 @@ class CsvImportServiceTest {
         assertThat(saved.getUserId()).isEqualTo(TEST_USER);
         assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 31));
         assertThat(saved.getMetricValue()).isEqualTo(3);
-        assertThat(saved.getType()).isEqualTo(GMetricType.LOST_BALLS);
+        assertThat(saved.getType()).isEqualTo(GMetricType.LOST_BALLS_PER_9HOLES);
     }
 
     @SneakyThrows
@@ -336,7 +336,7 @@ class CsvImportServiceTest {
                 .userId(TEST_USER)
                 .date(LocalDate.of(2024, 1, 1))
                 .metricValue(99)
-                .type(GMetricType.LOST_BALLS)
+                .type(GMetricType.LOST_BALLS_PER_9HOLES)
                 .build());
         gMetricRepository.save(GMetricEntity.builder()
                 .userId(TEST_USER)
@@ -358,7 +358,7 @@ class CsvImportServiceTest {
         assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
         assertThat(all.getFirst().getType()).isEqualTo(GMetricType.DOUBLE_BOGEY_PLUS);
         assertThat(gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2024, 1, 1), GMetricType.LOST_BALLS))
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2024, 1, 1), GMetricType.LOST_BALLS_PER_9HOLES))
                 .isEmpty();
     }
 
@@ -380,7 +380,7 @@ class CsvImportServiceTest {
         assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
         assertThat(all.getFirst().getType()).isEqualTo(GMetricType.BOGEY_PLUS);
         assertThat(gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2025, 1, 21), GMetricType.LOST_BALLS))
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2025, 1, 21), GMetricType.LOST_BALLS_PER_9HOLES))
                 .isEmpty();
     }
 
@@ -447,7 +447,7 @@ class CsvImportServiceTest {
                 .isEmpty();
 
         GMetricEntity lostBalls = gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 7, 26), GMetricType.LOST_BALLS)
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 7, 26), GMetricType.LOST_BALLS_PER_9HOLES)
                 .orElseThrow();
         assertThat(lostBalls.getMetricValue()).isEqualTo(2);
 
@@ -638,7 +638,7 @@ class CsvImportServiceTest {
                 .userId(TEST_USER)
                 .date(LocalDate.of(2024, 1, 1))
                 .metricValue(2)
-                .type(GMetricType.LOST_BALLS)
+                .type(GMetricType.LOST_BALLS_PER_9HOLES)
                 .build());
 
         String csv = gmetricCsv();

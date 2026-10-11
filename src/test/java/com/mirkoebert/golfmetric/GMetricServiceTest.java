@@ -26,7 +26,7 @@ class GMetricServiceTest {
     @Test
     void findByUserId_delegatesToRepositoryOrderedByDateDesc() {
         GMetricEntity entity = GMetricEntity.builder()
-                .userId("u1").date(LocalDate.of(2026, 1, 1)).metricValue(2).type(GMetricType.LOST_BALLS).build();
+                .userId("u1").date(LocalDate.of(2026, 1, 1)).metricValue(2).type(GMetricType.LOST_BALLS_PER_9HOLES).build();
         when(repo.findByUserIdOrderByDateDesc("u1")).thenReturn(List.of(entity));
 
         List<GMetricEntity> result = cut.findByUserId("u1");
@@ -62,10 +62,10 @@ class GMetricServiceTest {
 
     @Test
     void findLatestByUserIdAndType_returnsNullWhenNothingStored() {
-        when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.LOST_BALLS))
+        when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.LOST_BALLS_PER_9HOLES))
                 .thenReturn(Optional.empty());
 
-        GMetricEntity result = cut.findLatestByUserIdAndType("u3", GMetricType.LOST_BALLS);
+        GMetricEntity result = cut.findLatestByUserIdAndType("u3", GMetricType.LOST_BALLS_PER_9HOLES);
 
         assertThat(result).isNull();
     }

@@ -113,7 +113,7 @@ public class TimelineService {
             return "Golf Metric";
         }
         return switch (type) {
-            case LOST_BALLS -> "Lost Balls";
+            case LOST_BALLS_PER_9HOLES -> "Lost Balls";
             case DOUBLE_BOGEY_PLUS -> "Double Bogey";
             case BOGEY_PLUS -> "Bogey";
         };

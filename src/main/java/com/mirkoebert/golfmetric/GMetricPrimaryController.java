@@ -25,7 +25,7 @@ public class GMetricPrimaryController {
         return GMetricDTO.builder()
                 .selectedDate(java.time.LocalDate.now())
                 .metricValue(0)
-                .type(GMetricType.LOST_BALLS)
+                .type(GMetricType.LOST_BALLS_PER_9HOLES)
                 .build();
     }
 

@@ -64,7 +64,7 @@ class InputLimitsValidationTest {
         return GMetricDTO.builder()
                 .selectedDate(LocalDate.of(2026, 1, 1))
                 .metricValue(value)
-                .type(GMetricType.LOST_BALLS)
+                .type(GMetricType.LOST_BALLS_PER_9HOLES)
                 .build();
     }
 

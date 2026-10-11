@@ -53,9 +53,9 @@ class GMetricMonthAggregatorTest {
     @Test
     void getMetricsForRange_lastYear_averagesMultipleEntriesInTheSameMonth() {
         YearMonth currentMonth = YearMonth.now();
-        when(repo.findByUserIdAndType("u", GMetricType.LOST_BALLS)).thenReturn(List.of(
-                metric(currentMonth.atDay(1), GMetricType.LOST_BALLS, 2),
-                metric(currentMonth.atEndOfMonth(), GMetricType.LOST_BALLS, 4)
+        when(repo.findByUserIdAndType("u", GMetricType.LOST_BALLS_PER_9HOLES)).thenReturn(List.of(
+                metric(currentMonth.atDay(1), GMetricType.LOST_BALLS_PER_9HOLES, 2),
+                metric(currentMonth.atEndOfMonth(), GMetricType.LOST_BALLS_PER_9HOLES, 4)
         ));
 
         GMetricChartDataDto result = cut.getMetricsForRange("lastYear", "u");

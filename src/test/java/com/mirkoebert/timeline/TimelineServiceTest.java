@@ -51,7 +51,7 @@ class TimelineServiceTest {
                         .userId("user-123")
                         .date(LocalDate.of(2026, 7, 26))
                         .metricValue(3)
-                        .type(GMetricType.LOST_BALLS)
+                        .type(GMetricType.LOST_BALLS_PER_9HOLES)
                         .build()
         ));
 

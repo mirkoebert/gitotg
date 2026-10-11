@@ -93,12 +93,22 @@ public class CourseService {
                     .builder()
                     .date(date)
                     .metricValue(lostBalls)
-                    .type(GMetricType.LOST_BALLS)
+                    .type(GMetricType.LOST_BALLS_PER_9HOLES)
                     .userId(userId)
                     .build();
             repo.save(gme);
         }
         return true;
+    }
+
+    Float getNormaizedValue(int lostBalls, GolfCourse course){
+        if (course.getHoles().size() == 9) {
+            return (float) lostBalls;
+        } else if (course.getHoles().size() == 18) {
+            return (float) (lostBalls / 2);
+        }
+        log.warn("Can't get calc metric {}} because course {} has unsupported whole count", GMetricType.LOST_BALLS_PER_9HOLES, course);
+        return null;
     }
 
     public void deleteRound(@NonNull final String userId, long id) {

@@ -77,7 +77,7 @@ class CsvExportCharsetIT {
         singleTestResultRepository.save(SingleTestResultEntity.builder()
                 .userId(TEST_USER).date(DATE).points(7).testId(3).testType(TestSuite.SGI).hcp(6).build());
         gMetricRepository.save(GMetricEntity.builder()
-                .userId(TEST_USER).date(DATE).metricValue(4).type(GMetricType.LOST_BALLS).build());
+                .userId(TEST_USER).date(DATE).metricValue(4).type(GMetricType.LOST_BALLS_PER_9HOLES).build());
     }
 
     @AfterEach

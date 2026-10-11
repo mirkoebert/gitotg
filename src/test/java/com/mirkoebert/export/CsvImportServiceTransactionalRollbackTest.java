@@ -110,7 +110,7 @@ class CsvImportServiceTransactionalRollbackTest {
                 .userId(TEST_USER)
                 .date(LocalDate.of(2024, 1, 1))
                 .metricValue(2)
-                .type(GMetricType.LOST_BALLS)
+                .type(GMetricType.LOST_BALLS_PER_9HOLES)
                 .build());
 
         doThrow(new RuntimeException("simulated DB failure"))
