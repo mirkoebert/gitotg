@@ -45,4 +45,11 @@ class HcpPrimaryControllerIT {
                 .andExpect(content().string(containsString("uploading: \"Uploading...\"")))
                 .andExpect(content().string(not(containsString("i18nUploading"))));
     }
+
+    @Test
+    void inputPage_capsHandicapChartAt54() throws Exception {
+        mockMvc.perform(get("/handicap/input"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("y: {beginAtZero: true, max: 54}")));
+    }
 }
