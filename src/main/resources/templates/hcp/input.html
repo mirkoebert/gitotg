@@ -69,11 +69,6 @@
     const hcpChartLabel = /*[[#{hcp.chartLabel}]]*/ 'HCP';
     const hcpChartTitle = /*[[#{hcp.chartTitle}]]*/ 'Handicap Monthly';
     const chartDataUrl = /*[[@{/api/handicap/chart-data}]]*/ '/api/handicap/chart-data';
-    const i18nUploading = /*[[#{common.uploading}]]*/ 'Uploading...';
-    const i18nErrorPrefix = /*[[#{api.import.errorPrefix}]]*/ 'Error:';
-    const i18nFailedPrefix = /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:';
-    const i18nFileTooLarge = /*[[#{api.import.fileTooLarge}]]*/ 'File too large. Maximum allowed size is 500KB.';
-    const i18nTooManyLines = /*[[#{api.import.tooManyLines(420)}]]*/ 'Too many lines. Maximum allowed is 420 lines.';
 
     let hcpChart = null;
     let currentRange = 'lastTwoYears';
@@ -214,13 +209,13 @@
 </div>
 
 <script src="/js/csv-import.js"></script>
-<script>
+<script th:inline="javascript">
     GitotgCsvImport.bindImportForm('hcp-import-form', 'hcp-import-status', {
-        uploading: i18nUploading,
-        errorPrefix: i18nErrorPrefix,
-        failedPrefix: i18nFailedPrefix,
-        fileTooLarge: i18nFileTooLarge,
-        tooManyLines: i18nTooManyLines
+        uploading: /*[[#{common.uploading}]]*/ 'Uploading...',
+        errorPrefix: /*[[#{api.import.errorPrefix}]]*/ 'Error:',
+        failedPrefix: /*[[#{api.import.failedPrefix}]]*/ 'Upload failed:',
+        fileTooLarge: /*[[#{api.import.fileTooLarge}]]*/ 'File too large. Maximum allowed size is 500KB.',
+        tooManyLines: /*[[#{api.import.tooManyLines(420)}]]*/ 'Too many lines. Maximum allowed is 420 lines.'
     });
 </script>
 
