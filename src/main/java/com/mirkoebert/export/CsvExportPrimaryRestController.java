@@ -63,6 +63,16 @@ public class CsvExportPrimaryRestController {
     }
 
     @SneakyThrows
+    @GetMapping("/api/golfcourse/export")
+    public void getPlayedRoundCsv(final HttpServletResponse response) {
+        log.info("played-round export as csv");
+        val u = currentUserService.getCurrentUser();
+        final String userId = u.id();
+        String csv = hcpCsvExportService.exportAllPlayedRoundsToCsv(userId);
+        writeCsv(response, csvFileNameService.generatePlayedRoundExportFileName(), csv);
+    }
+
+    @SneakyThrows
     @GetMapping("/api/export/all")
     public void getAllDataZip(final HttpServletResponse response) {
         log.info("export all data as zip");

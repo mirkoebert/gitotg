@@ -39,6 +39,14 @@ public class CsvFileNameService {
     }
 
     /**
+     * Generates a filename for played-round export including today's date.
+     * Example: 2025-06-01-played-rounds.csv
+     */
+    public String generatePlayedRoundExportFileName() {
+        return generateFileName("played-rounds");
+    }
+
+    /**
      * Generates a filename for the all-data ZIP export including today's date.
      * Example: 2025-06-01-all-data.zip
      */

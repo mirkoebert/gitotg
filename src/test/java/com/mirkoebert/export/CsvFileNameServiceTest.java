@@ -35,6 +35,14 @@ class CsvFileNameServiceTest {
     }
 
     @Test
+    void generatesPlayedRoundFilenameWithTodayDate() {
+        String filename = service.generatePlayedRoundExportFileName();
+        assertThat(filename)
+                .startsWith(LocalDate.now().toString())
+                .endsWith("-played-rounds.csv");
+    }
+
+    @Test
     void generatesAllDataFilenameWithTodayDate() {
         String filename = service.generateAllDataExportFileName();
         assertThat(filename)

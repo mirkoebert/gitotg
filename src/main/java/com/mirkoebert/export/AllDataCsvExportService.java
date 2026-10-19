@@ -25,6 +25,7 @@ public class AllDataCsvExportService {
             addCsvEntry(zos, csvFileNameService.generateHcpExportFileName(), hcpCsvExportService.exportAllHcpDataToCsv(userId));
             addCsvEntry(zos, csvFileNameService.generateSgiExportFileName(), hcpCsvExportService.exportAllSgiDataToCsv(userId));
             addCsvEntry(zos, csvFileNameService.generateGMetricExportFileName(), hcpCsvExportService.exportAllGMetricDataToCsv(userId));
+            addCsvEntry(zos, csvFileNameService.generatePlayedRoundExportFileName(), hcpCsvExportService.exportAllPlayedRoundsToCsv(userId));
         } catch (IOException e) {
             log.error("Can't generate ZIP export for user {}", userId, e);
             throw new RuntimeException(e);

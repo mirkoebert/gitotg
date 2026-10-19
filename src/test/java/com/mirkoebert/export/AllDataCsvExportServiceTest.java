@@ -33,9 +33,10 @@ class AllDataCsvExportServiceTest {
             }
         }
 
-        assertThat(entryNames).hasSize(3);
+        assertThat(entryNames).hasSize(4);
         assertThat(entryNames).anyMatch(n -> n.endsWith("-handicap.csv"));
         assertThat(entryNames).anyMatch(n -> n.endsWith("-short-game.csv"));
         assertThat(entryNames).anyMatch(n -> n.endsWith("-gmetric.csv"));
+        assertThat(entryNames).anyMatch(n -> n.endsWith("-played-rounds.csv"));
     }
 }

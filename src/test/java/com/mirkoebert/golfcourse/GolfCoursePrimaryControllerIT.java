@@ -50,6 +50,7 @@ class GolfCoursePrimaryControllerIT {
                 .getContentAsString();
 
         assertThat(html).contains("id=\"golfcourse-import-form\"");
+        assertThat(html).contains("/api/golfcourse/export");
         assertThat(html).contains("/api/golfcourse/import");
         assertThat(html).contains("name=\"file\"");
         assertThat(html).contains("csv-import.js");

@@ -51,6 +51,8 @@
 </div>
 
 <ul class="list-group my-4">
+    <li class="list-group-item"><span th:text="#{golfcourse.export}">Export:</span> <a th:href="@{/api/golfcourse/export}"
+                                                                                        th:text="#{common.csv}">CSV</a></li>
     <li class="list-group-item">
         <div class="d-flex flex-column flex-sm-row flex-wrap align-items-sm-center gap-2">
             <span th:text="#{common.import}">Import:</span>
