@@ -10,8 +10,8 @@ import java.util.List;
 
 /**
  * OpenCSV bean for played-round rows.
- * Import reads {@code DATE}, {@code HOLE_1}…{@code HOLE_9}, and {@code LOST_BALLS}.
- * Export also writes {@code COURSE} and {@code HOLE_10}…{@code HOLE_18}.
+ * Columns are {@code DATE}, {@code COURSE}, {@code HOLE_1}…{@code HOLE_18}, and {@code LOST_BALLS}.
+ * A file with no {@code COURSE} column is the older 9-hole Fischland export.
  */
 @Data
 public class PlayedRoundCsvRow {
@@ -87,14 +87,30 @@ public class PlayedRoundCsvRow {
         }
     }
 
+    /**
+     * Strokes from hole 1 through the last filled hole.
+     * A gap before that hole, or a row with no strokes, is incomplete.
+     */
     List<Integer> holeStrokesOrNullIfIncomplete() {
-        Integer[] holes = {hole1, hole2, hole3, hole4, hole5, hole6, hole7, hole8, hole9};
-        List<Integer> strokes = new ArrayList<>(9);
-        for (Integer hole : holes) {
-            if (hole == null) {
+        Integer[] holes = {
+                hole1, hole2, hole3, hole4, hole5, hole6, hole7, hole8, hole9,
+                hole10, hole11, hole12, hole13, hole14, hole15, hole16, hole17, hole18
+        };
+        int lastFilled = -1;
+        for (int i = 0; i < holes.length; i++) {
+            if (holes[i] != null) {
+                lastFilled = i;
+            }
+        }
+        if (lastFilled < 0) {
+            return null;
+        }
+        List<Integer> strokes = new ArrayList<>(lastFilled + 1);
+        for (int i = 0; i <= lastFilled; i++) {
+            if (holes[i] == null) {
                 return null;
             }
-            strokes.add(hole);
+            strokes.add(holes[i]);
         }
         return strokes;
     }

@@ -44,6 +44,8 @@ class CsvImportServiceTest {
     @Autowired
     private PlayedRoundRepository playedRoundRepository;
     @Autowired
+    private HcpCsvExportService hcpCsvExportService;
+    @Autowired
     private PointsToSgiHcpFunction pointsToSgiHcpFunction;
 
     @BeforeEach
@@ -528,6 +530,70 @@ class CsvImportServiceTest {
 
     @SneakyThrows
     @Test
+    void importPlayedRoundData_roundTripsCourseAndEveryHole() {
+        final String otherUser = "csv-import-other-user";
+        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 3, 1), "Fischland", 2,
+                List.of(5, 4, 3, 5, 3, 4, 4, 3, 4)));
+        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 3, 2), "Tessin", 1,
+                List.of(4, 5, 3, 4, 4, 5, 4, 4, 3)));
+        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 4, 2), "Grambek", 5,
+                List.of(4, 5, 3, 4, 4, 4, 3, 4, 4, 4, 3, 4, 5, 4, 5, 4, 3, 4)));
+        playedRoundRepository.save(round(otherUser, LocalDate.of(2026, 3, 1), "Tessin", 9,
+                List.of(4, 5, 3, 4, 4, 5, 4, 4, 3)));
+
+        String csv = hcpCsvExportService.exportAllPlayedRoundsToCsv(TEST_USER);
+        int count = cut.importPlayedRoundData(
+                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)), TEST_USER);
+
+        assertThat(count).isEqualTo(3);
+        List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
+        assertThat(all).extracting(PlayedRoundEntity::getCourseName)
+                .containsExactlyInAnyOrder("Fischland", "Tessin", "Grambek");
+
+        PlayedRoundEntity fischland = roundOn(all, LocalDate.of(2026, 3, 1));
+        assertThat(fischland.getCourseName()).isEqualTo("Fischland");
+        assertThat(fischland.getHoleStrokes()).containsExactly(5, 4, 3, 5, 3, 4, 4, 3, 4);
+        assertThat(fischland.getLostBalls()).isEqualTo(2);
+
+        PlayedRoundEntity grambek = roundOn(all, LocalDate.of(2026, 4, 2));
+        assertThat(grambek.getCourseName()).isEqualTo("Grambek");
+        assertThat(grambek.getHoleStrokes()).hasSize(18);
+        assertThat(grambek.getLostBalls()).isEqualTo(5);
+        assertThat(gMetricRepository
+                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 2), GMetricType.LOST_BALLS_PER_9HOLES)
+                .orElseThrow()
+                .getMetricValue()).isEqualTo(2.5f);
+
+        assertThat(playedRoundRepository.findByUserId(otherUser)).hasSize(1);
+
+        int secondCount = cut.importPlayedRoundData(
+                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)), TEST_USER);
+        assertThat(secondCount).isEqualTo(3);
+        assertThat(playedRoundRepository.findByUserId(TEST_USER))
+                .extracting(PlayedRoundEntity::getCourseName)
+                .containsExactlyInAnyOrder("Fischland", "Tessin", "Grambek");
+
+        playedRoundRepository.findByUserId(otherUser).forEach(playedRoundRepository::delete);
+    }
+
+    @SneakyThrows
+    @Test
+    void importPlayedRoundData_skipsRowsWhoseCourseDoesNotMatchTheHoleCount() {
+        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 4, 3), "Grambek", 0,
+                List.of(4, 5, 3, 4, 4, 4, 3, 4, 4)));
+        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 4, 4), "Nowhere", 0,
+                List.of(5, 4, 3, 5, 3, 4, 4, 3, 4)));
+        String csv = hcpCsvExportService.exportAllPlayedRoundsToCsv(TEST_USER);
+
+        int count = cut.importPlayedRoundData(
+                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)), TEST_USER);
+
+        assertThat(count).isZero();
+        assertThat(playedRoundRepository.findByUserId(TEST_USER)).isEmpty();
+    }
+
+    @SneakyThrows
+    @Test
     void importGMetricData_acceptsUppercaseHeaders() {
         final String csv = "DATE,METRICVALUE,TYPE\n2026-03-01,7,DOUBLE_BOGEY_PLUS\n";
         @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
@@ -700,6 +766,21 @@ class CsvImportServiceTest {
                     .append(",LOST_BALLS\n");
         }
         return csv.toString();
+    }
+
+    private static PlayedRoundEntity round(
+            String userId, LocalDate date, String course, int lostBalls, List<Integer> strokes) {
+        return PlayedRoundEntity.builder()
+                .userId(userId)
+                .date(date)
+                .courseName(course)
+                .lostBalls(lostBalls)
+                .holeStrokes(strokes)
+                .build();
+    }
+
+    private static PlayedRoundEntity roundOn(List<PlayedRoundEntity> rounds, LocalDate date) {
+        return rounds.stream().filter(e -> date.equals(e.getDate())).findFirst().orElseThrow();
     }
 
     private static String playedRoundCsv() {

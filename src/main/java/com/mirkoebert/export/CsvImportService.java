@@ -237,7 +237,9 @@ public class CsvImportService {
         Map<String, String> columnMapping = new HashMap<>();
         columnMapping.put("date", "date");
         columnMapping.put("DATE", "date");
-        for (int i = 1; i <= 9; i++) {
+        columnMapping.put("course", "course");
+        columnMapping.put("COURSE", "course");
+        for (int i = 1; i <= 18; i++) {
             columnMapping.put("hole_" + i, "hole" + i);
             columnMapping.put("HOLE_" + i, "hole" + i);
         }
@@ -265,11 +267,20 @@ public class CsvImportService {
                 return false;
         }
 
-        boolean saved = courseService.submitRound(userId, DEFAULT_PLAYED_ROUND_COURSE, row.getDate(), holeStrokes, lostBalls);
+        boolean saved = courseService.submitRound(userId, courseName(row), row.getDate(), holeStrokes, lostBalls);
         if (!saved) {
             log.warn("Ignore played-round line rejected by CourseService {}", row);
         }
         return saved;
+    }
+
+    /** Files written before the course column existed are 9-hole Fischland rounds. */
+    private static String courseName(final PlayedRoundCsvRow row) {
+        final String course = row.getCourse();
+        if (course == null || course.isBlank()) {
+            return DEFAULT_PLAYED_ROUND_COURSE;
+        }
+        return course.trim();
     }
 
     private static RuntimeException importFailed(Exception e, String userId, String kind) {
