@@ -69,6 +69,7 @@
     const hcpChartLabel = /*[[#{hcp.chartLabel}]]*/ 'HCP';
     const hcpChartTitle = /*[[#{hcp.chartTitle}]]*/ 'Handicap Monthly';
     const chartDataUrl = /*[[@{/api/handicap/chart-data}]]*/ '/api/handicap/chart-data';
+    const hcpChartMax = 54;
 
     let hcpChart = null;
     let currentRange = 'lastTwoYears';
@@ -102,7 +103,20 @@
                     title: {display: true, text: hcpChartTitle}
                 },
                 scales: {
-                    y: {beginAtZero: true, max: 54},
+                    y: {
+                        beginAtZero: true,
+                        afterBuildTicks(scale) {
+                            if (!(scale.max > hcpChartMax)) {
+                                return;
+                            }
+                            scale.max = hcpChartMax;
+                            const ticks = scale.ticks.filter((tick) => tick.value <= hcpChartMax);
+                            if (ticks.length === 0 || ticks[ticks.length - 1].value < hcpChartMax) {
+                                ticks.push({value: hcpChartMax});
+                            }
+                            scale.ticks = ticks;
+                        }
+                    },
                     x: {
                         ticks: {
                             maxRotation: 0,

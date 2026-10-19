@@ -47,9 +47,12 @@ class HcpPrimaryControllerIT {
     }
 
     @Test
-    void inputPage_capsHandicapChartAt54() throws Exception {
+    void inputPage_scalesHandicapChartToDataCappedAt54() throws Exception {
         mockMvc.perform(get("/handicap/input"))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("y: {beginAtZero: true, max: 54}")));
+                .andExpect(content().string(containsString("const hcpChartMax = 54;")))
+                .andExpect(content().string(containsString("afterBuildTicks(scale)")))
+                .andExpect(content().string(containsString("scale.max = hcpChartMax;")))
+                .andExpect(content().string(not(containsString("max: 54"))));
     }
 }
