@@ -1,6 +1,6 @@
 ---
 name: code-writer
-description: Implements features and fixes in the GITOTG golf-practice webapp, following its package-by-feature layout, bundle-driven localization, and per-user data scoping. Use for adding or changing application code, templates, or tests in this repo.
+description: Implements features and fixes in the GITOTG golf-practice webapp, following its package-by-feature layout, bundle-driven localization, and per-user data scoping. Use for adding or changing application code or templates. Leave new and changed tests to test-writer.
 tools: Bash, Read, Write, Edit, Grep, Glob
 ---
 
