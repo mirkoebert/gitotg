@@ -87,11 +87,9 @@ JaCoCo hotspots (line coverage):
 
 Controllers without a dedicated IT: cockpit, CSV export/import REST, gmetric (MVC + REST), HCP (MVC + REST), login, main/timeline, SGI REST. Goal has `GoalControllerLocalizationIT` only.
 
-### 12. Hollow or disabled integration tests
+### 12. Submit paths still untested at HTTP
 
-- `SgiPrimaryControllerIT`: empty methods; `submitForm` is `@Disabled` with “TODO fix NPE…”.
-- `GolfCoursePrimaryControllerIT.submitForm`: empty body with `// TODO`.
-- These green tests add little regression protection.
+The empty and `@Disabled` methods in `SgiPrimaryControllerIT` and `GolfCoursePrimaryControllerIT` were removed. `POST /golfcourse/submit`, `GET /short-game-index`, and `POST /submit` still have no MockMvc coverage.
 
 ### 13. Thymeleaf is runtime-only typed
 
@@ -191,7 +189,7 @@ Shared goal template renamed `goal/break100` → `goal/breakX` on 2026-09-21.
 ## Suggested remediation order
 
 1. **Annotate remaining enums with `EnumType.STRING`** (and plan a one-shot data fix if ORDINAL rows already exist).
-2. **Fill or delete hollow ITs**; add MockMvc coverage for HCP/SGI/gmetric/CSV import submit paths (same pattern as `GoalControllerLocalizationIT`).
+2. **Add MockMvc coverage** for HCP/SGI/gmetric/CSV import submit paths (same pattern as `GoalControllerLocalizationIT`).
 3. **Remove or wire** `EclecticByYear` and `UsersGoalEntity`/`GoalRepository`.
 4. Polish naming and empty advisor buckets as time allows.
 
@@ -203,8 +201,6 @@ Shared goal template renamed `goal/break100` → `goal/breakX` on 2026-09-21.
 |----------|------|
 | `EclecticByYear.java` | `TODO tech debt two string parameter` |
 | `GolfCoursePrimaryController.java` | `TODO why not method delete` (uses POST) |
-| `SgiPrimaryControllerIT.java` | `@Disabled` + NPE TODO on submit |
-| `GolfCoursePrimaryControllerIT.java` | empty `submitForm` TODO |
 
 ---
 

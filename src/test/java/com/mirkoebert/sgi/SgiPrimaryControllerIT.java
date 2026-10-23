@@ -2,15 +2,11 @@ package com.mirkoebert.sgi;
 
 import com.mirkoebert.user.CurrentUser;
 import com.mirkoebert.user.CurrentUserService;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -20,7 +16,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -38,10 +33,6 @@ class SgiPrimaryControllerIT {
     void seedOneRowPerExport() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         when(currentUserService.getCurrentUser()).thenReturn(new CurrentUser(TEST_USER, "T. Ester", "t.ester@ebert-p.com", null));
-    }
-
-    @Test
-    void getShortGameIndex() {
     }
 
     @ParameterizedTest
@@ -75,16 +66,5 @@ class SgiPrimaryControllerIT {
         mockMvc.perform(get("/sgi/" + testId))
                 .andExpect(status().isOk())
                 .andExpect(content().string(not(containsString(otherDiagram))));
-    }
-
-    @SneakyThrows
-    @Test
-    @Disabled
-    void submitForm() {
-        // TODO fix NPE creating a model for the return
-        final MockHttpServletResponse response = mockMvc.perform(post("/submit").param("roundId", "1"))
-                .andExpect(status().isFound()) // 302
-                .andReturn()
-                .getResponse();
     }
 }

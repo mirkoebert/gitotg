@@ -34,11 +34,6 @@ class GolfCoursePrimaryControllerIT {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         when(currentUserService.getCurrentUser()).thenReturn(new CurrentUser(TEST_USER, "T. Ester", "t.ester@ebert-p.com", null));
     }
-    
-    @Test
-    void submitForm() {
-        // TODO
-    }
 
     @SneakyThrows
     @Test
