@@ -96,7 +96,7 @@ Controllers without a dedicated IT: cockpit, CSV export/import REST, gmetric (MV
 ### 13. Thymeleaf is runtime-only typed
 
 - Template mistakes fail silently at render time.
-- Only a few pages have render ITs (`GoalControllerLocalizationIT`, parts of golfcourse/putting-index).
+- Only a few pages have render ITs (`GoalControllerLocalizationIT`, parts of golfcourse).
 - Changing shared fragments (`navbar`, `head`) has limited automated coverage.
 
 ### 14. Mutation testing and Qodana not fully leveraged
