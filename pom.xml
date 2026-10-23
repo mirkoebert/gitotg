@@ -287,6 +287,8 @@
                 <configuration>
                     <skip>false</skip>
                     <failBuildOnCVSS>7</failBuildOnCVSS>
+                    <!-- Sonatype Guide now requires a token; without one the analyzer only logs a warning. -->
+                    <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
                     <suppressionFiles>
                         <suppressionFile>suppress.xml</suppressionFile>
                     </suppressionFiles>
@@ -377,6 +379,7 @@
                 <version>${dependency-check.version}</version>
                 <configuration>
                     <failOnError>false</failOnError>
+                    <ossindexAnalyzerEnabled>false</ossindexAnalyzerEnabled>
                     <suppressionFiles>
                         <suppressionFile>suppress.xml</suppressionFile>
                     </suppressionFiles>
