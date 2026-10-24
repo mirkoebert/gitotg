@@ -44,17 +44,21 @@ findings. Do not re-raise them.
 
 **2. Per-user scoping.** Every domain entity keys off a plain `userId` string; there is
 no `User` table, and Google and GitHub identities are separate users. Flag any query,
-update, or delete that is not scoped by `userId`. An unscoped `repo.deleteAll()` is a
-red flag — `DummyHcpGenerator` and `DummySgiResultGenerator` already contain one behind
-a feature flag.
+update, or delete that is not scoped by `userId`. An unscoped `repo.deleteAll()` wipes
+every user's rows. The import path is the model: `CsvImportService` loads one user's
+rows, then calls `deleteAll` on that list. A feature flag does not make an unscoped
+wipe acceptable. `DummyHcpGenerator` and `DummySgiResultGenerator` are gone; do not
+treat them as precedent.
 
 **3. Localization completeness.** Every user-facing string lives in both
 `messages.properties` and `messages_de.properties`. Flag hardcoded English in Java or in
 Thymeleaf templates. Checklist items (`checklist.<goalSlug>.<id>.name`, optional `.desc`)
 and advisor tips (`advisor.<bucket>.<n>`) are discovered by convention from the English
-bundle, so a key added to one file and not the other fails at request time for German
-users, not at build time. `ChecklistCatalogTest` and `AdviceCatalogTest` guard this —
-check that a new catalog of this shape ships with the same guard.
+bundle. A key in only one file fails `KeyParityTest`, which compares both bundles in
+full and runs in CI via `mvn package`. `ChecklistCatalogTest` and `AdviceCatalogTest`
+cover only the keys they discover. An item on an existing goal or a new tip is
+message keys only. A new goal also needs `GoalEnum`, nav and title keys, the navbar,
+`CockpitView`, `CockpitService`, and `cockpit.html`.
 
 **4. Charset at byte/char boundaries.** Require an explicit `StandardCharsets.UTF_8` on
 every `InputStreamReader`, `OutputStreamWriter`, `String.getBytes`, and `new String(byte[])`.
@@ -67,6 +71,9 @@ JSpecify annotations, transaction boundaries, resource leaks.
 
 - Package-by-feature under `com.mirkoebert`; no cross-feature reaching into internals.
 - `XxxPrimaryController` serves Thymeleaf views, `XxxPrimaryRestController` serves JSON.
+  `GMetricRestController` is the existing exception (`/api/gmetric` and
+  `/api/gmetric/chart-data`). Do not flag that name or ask for a second controller.
+  CSV for handicap, SGI, gmetric, and played rounds lives on `CsvExportPrimaryRestController`.
 - New services and components get a colocated test under `src/test/java`.
 - Thymeleaf expressions fail silently at runtime and are not type-checked, so a changed
   template needs a render test — follow `GoalControllerLocalizationIT`.

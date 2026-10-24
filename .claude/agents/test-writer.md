@@ -50,8 +50,8 @@ change needs a test that renders the page. Follow `GoalControllerLocalizationIT`
   `checklist.break100.` is absent.
 - Cover both `en` and `de` when the change is user-facing copy.
 
-`KeyParityTest` already requires every key in `messages.properties` to exist in
-`messages_de.properties`. Do not weaken it. Do not add keys yourself.
+`KeyParityTest` requires the key sets to match in both directions, and it fails on an
+empty bundle. Do not weaken it. Do not add keys yourself.
 
 ## Assertions that can fail
 

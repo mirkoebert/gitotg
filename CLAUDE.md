@@ -4,11 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-GITOTG ("Golf: Improve The Optimal Golf") — a small personal Spring Boot webapp for tracking short-game golf
-practice: handicap entries, Short Game Index (SGI) test results, and other golf metrics (lost balls, bogeys,
+GITOTG — a small personal Spring Boot webapp for tracking short-game golf practice on the pitching
+green: handicap entries, Short Game Index (SGI) test results, and other golf metrics (lost balls, bogeys,
 double bogeys), with charts, goals/checklists, and light AI-flavored "advisor" tips. Single-developer, low-scale
-personal project (see the JVM memory tuning throughout — this is optimized to run on a small VPS, not for
-throughput).
+personal project (JVM heap, Tomcat threads, and the H2 cache are tuned for a small VPS, not for throughput).
 
 ## Commands
 
@@ -28,8 +27,9 @@ mvn test -Dtest=HcpServiceTest#someMethodName
 # Run only the Cucumber BDD suite (glue: com.mirkoebert.cucumber, features: src/test/resources/features)
 mvn test -Dtest=CucumberTest
 
-# Run the app locally (port 8080, eager bean init, dummy OAuth creds from src/test/resources not used here —
-# real Google/GitHub OAuth app credentials are required, see README.md)
+# Run the app locally. application.yaml listens on port 80; this overrides it to 8080.
+# Dummy OAuth creds from src/test/resources are not used here —
+# real Google/GitHub OAuth app credentials are required, see README.md
 mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8080
 
 # Mutation testing (PIT) — declared in pom.xml but bound to no execution, so it only runs on demand
@@ -65,35 +65,47 @@ identities are separate users**; data does not merge across providers even for t
 
 **Package-by-feature**, one top-level package per domain under `com.mirkoebert`:
 - `handicap` (hcp) — golf handicap entries and trend/monthly aggregation.
-- `sgi` — Short Game Index: `SingleTestResultEntity` records raw points for one of several short-game tests.
-  `sgi/calc` holds one `SgiTestNHcpFunction` per test id (1–5,7,8) converting raw points → an HCP-equivalent
-  score; `PointsToSgiHcpFunction` dispatches to the right one by `testId`. `sgi/chart` aggregates SGI + HCP
-  together for charting.
-- `golfmetric` (gmetric) — simple counted metrics (`GMetricType`: LOST_BALLS, DOUBLE_BOGEY_PLUS, BOGEY_PLUS) per date.
-- `timeline` — merges HCP, SGI, and GMetric records into one reverse-chronological feed (`GolfType` enum
-  discriminates the source); `TimelineRange` caps how much history each source query pulls (30/100/all).
-- `checklist` / `goal` — goal-based checklists (e.g. "break 100") with per-user checked-item progress.
-  Like the advisor, the items are **not** listed in Java: `ChecklistCatalog` discovers them by convention from
-  the base bundle `messages.properties`, keys shaped `checklist.<goalSlug>.<id>.name` plus an optional
-  `.desc`. Only the per-user checkmarks live in the DB (`GolfCheckEntity.checkListItemId` references those
-  ids, so ids must stay stable). **Adding a checklist item means adding two lines to `messages.properties`
-  and `messages_de.properties` — nothing else.** `ChecklistCatalogTest` guards German coverage,
-  `GoalControllerLocalizationIT` renders the page in both languages.
+- `sgi` — Short Game Index: `SingleTestResultEntity` records raw points for tests 1–8.
+  `sgi/calc` holds one `SgiTestNHcpFunction` for test ids 1–5, 7, and 8, converting raw points → an
+  HCP-equivalent score. Test 6 has no class of its own; `PointsToSgiHcpFunction` maps `case 5, 6` onto
+  test 5's table. An unknown test id returns 99. `sgi/chart` aggregates SGI + HCP together for charting.
+- `golfmetric` (gmetric) — simple counted metrics (`GMetricType`: `LOST_BALLS_PER_9HOLES`, `DOUBLE_BOGEY_PLUS`,
+  `BOGEY_PLUS`) per date. `LOST_BALLS` is a played-round CSV column, not this enum constant.
+- `timeline` — merges HCP, SGI, and GMetric records into one reverse-chronological feed (`GolfType`: `HCP`,
+  `SGIHCP`, `COUNT`). `TimelineRange` caps each source query at 30, 100, or all, then limits the merged feed
+  to the same count. The page is served by `MainPrimaryController` at `/timeline`.
+- `checklist` / `goal` — goal checklists `break100`, `break90`, `break80`, and `alltime`, with per-user
+  checked-item progress. Items are **not** listed in Java: `ChecklistCatalog` discovers them from the base
+  bundle `messages.properties`, keys shaped `checklist.<goalSlug>.<id>.name` plus an optional `.desc`. Only
+  the per-user checkmarks live in the DB (`GolfCheckEntity.checkListItemId` references those ids, so ids must
+  stay stable). **Adding an item to an existing goal** means adding the `.name` key (and `.desc` if wanted) to
+  `messages.properties` and `messages_de.properties` — no Java change. **Adding a goal** also needs `GoalEnum`,
+  nav and title keys, the navbar, `CockpitView`, `CockpitService`, `cockpit.html`, and the related tests.
+  `ChecklistCatalogTest` guards German coverage for discovered keys, `KeyParityTest` requires every key in both
+  bundles, and `GoalControllerLocalizationIT` renders the page in both languages.
 - `advisor` — picks a random localized tip based on how much data the user has and their handicap tier.
   Tips are **not** listed in Java: `AdviceCatalog` discovers them by convention, scanning the base bundle
   `messages.properties` for keys shaped `advisor.<bucket>.<n>`. Buckets are `fresh` / `few` (data-point
   count) plus one per handicap tier — `hh`, `mh`, `lh`, `sfp`, `scratch` — plus `other` (always mixed in).
   A bucket with no keys is simply silent, so `lh`/`sfp`/`scratch` are wired but currently empty.
   **Adding a tip means adding one line to `messages.properties` and `messages_de.properties` — nothing else.**
-  `AdviceCatalogTest` guards that every discovered key has a German translation.
-- `export` — CSV export (`HcpCsvExportService`) and import (`CsvImportService`) for HCP, SGI, and GMetric data.
-  **Import always fully replaces existing records for that user** (delete-all-then-insert) within a
-  `@Transactional` method, so a failed parse can't leave partial data.
+  `AdviceCatalogTest` guards that every discovered key has a German translation; `KeyParityTest` covers the
+  whole bundle either way.
+- `export` — CSV for HCP, SGI, GMetric, and played rounds (`HcpCsvExportService`, `CsvImportService`,
+  `AllDataCsvExportService`), served by `CsvExportPrimaryRestController`:
+  `GET /api/{handicap,sgi,gmetric,golfcourse}/export`, `POST` on the matching `/import` paths, and
+  `GET /api/export/all`.
+  HCP, SGI, and GMetric imports **fully replace** that user's rows (delete-all-then-insert) inside a
+  `@Transactional` method and rethrow on parse failure, so a failed parse can't leave partial data.
+  Played-round import replaces that user's rounds, then each saved row calls `CourseService.submitRound`,
+  which **appends** bogey, double-bogey, and lost-ball gmetrics. Importing the same file again duplicates
+  those metrics.
 - `golfcourse` — hole-by-hole scoring for a played round. `GolfCourseCatalog` hardcodes the courses and
   their pars in Java; `PlayedRoundEntity` references a course by **name string**, so renaming a course
-  orphans existing rounds. `DoubleBogeyPlusCountFunction` derives gmetric counts from a round.
+  orphans existing rounds. `BogeyPlusCountFunction` and `DoubleBogeyPlusCountFunction` derive gmetric
+  counts from a round. `deleteRound` removes the round and leaves those gmetrics in place (accepted).
 - `cockpit` — the landing dashboard: aggregates latest HCP, SGI, the three gmetric snapshots, progress
-  on all three goal checklists, the last played round and an advisor tip into one `CockpitView` record.
+  on all four goal checklists, the last played round and an advisor tip into one `CockpitView` record.
 - `user` — `CurrentUser`/`CurrentUserService` (identity) plus `UserPreferenceEntity`/Service (e.g. locale) and
   stats.
 - `config` — security filter chain (`WebSecurityConfig`), locale resolution from user prefs
@@ -101,9 +113,10 @@ identities are separate users**; data does not merge across providers even for t
   `MaxUploadSizeExceededException` handling.
 
 **Controller naming convention:** `XxxPrimaryController` is a `@Controller` serving Thymeleaf views;
-`XxxPrimaryRestController` is a `@RestController` serving JSON (chart data under `/api/**/chart-data`, CSV
-export/import under `/api/**/export|import`). Both typically inject `CurrentUserService` to scope data to the
-logged-in user.
+`XxxPrimaryRestController` is a `@RestController` serving JSON. The exception is `GMetricRestController`
+(`/api/gmetric` and `/api/gmetric/chart-data`). Chart data otherwise lives under `/api/**/chart-data`. CSV
+export and import for all four datasets live on `CsvExportPrimaryRestController`. Both typically inject
+`CurrentUserService` to scope data to the logged-in user.
 
 **Broad `catch (Exception e)` blocks** in `export/`, `handicap/`, `golfmetric/`, and `sgi/chart/` are an
 intentional design choice in this codebase (fail soft, log, keep serving the page) — do not flag them as tech
@@ -111,6 +124,7 @@ debt or narrow the exception types unless explicitly asked.
 
 **Localization:** `messages.properties` / `messages_de.properties` (English/German), resolved per-user via
 `UserPreferenceEntity` and applied through `LocalePreferenceInterceptor` / `LocaleOAuth2SuccessHandler`.
+`KeyParityTest` fails when either file is missing a key or a value is empty.
 
 **Testing:** JUnit 5 + Mockito for unit tests (one per service/component, colocated package structure under
 `src/test/java`). Cucumber BDD feature tests live in `src/test/resources/features/*.feature` with step
@@ -133,11 +147,12 @@ checklist item id silently strands existing rows with no migration path. The dri
 database is known and accepted; do not re-raise it.
 
 **Build quality gates:** `maven-enforcer-plugin` checks Maven/Java versions plus `requireUpperBoundDeps`
-and `banDuplicatePomDependencyVersions` at `validate`. JaCoCo reports coverage during `test`
-(currently ~78% lines; the controllers are the gap). CSV import/export must name
-`StandardCharsets.UTF_8` explicitly at every byte/char boundary.
+and `banDuplicatePomDependencyVersions` at `validate`. JaCoCo reports coverage during `test`. The last
+recorded report is about 71% lines (see `TECH_DEBT.md`); the controllers are the gap. CSV import/export
+must name `StandardCharsets.UTF_8` explicitly at every byte/char boundary.
 
 **CI:** GitHub Actions runs `mvn -B package` on push/PR to `main` (`.github/workflows/maven.yml`) plus a
 Qodana static-analysis scan on the `qodana.recommended` profile
 (`.github/workflows/qodana_code_quality.yml`). That profile is likely to flag the intentional broad
-`catch` blocks; add the inspection id to the `exclude` list in `qodana.yaml` rather than changing the code.
+`catch` blocks. `qodana.yaml` has no active `exclude` list yet (the block is a commented placeholder);
+add the inspection id there rather than changing the code.

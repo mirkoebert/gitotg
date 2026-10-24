@@ -9,8 +9,11 @@ webapp running on a small VPS. Read CLAUDE.md first, then read the neighbouring 
 the package you are touching and match it — this codebase has a consistent house style
 and your change should be indistinguishable from what is already there.
 
-Build with `mvnd` when it is installed, otherwise `mvn`. Run the tests before reporting
-done, and report the actual result. Do not commit unless you are asked to.
+Build with `mvnd` when it is installed, otherwise `mvn`. Do not add or edit files under
+`src/test/`; test-writer owns new and changed tests. You may run an existing test to
+check a production change and report the Surefire result. If the change needs a new or
+updated test, name the missing coverage in your result and leave the test unwritten.
+Do not commit unless you are asked to.
 
 ## House style
 
@@ -19,8 +22,11 @@ done, and report the actual result. Do not commit unless you are asked to.
 - Lombok throughout: `@RequiredArgsConstructor` for injection, `@Slf4j` for logging,
   `@Data`/`@Builder` on entities, `val` for locals. Constructor injection only.
 - JSpecify `@NonNull`/`@Nullable` on public signatures, matching the surrounding file.
-- `XxxPrimaryController` serves Thymeleaf views; `XxxPrimaryRestController` serves JSON
-  (`/api/**/chart-data`, `/api/**/export|import`). Both inject `CurrentUserService`.
+- `XxxPrimaryController` serves Thymeleaf views; `XxxPrimaryRestController` serves JSON.
+  Keep the existing exception: `GMetricRestController` serves `/api/gmetric` and
+  `/api/gmetric/chart-data`. Do not rename it and do not add a second controller for
+  those paths. CSV for handicap, SGI, gmetric, and played rounds lives on
+  `CsvExportPrimaryRestController`. Both inject `CurrentUserService`.
 - Broad `catch (Exception e)` is the deliberate house style in `export/`, `handicap/`,
   `golfmetric/`, and `sgi/chart/` — fail soft, log, keep serving the page. Follow it
   there; never "fix" the existing ones.
@@ -48,27 +54,21 @@ Never hardcode English in Java or in a template.
 
 Checklist items and advisor tips are discovered by convention from the English bundle —
 `checklist.<goalSlug>.<id>.name` (optional `.desc`) and `advisor.<bucket>.<n>`. Adding
-one means adding lines to both bundles and nothing else: no Java, no database row. When
-a template needs a key chosen at runtime, use Thymeleaf preprocessing:
-`th:text="#{__${option.nameKey}__}"`.
+a tip, or an item on an existing goal (`break100`, `break90`, `break80`, `alltime`),
+means adding the key to both bundles and nothing else: no Java, no database row. Adding
+a goal also needs `GoalEnum`, nav and title keys, the navbar, `CockpitView`,
+`CockpitService`, `cockpit.html`, and a note that test-writer must cover it.
+`KeyParityTest` fails when either bundle is missing a key. When a template needs a key
+chosen at runtime, use Thymeleaf preprocessing: `th:text="#{__${option.nameKey}__}"`.
 
 ## Testing
 
-Colocate tests under `src/test/java` mirroring the package. JUnit 5 plus Mockito for
-units; `@SpringBootTest` when you need the real repositories.
+Do not write tests. test-writer follows `GoalControllerLocalizationIT` and
+`HcpPrimaryControllerIT` for rendered pages. Thymeleaf expressions are not type-checked
+and fail silently, so a template or message change is unfinished until that render test
+exists. Say so in your result instead of adding the test yourself.
 
-For anything that renders a template, write a test that actually renders it — Thymeleaf
-expressions are not type-checked and fail silently in production. Follow
-`GoalControllerLocalizationIT`. Note that `@AutoConfigureMockMvc` is **not** on this
-classpath (Spring Boot 4.1 moved it to a module the project does not depend on), so
-build MockMvc with `MockMvcBuilders.webAppContextSetup(webApplicationContext)` and mock
-`CurrentUserService` instead of dealing with the OAuth2 filter chain.
-
-Records work fine in Thymeleaf expressions here. Locale in a test is switched with the
-`lang` request parameter, not `Accept-Language` — the app uses a `SessionLocaleResolver`.
-
-Write assertions that can actually fail. Comparing a response against itself, or
-asserting on an empty result, is worse than no test.
+Do not run `mvn clean install`. Dependency-check rejects an empty NVD API key.
 
 ## Build file
 
