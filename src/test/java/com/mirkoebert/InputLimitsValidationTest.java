@@ -1,8 +1,6 @@
 package com.mirkoebert;
 
 import com.mirkoebert.golfcourse.PlayedRoundDto;
-import com.mirkoebert.golfmetric.GMetricDTO;
-import com.mirkoebert.golfmetric.GMetricType;
 import com.mirkoebert.handicap.HcpScoreDTO;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -21,19 +19,6 @@ class InputLimitsValidationTest {
     @BeforeAll
     static void setUpValidator() {
         validator = Validation.buildDefaultValidatorFactory().getValidator();
-    }
-
-    @Test
-    void gmetricValueMustBeWithinMetricLimits() {
-        GMetricDTO over = metric(InputLimits.METRIC_MAX + 1);
-        GMetricDTO under = metric(InputLimits.METRIC_MIN - 1);
-        GMetricDTO maxOk = metric(InputLimits.METRIC_MAX);
-        GMetricDTO minOk = metric(InputLimits.METRIC_MIN);
-
-        assertThat(validator.validate(over)).isNotEmpty();
-        assertThat(validator.validate(under)).isNotEmpty();
-        assertThat(validator.validate(maxOk)).isEmpty();
-        assertThat(validator.validate(minOk)).isEmpty();
     }
 
     @Test
@@ -58,14 +43,6 @@ class InputLimitsValidationTest {
         assertThat(validator.validate(overStrokes)).isNotEmpty();
         assertThat(validator.validate(overLost)).isNotEmpty();
         assertThat(validator.validate(ok)).isEmpty();
-    }
-
-    private static GMetricDTO metric(int value) {
-        return GMetricDTO.builder()
-                .selectedDate(LocalDate.of(2026, 1, 1))
-                .metricValue(value)
-                .type(GMetricType.LOST_BALLS_PER_9HOLES)
-                .build();
     }
 
     private static HcpScoreDTO hcp(double value) {

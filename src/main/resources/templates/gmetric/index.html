@@ -228,39 +228,6 @@
 
     selectRange(currentRange);
 </script>
-
-<div class="my-5">
-    <h2 th:text="#{gmetric.addHeading}">Add Metric</h2>
-    <form method="post" th:action="@{/gmetric}" th:object="${gMetric}">
-        <div class="row g-3 align-items-end">
-            <div class="col-12 col-md-3" th:classappend="${#fields.hasErrors('type')} ? 'is-invalid'">
-                <label class="form-label" for="type" th:text="#{gmetric.typeLabel}">Type</label>
-                <select class="form-select" id="type" required th:field="*{type}">
-                    <option th:text="#{gmetric.type.lostBalls}" th:value="LOST_BALLS">Lost Balls</option>
-                    <option th:text="#{gmetric.type.doubleBogey}" th:value="DOUBLE_BOGEY">Double Bogey</option>
-                    <option th:text="#{gmetric.type.bogey}" th:value="BOGEY">Bogey</option>
-                </select>
-                <div class="text-danger small" th:errors="*{type}"></div>
-            </div>
-            <div class="col-12 col-md-3" th:classappend="${#fields.hasErrors('metricValue')} ? 'is-invalid'">
-                <label class="form-label" for="metricValue" th:text="#{gmetric.valueLabel}">Value</label>
-                <input class="form-control" id="metricValue" required step="1" th:field="*{metricValue}"
-                       th:max="${T(com.mirkoebert.InputLimits).METRIC_MAX}"
-                       th:min="${T(com.mirkoebert.InputLimits).METRIC_MIN}"
-                       th:placeholder="#{gmetric.valuePlaceholder}" type="number">
-                <div class="text-danger small" th:errors="*{metricValue}"></div>
-            </div>
-            <div class="col-12 col-md-3" th:classappend="${#fields.hasErrors('selectedDate')} ? 'is-invalid'">
-                <label class="form-label" for="selectedDate" th:text="#{common.date}">Date</label>
-                <input class="form-control" id="selectedDate" required th:field="*{selectedDate}" type="date">
-                <div class="text-danger small" th:errors="*{selectedDate}"></div>
-            </div>
-            <div class="col-12 col-md-3">
-                <button class="btn btn-primary" th:text="#{gmetric.addScore}" type="submit">Add Metric</button>
-            </div>
-        </div>
-    </form>
-</div>
 </div>
 </div>
 
