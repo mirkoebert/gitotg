@@ -28,6 +28,6 @@ java -jar target/gitotg-0.5.0-SNAPSHOT.jar --spring.profiles.active=local
 
 ## CSV Export / Import
 - Export: GET `/api/handicap/export` and `/api/sgi/export` (downloads CSV for current user).
-- Import: POST `/api/handicap/import`, `/api/sgi/import`, `/api/gmetric/import` with multipart file (replaces all existing records for the current user; max file size 500KB / 420 lines).
-- UI: File upload forms with AJAX on Handicap, Short Game Index, and Metrics pages.
+- Import: POST `/api/handicap/import`, `/api/sgi/import` with multipart file (replaces all existing records for the current user; max file size 500KB / 420 lines).
+- UI: File upload forms with AJAX on Handicap and Short Game Index pages.
 - CSV format matches export

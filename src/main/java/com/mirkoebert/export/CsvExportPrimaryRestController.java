@@ -107,17 +107,6 @@ public class CsvExportPrimaryRestController {
     }
 
     @SneakyThrows
-    @PostMapping(value = "/api/gmetric/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> importGMetricCsv(@RequestParam("file") MultipartFile file) {
-        log.info("gmetric import csv");
-        val u = currentUserService.getCurrentUser();
-        final String userId = u.id();
-        int count = csvImportService.importGMetricData(file.getInputStream(), userId);
-        return ResponseEntity.ok(messageSource.getMessage(
-                "api.import.gmetric", new Object[]{count}, LocaleContextHolder.getLocale()));
-    }
-
-    @SneakyThrows
     @PostMapping(value = "/api/golfcourse/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> importPlayedRoundCsv(@RequestParam("file") MultipartFile file) {
         log.info("played-round import csv");
