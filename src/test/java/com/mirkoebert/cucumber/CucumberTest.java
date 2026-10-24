@@ -12,8 +12,8 @@ import static io.cucumber.junit.platform.engine.Constants.PLUGIN_PROPERTY_NAME;
 @IncludeEngines("cucumber")
 @SelectClasspathResource("features")
 @ConfigurationParameter(key = GLUE_PROPERTY_NAME, value = "com.mirkoebert.cucumber")
-// html goes straight into the site output dir so mvn test site publishes it;
-// like the JaCoCo and surefire reports it is simply absent if the tests did not run
-@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, html:target/site/cucumber.html")
+// JSON is the input for net.masterthought:maven-cucumber-reporting, which renders
+// the site page during pre-site. Like JaCoCo and Surefire, a bare mvn site has nothing to read.
+@ConfigurationParameter(key = PLUGIN_PROPERTY_NAME, value = "pretty, json:target/cucumber/cucumber.json")
 public class CucumberTest {
 }

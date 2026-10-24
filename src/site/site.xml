@@ -14,9 +14,9 @@
         <!-- Keep the generated Project Information / Project Reports menus -->
         <menu ref="reports"/>
         <menu name="BDD">
-            <!-- Written by the Cucumber HTML formatter during the test phase, not by a report plugin,
-                 so it needs an explicit menu entry -->
-            <item name="Cucumber" href="cucumber.html"/>
+            <!-- maven-cucumber-reporting is not a MavenReport, so it never lands on
+                 project-reports.html and needs this entry. -->
+            <item name="Cucumber" href="cucumber/cucumber-html-reports/overview-features.html"/>
         </menu>
     </body>
 </project>

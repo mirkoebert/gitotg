@@ -35,7 +35,8 @@ mvn spring-boot:run -Dspring-boot.run.arguments=--server.port=8080
 # Mutation testing (PIT) — declared in pom.xml but bound to no execution, so it only runs on demand
 mvn org.pitest:pitest-maven:mutationCoverage
 
-# Quality reports on the Maven site: Surefire, JaCoCo, dependency-check, Cucumber.
+# Quality reports on the Maven site: Surefire, JaCoCo, dependency-check, and Cucumber.
+# Cucumber JSON is written during test; maven-cucumber-reporting renders it in pre-site.
 # Must be "test site" — JaCoCo, Surefire and Cucumber all read artifacts the test phase wrote,
 # and a bare "mvn site" silently omits them. Output: target/site/index.html
 mvn test site

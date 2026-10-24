@@ -45,6 +45,7 @@
         <dependency-check.version>13.0.0</dependency-check.version>
         <surefire.version>3.6.0</surefire.version>
         <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
+        <maven-cucumber-reporting.version>5.11.0</maven-cucumber-reporting.version>
         <!-- Filled in by jacoco:prepare-agent; empty default keeps surefire working without it -->
         <jacocoArgLine/>
     </properties>
@@ -313,6 +314,78 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!-- The report mojo is not a MavenReport, so it cannot live in <reporting>.
+                     pre-site still runs as part of mvn test site, after the JSON exists.
+                     When that JSON is absent, write cucumber.report.skip=true so a bare
+                     mvn site omits the page instead of failing. -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>skip-cucumber-report-when-json-missing</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <mkdir dir="${project.build.directory}"/>
+                                <condition property="cucumber.report.skip" value="true" else="false">
+                                    <not>
+                                        <available file="${project.build.directory}/cucumber/cucumber.json"/>
+                                    </not>
+                                </condition>
+                                <echo file="${project.build.directory}/cucumber-report-skip.properties"
+                                      message="cucumber.report.skip=${cucumber.report.skip}${line.separator}"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.3.1</version>
+                <executions>
+                    <execution>
+                        <id>read-cucumber-report-skip</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${project.build.directory}/cucumber-report-skip.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>net.masterthought</groupId>
+                <artifactId>maven-cucumber-reporting</artifactId>
+                <version>${maven-cucumber-reporting.version}</version>
+                <executions>
+                    <execution>
+                        <id>generate-cucumber-report</id>
+                        <phase>pre-site</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <projectName>gitotg</projectName>
+                            <checkBuildResult>false</checkBuildResult>
+                            <outputDirectory>${project.reporting.outputDirectory}/cucumber</outputDirectory>
+                            <inputDirectory>${project.build.directory}/cucumber</inputDirectory>
+                            <jsonFiles>
+                                <param>cucumber.json</param>
+                            </jsonFiles>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
