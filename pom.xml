@@ -128,9 +128,9 @@
             <version>4.6.0</version>
         </dependency>
         <dependency>
+            <!-- Boot 4.1.2 manages 1.0.1, the latest stable release. -->
             <groupId>org.jspecify</groupId>
             <artifactId>jspecify</artifactId>
-            <version>1.0.1</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -205,9 +205,11 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- Exposes ${org.mockito:mockito-core:jar} for the Surefire javaagent path -->
+                <!-- Exposes ${org.mockito:mockito-core:jar} for the Surefire javaagent path.
+                     3.11.0 is the latest stable release; Boot 4.1.2 manages 3.10.0. -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.11.0</version>
                 <executions>
                     <execution>
                         <goals>
@@ -233,8 +235,11 @@
                 </configuration>
             </plugin>
             <plugin>
+                <!-- 3.16.0 is the latest stable release; Boot 4.1.2 manages 3.15.0.
+                     4.0.0-beta-5 is a beta and stays out. -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.16.0</version>
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
