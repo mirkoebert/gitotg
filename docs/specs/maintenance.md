@@ -4,12 +4,13 @@
 Fix all CVE by updating dependencies.
 
 ## Behavior
-- Update parent to lates stable version
+- Update parent to latest stable version
 - Update all self-managed dependencies to latest stable versions
 - Update all maven plugins to latest stable versions
+- Check: `mvn clean test verify -DnvdApiKey=$NVD_API_KEY`
 
 ## Constraints
-- If possible use managed dependency versions if they are CVE free
+- Prefer managed dependency over latest versions, if they are CVE free
 
 
 ## Working agreement
