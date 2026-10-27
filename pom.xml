@@ -128,7 +128,6 @@
             <version>4.6.0</version>
         </dependency>
         <dependency>
-            <!-- Boot 4.1.2 manages 1.0.1, the latest stable release. -->
             <groupId>org.jspecify</groupId>
             <artifactId>jspecify</artifactId>
         </dependency>

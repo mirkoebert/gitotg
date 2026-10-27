@@ -5,9 +5,9 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.boot.test.web.client.TestRestTemplate;
-//import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,7 +24,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -53,23 +52,11 @@ public class MetricsSteps {
 
         OidcUser oidcUser = new DefaultOidcUser(List.of(new SimpleGrantedAuthority("ROLE_USER")), idToken);
 
-        var auth = new OAuth2AuthenticationToken(oidcUser, oidcUser.getAuthorities(), "test");
+        OAuth2AuthenticationToken auth = new OAuth2AuthenticationToken(oidcUser, oidcUser.getAuthorities(), "test");
 
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
-//    void iAmAuthenticated() {
-//        OidcUser oidcUser = DefaultOidcUser.withUserAuthority(
-//                        new SimpleGrantedAuthority("ROLE_USER"),
-//                        Map.of(
-//                                "sub", "test-user-123",
-//                                "name", "Test User",
-//                                "email", "test@example.com"
-//                        )
-//                ).build();
-//        UsernamePasswordAuthenticationToken auth =
-//                new UsernamePasswordAuthenticationToken(oidcUser, null, oidcUser.getAuthorities());
-//        SecurityContextHolder.getContext().setAuthentication(auth);
-//    }
+
 
     @When("I open the golf metrics page")
     void iOpenTheGolfMetricsPage() {
