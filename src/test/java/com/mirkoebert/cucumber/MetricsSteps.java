@@ -5,7 +5,9 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.client.TestRestTemplate;
+//import org.springframework.boot.test.web.client.TestRestTemplate;
+//import org.springframework.boot.resttestclient.TestRestTemplate;
+import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -14,10 +16,13 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,18 +42,34 @@ public class MetricsSteps {
 
     @Given("I am authenticated")
     void iAmAuthenticated() {
-        OidcUser oidcUser = DefaultOidcUser.withUserAuthority(
-                        new SimpleGrantedAuthority("ROLE_USER"),
-                        Map.of(
-                                "sub", "test-user-123",
-                                "name", "Test User",
-                                "email", "test@example.com"
-                        )
-                ).build();
-        UsernamePasswordAuthenticationToken auth =
-                new UsernamePasswordAuthenticationToken(oidcUser, null, oidcUser.getAuthorities());
+        Instant now = Instant.now();
+        OidcIdToken idToken = OidcIdToken.withTokenValue("test-token")
+                .subject("test-user-123")
+                .claim("name", "Test User")
+                .claim("email", "test@example.com")
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(300))
+                .build();
+
+        OidcUser oidcUser = new DefaultOidcUser(List.of(new SimpleGrantedAuthority("ROLE_USER")), idToken);
+
+        var auth = new OAuth2AuthenticationToken(oidcUser, oidcUser.getAuthorities(), "test");
+
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
+//    void iAmAuthenticated() {
+//        OidcUser oidcUser = DefaultOidcUser.withUserAuthority(
+//                        new SimpleGrantedAuthority("ROLE_USER"),
+//                        Map.of(
+//                                "sub", "test-user-123",
+//                                "name", "Test User",
+//                                "email", "test@example.com"
+//                        )
+//                ).build();
+//        UsernamePasswordAuthenticationToken auth =
+//                new UsernamePasswordAuthenticationToken(oidcUser, null, oidcUser.getAuthorities());
+//        SecurityContextHolder.getContext().setAuthentication(auth);
+//    }
 
     @When("I open the golf metrics page")
     void iOpenTheGolfMetricsPage() {
