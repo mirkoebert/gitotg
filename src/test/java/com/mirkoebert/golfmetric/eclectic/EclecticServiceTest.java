@@ -1,4 +1,4 @@
-package com.mirkoebert.golfmetric.byyear;
+package com.mirkoebert.golfmetric.eclectic;
 
 import com.mirkoebert.golfcourse.*;
 import com.mirkoebert.handicap.HcpScoreDTO;
@@ -20,10 +20,10 @@ import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Slf4j
-class EclecticByYearTest {
+class EclecticServiceTest {
 
     @Autowired
-    private EclecticByYear cut;
+    private EclecticService cut;
     @Autowired
     private CourseService courseService;
     @MockitoBean
@@ -32,6 +32,7 @@ class EclecticByYearTest {
     private PlayedRoundRepository playedRoundRepository;
 
     final String testCourseName = "test course 16";
+    final String otherTestCourseName = "test course 17";
     final String testUser = "testUser";
 
     @BeforeEach
@@ -49,6 +50,7 @@ class EclecticByYearTest {
                 new Hole(8,4),
                 new Hole(9,4));
         when(catalog.findByName(testCourseName)).thenReturn(Optional.of(GolfCourse.builder().name(testCourseName).holes(holes).build()));
+        when(catalog.findByName(otherTestCourseName)).thenReturn(Optional.of(GolfCourse.builder().name(otherTestCourseName).holes(holes).build()));
 
         playedRoundRepository.deleteAll();
     }
@@ -59,19 +61,19 @@ class EclecticByYearTest {
         List<Integer> played = List.of(5,4,4,4,4,4,4,4,4);
         boolean r = courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 22), played, 0);
         assertTrue(r);
-        assertThat(cut.getEclecticHcpForYear(2025, testCourseName, testUser)).isEqualTo(1);
+        assertThat(cut.getEclecticHcpForYear(2025, testUser)).isEqualTo(1);
 
         log.info("Test with two played rounds");
         played = List.of(4,4,4,4,4,4,4,4,4);
         r = courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 22), played, 0);
         assertTrue(r);
         assertThat(playedRoundRepository.findByUserId(testUser)).isNotEmpty();
-        assertThat(cut.getEclecticHcpForYear(2025, testCourseName, testUser)).isEqualTo(0);
+        assertThat(cut.getEclecticHcpForYear(2025, testUser)).isEqualTo(0);
     }
 
     @Test
     void getEclecticHcpFor_YearWithoutPlayedRound() {
-        assertNull(cut.getEclecticHcpForYear(1612, testCourseName, testUser));
+        assertNull(cut.getEclecticHcpForYear(1612, testUser));
     }
 
     @Test
@@ -87,11 +89,28 @@ class EclecticByYearTest {
                 new HcpScoreDTO(LocalDate.of(2025, 1, 1), (double) 0)
         );
 
-        assertThat(cut.getEclecticHcpTimeline(testCourseName, testUser)).containsExactlyElementsOf(expectedList);
+        assertThat(cut.getEclecticHcpTimeline(testUser)).containsExactlyElementsOf(expectedList);
     }
 
     @Test
     void getEclecticHcpTimelineNoResult(){
-        assertThat(cut.getEclecticHcpTimeline(testCourseName, testUser)).containsExactlyElementsOf(Collections.emptyList());
+        assertThat(cut.getEclecticHcpTimeline(testUser)).containsExactlyElementsOf(Collections.emptyList());
+    }
+
+    @Test
+    void getHomeCourseName(){
+        List<Integer> played = List.of(5,5,4,4,4,4,4,4,4);
+        boolean r = courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 22), played, 0);
+        assertTrue(r);
+
+        played = List.of(4,4,4,4,4,4,4,4,4);
+        r = courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 23), played, 0);
+        assertTrue(r);
+
+        played = List.of(4,4,4,4,4,4,4,4,4);
+        r = courseService.submitRound(testUser, otherTestCourseName, LocalDate.of(2025, 6, 23), played, 0);
+        assertTrue(r);
+
+        assertThat(cut.getHomeCourseName(testUser)).hasToString(testCourseName);
     }
 }
