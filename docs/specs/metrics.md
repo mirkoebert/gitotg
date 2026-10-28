@@ -6,7 +6,7 @@ Show the user a chart with golf metrics (gmetrics) and handicap history.
 ### Context
 Spring Boot 4, Java 25, Thymeleaf.
 - Templates: `src/main/resources/templates/`, fragments in `fragments/`.
-- Metrics include: lost balls, bogeys, double bogeys, and other golf statistics.
+- Metrics include: lost balls, bogeys, double bogeys.
 
 ### Behavior
 - Default view: shows data from the last year
@@ -15,7 +15,7 @@ Spring Boot 4, Java 25, Thymeleaf.
   - 'Last two years'
   - 'All' (entire history)
 - Each metric has a distinct color in the chart
-- Chart shows both metrics and handicap on the same timeline
+- Chart shows all metrics and handicap on the same timeline
 - Responsive design that works on mobile and desktop
 
 ### Technical Details
@@ -27,4 +27,3 @@ Spring Boot 4, Java 25, Thymeleaf.
 ### Constraints
 - No new dependencies
 - Must maintain existing performance characteristics
-- Chart must be accessible (colorblind-friendly palette)
