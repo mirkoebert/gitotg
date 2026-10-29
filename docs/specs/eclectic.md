@@ -1,13 +1,13 @@
-# SPEC: Current Year Eclectic value for home course
+# SPEC: Current Eclectic value for home course
 
 ## Goal
-One or two sentences: what problem does this solve, for whom?
+Eclectic is a other number that shows the players potential. It should be a little bit lower than the handicap.
 
 ## Current behavior
 The current cockpit page doesn't show the eclectic value.
 
 ## Desired behavior
-Show the eclectic value, the year and the count of played rounds that goes in the eclectic calculation
+Show the eclectic value based on the 10 last rounds on the home course
 
 ## Out of scope
 Don't touch any existing boxes on the cockpit page.
@@ -30,6 +30,8 @@ URL: /cockpit
 Use existing: EclecticService.getEclecticHcpForLast10Rounds
 
 ## Acceptance criteria
+Write acceptance test first.
+
 Scenario: Show eclectic value
     Given I am an authenticated user
     And I have only two played rounds for the same course
