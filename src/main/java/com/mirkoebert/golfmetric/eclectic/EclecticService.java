@@ -49,7 +49,7 @@ public class EclecticService {
         }
     }
 
-    Double getEclecticHcpForLast10Rounds(final String userId){
+    public Double getEclecticHcpForLast10Rounds(final String userId){
         try {
             final String courseName = getHomeCourseName(userId);
             log.info("getEclecticHcpForLast10Rounds {} {}",  courseName, userId);

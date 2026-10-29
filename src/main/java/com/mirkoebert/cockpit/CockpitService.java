@@ -6,6 +6,7 @@ import com.mirkoebert.goal.GoalEnum;
 import com.mirkoebert.golfcourse.CourseService;
 import com.mirkoebert.golfmetric.GMetricService;
 import com.mirkoebert.golfmetric.GMetricType;
+import com.mirkoebert.golfmetric.eclectic.EclecticService;
 import com.mirkoebert.handicap.HcpService;
 import com.mirkoebert.sgi.SgiHcpAggregatedService;
 import com.mirkoebert.sgi.SingleTestResultRepository;
@@ -24,6 +25,7 @@ public class CockpitService {
     private final ChecklistService checklistService;
     private final CourseService courseService;
     private final AdvisorService advisorService;
+    private final EclecticService eclecticService;
 
     public @NonNull CockpitView load(@NonNull final  String userId) {
         Integer sgiHcp = singleTestResultRepository.countByUserId(userId) > 0
@@ -46,7 +48,12 @@ public class CockpitService {
                 checklistService.getProgress(userId, GoalEnum.BREAK80),
                 checklistService.getProgress(userId, GoalEnum.ALLTIME),
                 lastRound,
-                advisorService.getAdvise(userId)
+                advisorService.getAdvise(userId),
+                wholeNumber(eclecticService.getEclecticHcpForLast10Rounds(userId))
         );
+    }
+
+    private static Integer wholeNumber(Double value) {
+        return value == null ? null : value.intValue();
     }
 }

@@ -9,6 +9,7 @@ import com.mirkoebert.golfcourse.PlayedRoundEntity;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.golfmetric.GMetricService;
 import com.mirkoebert.golfmetric.GMetricType;
+import com.mirkoebert.golfmetric.eclectic.EclecticService;
 import com.mirkoebert.handicap.HcpScoreOutFormattedDTO;
 import com.mirkoebert.handicap.HcpService;
 import com.mirkoebert.sgi.SgiHcpAggregatedService;
@@ -48,6 +49,8 @@ class CockpitServiceTest {
     private CourseService courseService;
     @MockitoBean
     private AdvisorService advisorService;
+    @MockitoBean
+    private EclecticService eclecticService;
 
     @Test
     void load_emptyUser_hasNoSgiHcpRoundOrMetrics() {
@@ -58,6 +61,7 @@ class CockpitServiceTest {
         when(gMetricService.findLatestByUserIdAndType(USER, GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(null);
         when(courseService.findRoundsForUser(USER)).thenReturn(List.of());
         when(advisorService.getAdvise(USER)).thenReturn("Start a test.");
+        when(eclecticService.getEclecticHcpForLast10Rounds(USER)).thenReturn(null);
 
         CockpitView view = cut.load(USER);
 
@@ -68,6 +72,7 @@ class CockpitServiceTest {
         assertThat(view.lastRound()).isNull();
         assertThat(view.break100().percentage()).isZero();
         assertThat(view.advice()).isEqualTo("Start a test.");
+        assertThat(view.eclectic()).isNull();
     }
 
     @Test
@@ -97,6 +102,7 @@ class CockpitServiceTest {
                         .build()
         ));
         when(advisorService.getAdvise(USER)).thenReturn("Work the short game.");
+        when(eclecticService.getEclecticHcpForLast10Rounds(USER)).thenReturn(22.0);
 
         CockpitView view = cut.load(USER);
 
@@ -112,6 +118,7 @@ class CockpitServiceTest {
         assertThat(view.lastRound().totalStrokes()).isEqualTo(11);
         assertThat(view.lastRound().lostBalls()).isEqualTo(1);
         assertThat(view.advice()).isEqualTo("Work the short game.");
+        assertThat(view.eclectic()).isEqualTo(22);
     }
 
     @Test
@@ -125,6 +132,7 @@ class CockpitServiceTest {
         stubEmptyGoals();
         when(courseService.findRoundsForUser(USER)).thenReturn(List.of());
         when(advisorService.getAdvise(USER)).thenReturn("Keep going.");
+        when(eclecticService.getEclecticHcpForLast10Rounds(USER)).thenReturn(null);
 
         CockpitView view = cut.load(USER);
 
@@ -132,6 +140,7 @@ class CockpitServiceTest {
         assertThat(view.sgiHcp()).isNull();
         assertThat(view.lastRound()).isNull();
         assertThat(view.lostBalls().present()).isFalse();
+        assertThat(view.eclectic()).isNull();
     }
 
     private void stubEmptyHcpAndGoals() {
