@@ -61,14 +61,14 @@ class EclecticServiceTest {
         List<Integer> played = List.of(5,4,4,4,4,4,4,4,4);
         boolean r = courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 22), played, 0);
         assertTrue(r);
-        assertThat(cut.getEclecticHcpForYear(2025, testUser)).isEqualTo(1);
+        assertThat(cut.getEclecticHcpForYear(2025, testUser)).isEqualTo(37);
 
         log.info("Test with two played rounds");
         played = List.of(4,4,4,4,4,4,4,4,4);
         r = courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 22), played, 0);
         assertTrue(r);
         assertThat(playedRoundRepository.findByUserId(testUser)).isNotEmpty();
-        assertThat(cut.getEclecticHcpForYear(2025, testUser)).isEqualTo(0);
+        assertThat(cut.getEclecticHcpForYear(2025, testUser)).isEqualTo(36);
     }
 
     @Test
@@ -85,8 +85,8 @@ class EclecticServiceTest {
         courseService.submitRound(testUser, testCourseName, LocalDate.of(2025, 6, 22), played, 0);
 
         Iterable<? extends HcpScoreDTO> expectedList = List.of(
-                new HcpScoreDTO(LocalDate.of(2026, 1, 1), (double) 1),
-                new HcpScoreDTO(LocalDate.of(2025, 1, 1), (double) 0)
+                new HcpScoreDTO(LocalDate.of(2026, 1, 1), (double) 37),
+                new HcpScoreDTO(LocalDate.of(2025, 1, 1), (double) 36)
         );
 
         assertThat(cut.getEclecticHcpTimeline(testUser)).containsExactlyElementsOf(expectedList);

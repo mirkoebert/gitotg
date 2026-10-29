@@ -26,8 +26,6 @@ public class EclecticService {
             final String courseName = getHomeCourseName(userId);
             log.info("getEclecticHcpForYear {} {} {}", year, courseName, userId);
             final GolfCourse c = catalog.findByName(courseName).get();
-            int courseHcp = c.getHoles().stream().mapToInt(Hole::getPar).sum();
-            log.info("courseHcp {}", courseHcp);
 
             List<PlayedRoundEntity> allPlayedRounds = playedRoundRepository.findAllByUserIdAndCourseName(userId, courseName);
             List<PlayedRoundEntity> playedRoundsOfYear = allPlayedRounds
@@ -42,20 +40,18 @@ public class EclecticService {
             log.info("eclecticSum {}", eclecticSum);
 
 
-            return (double) (eclecticSum - courseHcp);
+            return (double) eclecticSum;
         } catch (Exception e) {
             log.info("Can't calc eclectic hcp {}", e.getMessage());
             return null;
         }
     }
 
-    public Double getEclecticHcpForLast10Rounds(final String userId){
+    public Integer getEclecticHcpForLast10Rounds(final String userId){
         try {
             final String courseName = getHomeCourseName(userId);
             log.info("getEclecticHcpForLast10Rounds {} {}",  courseName, userId);
             final GolfCourse c = catalog.findByName(courseName).get();
-            int courseHcp = c.getHoles().stream().mapToInt(Hole::getPar).sum();
-            log.info("courseHcp {}", courseHcp);
 
             List<PlayedRoundEntity> allPlayedRounds = playedRoundRepository.findAllByUserIdAndCourseName(userId, courseName);
             List<PlayedRoundEntity> playedRoundsSelected = allPlayedRounds
@@ -67,10 +63,9 @@ public class EclecticService {
             for (int i = 0; i < countOfHoles; i++) {
                 eclecticSum = eclecticSum + getBestShotCountForHole(i, playedRoundsSelected);
             }
+
             log.info("eclecticSum {}", eclecticSum);
-
-
-            return (double) (eclecticSum - courseHcp);
+            return eclecticSum;
         } catch (Exception e) {
             log.info("Can't calc eclectic hcp {}", e.getMessage());
             return null;
@@ -120,5 +115,12 @@ public class EclecticService {
         Optional<Map.Entry<String, Long>> top = x.entrySet().stream().max(Map.Entry.comparingByValue());
         log.info("top entry: {}", top);
         return top.get().getKey();
+    }
+
+    int getCoursePar(final String userId, final String courseName){
+        final GolfCourse c = catalog.findByName(courseName).get();
+        int coursePar = c.getHoles().stream().mapToInt(Hole::getPar).sum();
+        log.info("course name {} par {}", courseName, coursePar);
+        return coursePar;
     }
 }

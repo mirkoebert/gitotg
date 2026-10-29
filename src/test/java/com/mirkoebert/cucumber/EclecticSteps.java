@@ -80,6 +80,6 @@ public class EclecticSteps {
     public void myEclecticValueIsShown() {
         assertThat(cockpitHtml).contains("Eclectic");
         assertThat(cockpitHtml).contains("Based on last 10 rounds");
-        assertThat(cockpitHtml).containsPattern("(?s)Eclectic.{0,400}>\\s*1\\s*<.{0,200}Based on last 10 rounds");
+        assertThat(cockpitHtml).containsPattern("(?s)Eclectic.{0,400}>\\s*36\\s*<.{0,200}Based on last 10 rounds");
     }
 }

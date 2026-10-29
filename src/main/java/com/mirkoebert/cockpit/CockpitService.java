@@ -53,7 +53,7 @@ public class CockpitService {
         );
     }
 
-    private static Integer wholeNumber(Double value) {
+    private static Integer wholeNumber(Integer value) {
         return value == null ? null : value.intValue();
     }
 }

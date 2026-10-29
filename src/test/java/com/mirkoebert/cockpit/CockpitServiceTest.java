@@ -102,7 +102,7 @@ class CockpitServiceTest {
                         .build()
         ));
         when(advisorService.getAdvise(USER)).thenReturn("Work the short game.");
-        when(eclecticService.getEclecticHcpForLast10Rounds(USER)).thenReturn(22.0);
+        when(eclecticService.getEclecticHcpForLast10Rounds(USER)).thenReturn(22);
 
         CockpitView view = cut.load(USER);
 
