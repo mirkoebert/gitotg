@@ -105,7 +105,7 @@ public class EclecticService {
         }
     }
 
-    String getHomeCourseName(final String userId){
+    public String getHomeCourseName(final String userId){
         List<PlayedRoundEntity> p = playedRoundRepository.findByUserId(userId);
         Map<String, Long> x = p
                 .stream()
@@ -117,7 +117,7 @@ public class EclecticService {
         return top.get().getKey();
     }
 
-    int getCoursePar(final String userId, final String courseName){
+    public int getCoursePar(final String userId, final String courseName){
         final GolfCourse c = catalog.findByName(courseName).get();
         int coursePar = c.getHoles().stream().mapToInt(Hole::getPar).sum();
         log.info("course name {} par {}", courseName, coursePar);

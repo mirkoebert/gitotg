@@ -6,3 +6,5 @@ Feature: Current eclectic value on the cockpit
     And I have only two played rounds for the same course
     When I open the cockpit page
     Then My eclectic value is shown
+    And The name of my Home course is shown
+    And The PAR value of my Home course is shown

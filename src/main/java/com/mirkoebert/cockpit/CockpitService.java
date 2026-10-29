@@ -14,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.util.NoSuchElementException;
+
 @Service
 @RequiredArgsConstructor
 public class CockpitService {
@@ -37,6 +39,7 @@ public class CockpitService {
                 .map(CockpitView.RoundSnapshot::from)
                 .orElse(null);
 
+        final String homeCourse = homeCourseName(userId);
         return new CockpitView(
                 hcpService.findLatestByUserId(userId),
                 sgiHcp,
@@ -49,11 +52,28 @@ public class CockpitService {
                 checklistService.getProgress(userId, GoalEnum.ALLTIME),
                 lastRound,
                 advisorService.getAdvise(userId),
-                wholeNumber(eclecticService.getEclecticHcpForLast10Rounds(userId))
+                eclecticService.getEclecticHcpForLast10Rounds(userId),
+                homeCourse,
+                coursePar(userId, homeCourse)
         );
     }
 
-    private static Integer wholeNumber(Integer value) {
-        return value == null ? null : value.intValue();
+    private String homeCourseName(String userId) {
+        try {
+            return eclecticService.getHomeCourseName(userId);
+        } catch (NoSuchElementException ex) {
+            return null;
+        }
+    }
+
+    private Integer coursePar(String userId, String homeCourse) {
+        if (homeCourse == null) {
+            return null;
+        }
+        try {
+            return eclecticService.getCoursePar(userId, homeCourse);
+        } catch (NoSuchElementException ex) {
+            return null;
+        }
     }
 }

@@ -80,6 +80,16 @@ public class EclecticSteps {
     public void myEclecticValueIsShown() {
         assertThat(cockpitHtml).contains("Eclectic");
         assertThat(cockpitHtml).contains("Based on last 10 rounds");
-        assertThat(cockpitHtml).containsPattern("(?s)Eclectic.{0,400}>\\s*36\\s*<.{0,200}Based on last 10 rounds");
+        assertThat(cockpitHtml).containsPattern("(?s)Eclectic.{0,400}>\\s*36\\s*<.{0,400}Based on last 10 rounds");
+    }
+
+    @Then("The name of my Home course is shown")
+    public void theNameOfMyHomeCourseIsShown() {
+        assertThat(cockpitHtml).containsPattern("(?s)Home course.{0,80}Fischland");
+    }
+
+    @Then("The PAR value of my Home course is shown")
+    public void theParValueOfMyHomeCourseIsShown() {
+        assertThat(cockpitHtml).containsPattern("(?s)Par.{0,80}>\\s*35\\s*<");
     }
 }

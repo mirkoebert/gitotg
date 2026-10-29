@@ -19,7 +19,9 @@ public record CockpitView(
         ChecklistProgress alltime,
         RoundSnapshot lastRound,
         String advice,
-        Integer eclectic
+        Integer eclectic,
+        String homeCourse,
+        Integer coursePar
 ) {
 
     public record MetricSnapshot(Float value, LocalDate date) {

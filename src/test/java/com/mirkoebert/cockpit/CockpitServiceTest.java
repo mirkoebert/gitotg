@@ -73,6 +73,8 @@ class CockpitServiceTest {
         assertThat(view.break100().percentage()).isZero();
         assertThat(view.advice()).isEqualTo("Start a test.");
         assertThat(view.eclectic()).isNull();
+        assertThat(view.homeCourse()).isNull();
+        assertThat(view.coursePar()).isNull();
     }
 
     @Test
@@ -103,6 +105,8 @@ class CockpitServiceTest {
         ));
         when(advisorService.getAdvise(USER)).thenReturn("Work the short game.");
         when(eclecticService.getEclecticHcpForLast10Rounds(USER)).thenReturn(22);
+        when(eclecticService.getHomeCourseName(USER)).thenReturn("Fischland");
+        when(eclecticService.getCoursePar(USER, "Fischland")).thenReturn(35);
 
         CockpitView view = cut.load(USER);
 
@@ -119,6 +123,8 @@ class CockpitServiceTest {
         assertThat(view.lastRound().lostBalls()).isEqualTo(1);
         assertThat(view.advice()).isEqualTo("Work the short game.");
         assertThat(view.eclectic()).isEqualTo(22);
+        assertThat(view.homeCourse()).isEqualTo("Fischland");
+        assertThat(view.coursePar()).isEqualTo(35);
     }
 
     @Test
@@ -141,6 +147,8 @@ class CockpitServiceTest {
         assertThat(view.lastRound()).isNull();
         assertThat(view.lostBalls().present()).isFalse();
         assertThat(view.eclectic()).isNull();
+        assertThat(view.homeCourse()).isNull();
+        assertThat(view.coursePar()).isNull();
     }
 
     private void stubEmptyHcpAndGoals() {

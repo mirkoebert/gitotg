@@ -139,6 +139,16 @@
                 <p class="display-6 mb-1" th:if="${cockpit.eclectic() != null}" th:text="${cockpit.eclectic()}">22</p>
                 <p class="display-6 mb-1 text-muted" th:if="${cockpit.eclectic() == null}"
                    th:text="#{trend.notEnoughData}">not enough data available</p>
+                <p class="mb-1">
+                    <span th:text="#{cockpit.eclectic.homeCourse}">Home course</span>:
+                    <span th:if="${cockpit.homeCourse() != null}" th:text="${cockpit.homeCourse()}">CourseName</span>
+                    <span th:if="${cockpit.homeCourse() == null}" th:text="#{trend.notEnoughData}">not enough data available</span>
+                </p>
+                <p class="mb-1">
+                    <span th:text="#{cockpit.eclectic.par}">Par</span>:
+                    <span th:if="${cockpit.coursePar() != null}" th:text="${cockpit.coursePar()}">35</span>
+                    <span th:if="${cockpit.coursePar() == null}" th:text="#{trend.notEnoughData}">not enough data available</span>
+                </p>
                 <p class="mb-0 text-muted" th:text="#{cockpit.eclectic.basis}">Based on last 10 rounds</p>
             </div>
         </div>
