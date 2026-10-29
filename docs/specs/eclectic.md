@@ -1,13 +1,13 @@
 # SPEC: Current Eclectic value for home course
 
 ## Goal
-Eclectic is a other number that shows the players potential. It should be a little bit lower than the handicap.
+Eclectic is an other number that shows the players potential.
 
 ## Current behavior
 The current cockpit page doesn't show the eclectic value.
 
 ## Desired behavior
-Show the eclectic value based on the 10 last rounds on the home course
+Show the eclectic value based on the 10 last rounds on the home course, the name of the home course and the PAR value
 
 ## Out of scope
 Don't touch any existing boxes on the cockpit page.
@@ -17,6 +17,8 @@ Show the eclectic value in the same way, like the others, in a box
 ---------------------------
 | Eclectic                |
 | 22                      |
+| Home course: CourseName |
+| Par: 35                 |
 | Based on last 10 rounds |
 ---------------------------
 
@@ -27,7 +29,10 @@ src/main/resources/templates/cockpit.html
 endpoints
 URL: /cockpit 
 
-Use existing: EclecticService.getEclecticHcpForLast10Rounds
+Use existing: 
+EclecticService.getEclecticHcpForLast10Rounds
+EclecticService.getHomeCourseName
+EclecticService.getCoursePar
 
 ## Acceptance criteria
 Write acceptance test first.
@@ -37,3 +42,5 @@ Scenario: Show eclectic value
     And I have only two played rounds for the same course
     When I open the cockpit page
     Then My eclectic value is shown
+    And The name of my Home course is shown
+    And The PAR value of my Home course is shown
