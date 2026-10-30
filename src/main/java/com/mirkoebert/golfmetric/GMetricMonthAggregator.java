@@ -19,9 +19,11 @@ import java.util.stream.Collectors;
 class GMetricMonthAggregator {
 
     public static final String RANGE_LAST_YEAR = "lastYear";
+    public static final String RANGE_LAST_TWO_YEARS = "lastTwoYears";
     public static final String RANGE_ALL = "all";
 
     private static final int LAST_YEAR_MONTHS = 12;
+    private static final int LAST_TWO_YEARS_MONTHS = 24;
 
     private final GMetricRepository repo;
     private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-yyyy");
@@ -30,19 +32,22 @@ class GMetricMonthAggregator {
     /**
      * Builds monthly chart series for the given timeframe.
      *
-     * @param range {@value #RANGE_LAST_YEAR} (default) or {@value #RANGE_ALL}
+     * @param range {@value #RANGE_LAST_YEAR} (default), {@value #RANGE_LAST_TWO_YEARS}, or {@value #RANGE_ALL}
      */
     public @NonNull GMetricChartDataDto getMetricsForRange(final String range, final String userId) {
         if (RANGE_ALL.equalsIgnoreCase(range)) {
             return chartForAll(userId);
         }
-        return chartForLastYear(userId);
+        if (RANGE_LAST_TWO_YEARS.equalsIgnoreCase(range)) {
+            return chartForLastMonths(userId, LAST_TWO_YEARS_MONTHS);
+        }
+        return chartForLastMonths(userId, LAST_YEAR_MONTHS);
     }
 
-    private @NonNull GMetricChartDataDto chartForLastYear(@NonNull final String userId) {
+    private @NonNull GMetricChartDataDto chartForLastMonths(@NonNull final String userId, final int months) {
         final YearMonth end = YearMonth.now();
-        final YearMonth start = end.minusMonths(LAST_YEAR_MONTHS - 1L);
-        // Keep a fixed 12-month window so switching ranges is visible.
+        final YearMonth start = end.minusMonths(months - 1L);
+        // Keep a fixed month window so switching ranges is visible.
         return buildMonthlyChartData(userId, start, end);
     }
 

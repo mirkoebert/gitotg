@@ -51,6 +51,27 @@ class GMetricMonthAggregatorTest {
     }
 
     @Test
+    void getMetricsForRange_lastTwoYears_keeps24MonthsAndDropsOlderEntries() {
+        YearMonth now = YearMonth.now();
+        YearMonth inside = now.minusMonths(20);
+        YearMonth outside = now.minusMonths(30);
+        when(repo.findByUserIdAndType("u", GMetricType.BOGEY_PLUS)).thenReturn(List.of(
+                metric(inside.atDay(10), GMetricType.BOGEY_PLUS, 4),
+                metric(outside.atDay(10), GMetricType.BOGEY_PLUS, 9)
+        ));
+
+        GMetricChartDataDto result = cut.getMetricsForRange("lastTwoYears", "u");
+
+        assertThat(result.labels()).hasSize(24);
+        assertThat(result.labels().getFirst()).isEqualTo(FMT.format(now.minusMonths(23)));
+        assertThat(result.labels().getLast()).isEqualTo(FMT.format(now));
+        assertThat(result.bogey().get(3)).isEqualTo(4.0);
+        assertThat(result.bogey()).doesNotContain(9.0);
+        assertThat(result.lostBalls()).hasSize(24);
+        assertThat(result.doubleBogey()).hasSize(24);
+    }
+
+    @Test
     void getMetricsForRange_lastYear_averagesMultipleEntriesInTheSameMonth() {
         YearMonth currentMonth = YearMonth.now();
         when(repo.findByUserIdAndType("u", GMetricType.LOST_BALLS_PER_9HOLES)).thenReturn(List.of(

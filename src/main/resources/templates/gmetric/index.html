@@ -23,9 +23,12 @@
 <div class="row justify-content-center">
 <div class="col-12 col-md-10 col-lg-8">
     <div class="d-flex justify-content-center mb-3">
-        <div class="btn-group" role="group" th:aria-label="#{gmetric.range.label}">
+        <div class="btn-group flex-wrap" role="group" th:aria-label="#{gmetric.range.label}">
             <button class="btn btn-outline-primary active" data-range="lastYear" id="range-lastYear"
                     th:text="#{gmetric.range.lastYear}" type="button">Last year
+            </button>
+            <button class="btn btn-outline-primary" data-range="lastTwoYears" id="range-lastTwoYears"
+                    th:text="#{gmetric.range.lastTwoYears}" type="button">Last two years
             </button>
             <button class="btn btn-outline-primary" data-range="all" id="range-all"
                     th:text="#{gmetric.range.all}" type="button">All
@@ -46,6 +49,14 @@
     let metricsChart = null;
     let currentRange = 'lastYear';
     let loadToken = 0;
+
+    function exactTooltipLabel(context) {
+        const value = context.parsed.y;
+        if (value === null || value === undefined) {
+            return context.dataset.label + ': ';
+        }
+        return context.dataset.label + ': ' + value;
+    }
 
     function smoothDataset(label, borderColor, backgroundColor) {
         return {
@@ -104,7 +115,13 @@
                 },
                 plugins: {
                     legend: {position: 'top'},
-                    title: {display: true, text: chartTitle}
+                    title: {display: true, text: chartTitle},
+                    tooltip: {
+                        enabled: true,
+                        callbacks: {
+                            label: exactTooltipLabel
+                        }
+                    }
                 },
                 scales: {
                     y: {
