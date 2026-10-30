@@ -33,6 +33,8 @@ Show the eclectic value in the same way, like the others, in a box
 | Chart                   |
 ---------------------------
 
+The cart have the same size, like the navigation. 
+
 ## Technical notes
 Affected files
 src/main/resources/templates/gmetric/index.html
@@ -46,6 +48,7 @@ The metric is aggregated by month (exists). Extend class `GMetricMonthAggregator
 - Data points should be connected with lines
 - Y-axis should show appropriate scale, min is 0
 - Tooltip should show exact values when hovering over data points
+- The values in the tooltip have max 1 place like 2.5
 
 ### Constraints
 - No new dependencies
