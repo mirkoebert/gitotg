@@ -40,11 +40,11 @@ src/main/resources/templates/gmetric/index.html
 endpoints
 URL: /gmetric
 
-The metric is aggregated by month (exists). Extend class GMetricMonthAggregator for an additional range (last two years)
+The metric is aggregated by month (exists). Extend class `GMetricMonthAggregator` for an additional range (last two years)
 
 - Chart implementation: use existing charting library (no new dependencies)
 - Data points should be connected with lines
-- Y-axis should show appropriate scale for each metric type
+- Y-axis should show appropriate scale, min is 0
 - Tooltip should show exact values when hovering over data points
 
 ### Constraints
@@ -59,3 +59,8 @@ And I have only twenty played rounds for the same course over three years
 When I open the metrics page
 Then My metrics chart is shown
 And The selected time range is 'last year'
+And I can switch the time range to 'last two years' and 'all'                                                                                                                                                                                                                                                                                    
+And The chart updates dynamically when the time range is changed                                                                                                                                                                                                                                                                                 
+And The chart is responsive and works on mobile and desktop                                                                                                                                                                                                                                                                                      
+And Each metric is displayed with a distinct color                                                                                                                                                                                                                                                                                               
+And The tooltip shows exact values when hovering over data points
