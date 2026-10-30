@@ -1,7 +1,7 @@
 # SPEC: Current Eclectic value for home course
 
 ## Goal
-Eclectic is an other number that shows the players potential.
+Eclectic is another number that shows the players potential.
 
 ## Current behavior
 The current cockpit page doesn't show the eclectic value.
