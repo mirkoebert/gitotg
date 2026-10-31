@@ -228,8 +228,6 @@
                 </configuration>
             </plugin>
             <plugin>
-                <!-- 3.16.0 is the latest stable release; Boot 4.1.2 manages 3.15.0.
-                     4.0.0-beta-5 is a beta and stays out. -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.16.0</version>
@@ -391,6 +389,24 @@
                     </dependency>
                 </dependencies>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.28.0</version>
+                <configuration>
+                    <!-- failOnViolation is actually true by default, but can be disabled -->
+                    <failOnViolation>true</failOnViolation>
+                    <!-- printFailingErrors is pretty useful -->
+                    <printFailingErrors>true</printFailingErrors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
@@ -452,6 +468,11 @@
                         </reports>
                     </reportSet>
                 </reportSets>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.28.0</version>
             </plugin>
         </plugins>
     </reporting>

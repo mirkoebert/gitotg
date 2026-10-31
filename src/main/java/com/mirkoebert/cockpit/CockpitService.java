@@ -54,7 +54,7 @@ public class CockpitService {
                 advisorService.getAdvise(userId),
                 eclecticService.getEclecticHcpForLast10Rounds(userId),
                 homeCourse,
-                coursePar(userId, homeCourse)
+                coursePar(homeCourse)
         );
     }
 
@@ -66,7 +66,7 @@ public class CockpitService {
         }
     }
 
-    private Integer coursePar(String userId, String homeCourse) {
+    private Integer coursePar(final String homeCourse) {
         if (homeCourse == null) {
             return null;
         }

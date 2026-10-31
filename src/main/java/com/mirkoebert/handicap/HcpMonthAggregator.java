@@ -72,7 +72,7 @@ class HcpMonthAggregator {
         final List<String> labels = new ArrayList<>(i);
         final List<Double> hcps = new ArrayList<>(i);
 
-        for (int j = (i - 1); j >= 0; j--) {
+        for (int j = i - 1; j >= 0; j--) {
             YearMonth mi = YearMonth.from(now.minusMonths(j));
             Double v = byMonth.get(mi);
             hcps.add(v);

@@ -107,7 +107,7 @@ public class CourseService {
         if (course.getHoles().size() == 9) {
             return (float) lostBalls;
         } else if (course.getHoles().size() == 18) {
-            return  ((float)lostBalls / 2);
+            return  (float)lostBalls / 2;
         }
         log.warn("Can't get calc metric {}} because course {} has unsupported whole count", GMetricType.LOST_BALLS_PER_9HOLES, course);
         return null;
