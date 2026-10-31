@@ -23,6 +23,7 @@ public class GolfCoursePrimaryController {
 
     private final CourseService courseService;
     private final CurrentUserService currentUserService;
+    private final GolfCourseCatalog catalog;
 
     private static PlayedRoundDto emptyForm() {
         return PlayedRoundDto.builder().selectedDate(LocalDate.now()).build();
@@ -32,7 +33,7 @@ public class GolfCoursePrimaryController {
     public String getPage(final Model model) {
         log.info("Get golf course page");
         final CurrentUser u = currentUserService.getCurrentUser();
-        model.addAttribute("courses", courseService.findAllCourses());
+        model.addAttribute("courses", catalog.findAll());
         model.addAttribute("round", emptyForm());
         model.addAttribute("rounds", courseService.findRoundsForUser(u.id()));
         return "golfcourse/index";
@@ -51,7 +52,7 @@ public class GolfCoursePrimaryController {
             model.addAttribute("error", "golfcourse.error.mismatch");
         }
 
-        model.addAttribute("courses", courseService.findAllCourses());
+        model.addAttribute("courses", catalog.findAll());
         model.addAttribute("round", emptyForm());
         model.addAttribute("rounds", courseService.findRoundsForUser(u.id()));
         return "golfcourse/index";

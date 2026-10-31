@@ -106,7 +106,7 @@ class CockpitServiceTest {
         when(advisorService.getAdvise(USER)).thenReturn("Work the short game.");
         when(eclecticService.getEclecticHcpForLast10Rounds(USER)).thenReturn(22);
         when(eclecticService.getHomeCourseName(USER)).thenReturn("Fischland");
-        when(eclecticService.getCoursePar(USER, "Fischland")).thenReturn(35);
+        when(eclecticService.getCoursePar("Fischland")).thenReturn(35);
 
         CockpitView view = cut.load(USER);
 

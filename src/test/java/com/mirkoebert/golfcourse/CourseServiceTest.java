@@ -1,7 +1,6 @@
 package com.mirkoebert.golfcourse;
 
 import com.mirkoebert.golfmetric.GMetricRepository;
-import org.jspecify.annotations.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

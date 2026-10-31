@@ -117,7 +117,7 @@ public class EclecticService {
         return top.get().getKey();
     }
 
-    public int getCoursePar(final String userId, final String courseName){
+    public int getCoursePar(final String courseName){
         final GolfCourse c = catalog.findByName(courseName).get();
         int coursePar = c.getHoles().stream().mapToInt(Hole::getPar).sum();
         log.info("course name {} par {}", courseName, coursePar);

@@ -25,10 +25,6 @@ public class CourseService {
     private final DoubleBogeyPlusCountFunction doubleBogeyPlusCountFunction;
     private final GMetricRepository repo;
 
-    public @NonNull List<GolfCourse> findAllCourses() {
-        return catalog.findAll();
-    }
-
     public @NonNull List<PlayedRoundEntity> findRoundsForUser(@NonNull final String userId) {
         return playedRoundRepository.findTop10ByUserIdOrderByDateDesc(userId);
     }

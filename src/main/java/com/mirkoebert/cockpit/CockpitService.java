@@ -71,7 +71,7 @@ public class CockpitService {
             return null;
         }
         try {
-            return eclecticService.getCoursePar(userId, homeCourse);
+            return eclecticService.getCoursePar(homeCourse);
         } catch (NoSuchElementException ex) {
             return null;
         }

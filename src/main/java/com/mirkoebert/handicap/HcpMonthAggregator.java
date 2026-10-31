@@ -62,7 +62,6 @@ class HcpMonthAggregator {
         return (int) span;
     }
 
-    @SuppressWarnings({"SequencedCollectionMethodCanBeUsed", "ConditionalBreakInInfiniteLoop"})
     HcpData getHcpForLastMonth(int i, String userId) {
         return windowEndingNow(averagesByMonth(userId), i);
     }

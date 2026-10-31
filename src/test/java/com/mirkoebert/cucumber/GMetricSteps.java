@@ -55,11 +55,6 @@ public class GMetricSteps {
         assertThat(all).hasSize(expectedCount);
     }
 
-    @Then("the last import saved {int} records")
-    public void theLastImportSavedRecords(int expectedCount) {
-        assertThat(lastImportCount).isEqualTo(expectedCount);
-    }
-
     @Then("a gmetric exists with date {string}, type {string} and value {int}")
     public void aGmetricExistsWithDateTypeAndValue(String date, String type, int value) {
         LocalDate localDate = LocalDate.parse(date);
