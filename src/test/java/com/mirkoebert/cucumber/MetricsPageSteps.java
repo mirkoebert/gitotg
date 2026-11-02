@@ -134,9 +134,10 @@ public class MetricsPageSteps {
     public void theChartIsResponsiveAndWorksOnMobileAndDesktop() {
         assertThat(pageHtml).contains("width=device-width");
         assertThat(pageHtml).contains("responsive: true");
-        assertThat(pageHtml).contains("col-12");
-        assertThat(pageHtml).contains("col-lg-8");
         assertThat(pageHtml).contains("width: 100%");
+        assertThat(pageHtml).contains("class=\"chart-wrap\"");
+        assertThat(pageHtml).doesNotContain("col-lg-8");
+        assertThat(pageHtml).doesNotContain("col-md-10");
     }
 
     @Then("Each metric is displayed with a distinct color")
@@ -146,7 +147,8 @@ public class MetricsPageSteps {
         while (matcher.find()) {
             colors.add(matcher.group(1) + "," + matcher.group(2) + "," + matcher.group(3));
         }
-        assertThat(colors).hasSize(3).doesNotHaveDuplicates();
+        assertThat(colors).hasSize(4).doesNotHaveDuplicates();
+        assertThat(pageHtml).contains("data.handicap");
     }
 
     @Then("The tooltip shows exact values when hovering over data points")
@@ -165,6 +167,7 @@ public class MetricsPageSteps {
                 .andExpect(jsonPath("$.lostBalls").isArray())
                 .andExpect(jsonPath("$.doubleBogey").isArray())
                 .andExpect(jsonPath("$.bogey").isArray())
+                .andExpect(jsonPath("$.handicap").isArray())
                 .andReturn();
         return result.getResponse().getContentAsString();
     }

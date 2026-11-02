@@ -1,5 +1,7 @@
 package com.mirkoebert.golfmetric;
 
+import com.mirkoebert.handicap.HcpRepository;
+import com.mirkoebert.handicap.HcpScoreEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,15 +25,18 @@ class GMetricMonthAggregatorTest {
     private static final DateTimeFormatter FMT_YEAR = DateTimeFormatter.ofPattern("yyyy");
     @Mock
     private GMetricRepository repo;
+    @Mock
+    private HcpRepository hcpRepository;
     private GMetricMonthAggregator cut;
 
     @BeforeEach
     void setUp() {
-        cut = new GMetricMonthAggregator(repo);
+        cut = new GMetricMonthAggregator(repo, hcpRepository);
         // default: no data for any type unless a test overrides it
         for (GMetricType type : GMetricType.values()) {
             lenient().when(repo.findByUserIdAndType("u", type)).thenReturn(List.of());
         }
+        lenient().when(hcpRepository.findByUserId("u")).thenReturn(List.of());
     }
 
     private static GMetricEntity metric(LocalDate date, GMetricType type, int value) {
@@ -46,6 +51,7 @@ class GMetricMonthAggregatorTest {
         assertThat(result.lostBalls()).hasSize(12).containsOnlyNulls();
         assertThat(result.doubleBogey()).hasSize(12).containsOnlyNulls();
         assertThat(result.bogey()).hasSize(12).containsOnlyNulls();
+        assertThat(result.handicap()).hasSize(12).containsOnlyNulls();
         assertThat(result.labels().getLast()).isEqualTo(FMT.format(YearMonth.now()));
         assertThat(result.labels().getFirst()).isEqualTo(FMT.format(YearMonth.now().minusMonths(11)));
     }
@@ -69,6 +75,45 @@ class GMetricMonthAggregatorTest {
         assertThat(result.bogey()).doesNotContain(9.0);
         assertThat(result.lostBalls()).hasSize(24);
         assertThat(result.doubleBogey()).hasSize(24);
+        assertThat(result.handicap()).hasSize(24).containsOnlyNulls();
+    }
+
+    @Test
+    void getMetricsForRange_lastYear_roundsAveragesToOneDecimalAndIncludesHandicap() {
+        YearMonth currentMonth = YearMonth.now();
+        when(repo.findByUserIdAndType("u", GMetricType.LOST_BALLS_PER_9HOLES)).thenReturn(List.of(
+                metric(currentMonth.atDay(1), GMetricType.LOST_BALLS_PER_9HOLES, 1),
+                metric(currentMonth.atDay(2), GMetricType.LOST_BALLS_PER_9HOLES, 2),
+                metric(currentMonth.atDay(3), GMetricType.LOST_BALLS_PER_9HOLES, 2)
+        ));
+        when(hcpRepository.findByUserId("u")).thenReturn(List.of(
+                handicap(currentMonth.atDay(1), 2.0),
+                handicap(currentMonth.atDay(20), 3.0),
+                handicap(currentMonth.minusMonths(13).atDay(1), 40.0)
+        ));
+
+        GMetricChartDataDto result = cut.getMetricsForRange("lastYear", "u");
+
+        assertThat(result.lostBalls().getLast()).isEqualTo(1.7);
+        assertThat(result.handicap()).hasSize(12);
+        assertThat(result.handicap().getLast()).isEqualTo(2.5);
+        assertThat(result.handicap()).doesNotContain(40.0);
+    }
+
+    @Test
+    void getMetricsForRange_lastTwoYears_keepsHandicapInsideThe24MonthWindow() {
+        YearMonth now = YearMonth.now();
+        when(hcpRepository.findByUserId("u")).thenReturn(List.of(
+                handicap(now.minusMonths(13).atDay(1), 40.0),
+                handicap(now.atDay(2), 2.0),
+                handicap(now.atDay(12), 3.0)
+        ));
+
+        GMetricChartDataDto result = cut.getMetricsForRange("lastTwoYears", "u");
+
+        assertThat(result.handicap()).hasSize(24);
+        assertThat(result.handicap().get(10)).isEqualTo(40.0);
+        assertThat(result.handicap().getLast()).isEqualTo(2.5);
     }
 
     @Test
@@ -109,5 +154,33 @@ class GMetricMonthAggregatorTest {
         assertThat(result.labels().getFirst()).isEqualTo(FMT_YEAR.format(Year.from(earliest)));
         assertThat(result.labels().getLast()).isEqualTo(FMT_YEAR.format(Year.now()));
         assertThat(result.bogey().getFirst()).isEqualTo(7.0);
+        assertThat(result.handicap()).containsOnlyNulls();
+    }
+
+    @Test
+    void getMetricsForRange_all_startsAtEarliestHandicapAndRoundsToOneDecimal() {
+        LocalDate handicapStart = LocalDate.now().minusYears(2).withMonth(6).withDayOfMonth(1);
+        LocalDate metricDate = LocalDate.now().withDayOfMonth(1);
+        GMetricEntity bogey = metric(metricDate, GMetricType.BOGEY_PLUS, 3);
+        when(repo.findByUserId("u")).thenReturn(List.of(bogey));
+        when(repo.findByUserIdAndType("u", GMetricType.BOGEY_PLUS)).thenReturn(List.of(bogey));
+        when(hcpRepository.findByUserId("u")).thenReturn(List.of(
+                handicap(handicapStart, 18.24),
+                handicap(metricDate, 20.0),
+                handicap(metricDate.plusDays(10), 21.0)
+        ));
+
+        GMetricChartDataDto result = cut.getMetricsForRange("all", "u");
+
+        assertThat(result.labels().getFirst()).isEqualTo(FMT_YEAR.format(Year.from(handicapStart)));
+        assertThat(result.labels().getLast()).isEqualTo(FMT_YEAR.format(Year.now()));
+        assertThat(result.handicap().getFirst()).isEqualTo(18.2);
+        assertThat(result.handicap().getLast()).isEqualTo(20.5);
+        assertThat(result.lostBalls().getFirst()).isNull();
+        assertThat(result.bogey().getLast()).isEqualTo(3.0);
+    }
+
+    private static HcpScoreEntity handicap(LocalDate date, double hcp) {
+        return HcpScoreEntity.builder().userId("u").date(date).hcp(hcp).build();
     }
 }

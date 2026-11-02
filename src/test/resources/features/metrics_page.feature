@@ -1,5 +1,5 @@
 Feature: Metrics page showing metrics
-  The metrics page charts lost balls, double bogey+, and bogey+ and lets the player switch the time range.
+  The metrics page charts lost balls, double bogey+, bogey+, and handicap and lets the player switch the time range.
 
   @metrics-page
   Scenario: Show metric page
