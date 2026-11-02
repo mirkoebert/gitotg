@@ -6,6 +6,7 @@ Metrics are:
 - Lost Balls
 - Double Bogey+
 - Bogey+
+- Handicap
 
 ## Current behavior
 Show the user a chart with golf metrics (gmetrics) over time. There is a switcher for the time range: All, Last year
@@ -33,7 +34,7 @@ Show the eclectic value in the same way, like the others, in a box
 | Chart                   |
 ---------------------------
 
-The cart have the same size, like the navigation. 
+The chart have the same width, like the navigation bar. 
 
 ## Technical notes
 Affected files
@@ -54,7 +55,7 @@ The metric is aggregated by month (exists). Extend class `GMetricMonthAggregator
 - No new dependencies
 
 ## Acceptance criteria
-Write acceptance test first.
+Write or extend acceptance test first.
 
 Scenario: Show metric page
 Given I am an authenticated user

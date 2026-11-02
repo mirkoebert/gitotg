@@ -40,7 +40,7 @@ public class MonthlySgiHcpAggregator {
         final List<Double> hcps = new ArrayList<>();
         try {
             Map<YearMonth, Double> ghcp = getLastOfMonth(userId, testId);
-            
+
             for (int j = i - 1; j >= 0; j--) {
                 YearMonth mi = YearMonth.from(now.minusMonths(j));
                 Double v = ghcp.get(mi);
