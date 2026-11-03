@@ -25,8 +25,8 @@ class InputLimitsValidationTest {
     void hcpMustBeWithinHandicapLimits() {
         HcpScoreDTO over = hcp(InputLimits.HCP_MAX + 1.0);
         HcpScoreDTO under = hcp(InputLimits.HCP_MIN - 1.0);
-        HcpScoreDTO maxOk = hcp((double) InputLimits.HCP_MAX);
-        HcpScoreDTO minOk = hcp((double) InputLimits.HCP_MIN);
+        HcpScoreDTO maxOk = hcp(InputLimits.HCP_MAX);
+        HcpScoreDTO minOk = hcp(InputLimits.HCP_MIN);
 
         assertThat(validator.validate(over)).isNotEmpty();
         assertThat(validator.validate(under)).isNotEmpty();
