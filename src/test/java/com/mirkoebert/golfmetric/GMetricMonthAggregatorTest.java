@@ -132,12 +132,16 @@ class GMetricMonthAggregatorTest {
     }
 
     @Test
-    void getMetricsForRange_all_emptyRepo_fallsBackTo3YearWindow() {
+    void getMetricsForRange_all_emptyRepo_returnsEmptySeries() {
         when(repo.findByUserId("u")).thenReturn(List.of());
 
         GMetricChartDataDto result = cut.getMetricsForRange("all", "u");
 
-        assertThat(result.labels()).hasSize(3);
+        assertThat(result.labels()).isEmpty();
+        assertThat(result.lostBalls()).isEmpty();
+        assertThat(result.doubleBogey()).isEmpty();
+        assertThat(result.bogey()).isEmpty();
+        assertThat(result.handicap()).isEmpty();
     }
 
     @Test

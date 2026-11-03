@@ -7,8 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
@@ -16,6 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -35,7 +34,8 @@ class GMetricMonthAggregator {
     private final DateTimeFormatter fmtYear = DateTimeFormatter.ofPattern("yyyy");
 
     /**
-     * Builds monthly chart series for the given timeframe.
+     * Builds chart series for the given timeframe: monthly for
+     * {@value #RANGE_LAST_YEAR} / {@value #RANGE_LAST_TWO_YEARS}, yearly for {@value #RANGE_ALL}.
      *
      * @param range {@value #RANGE_LAST_YEAR} (default), {@value #RANGE_LAST_TWO_YEARS}, or {@value #RANGE_ALL}
      */
@@ -62,7 +62,7 @@ class GMetricMonthAggregator {
         final LocalDate earliest = earliestDate(all, handicaps);
         if (earliest == null) {
             log.info("No metrics found for user {}", userId);
-            return emptyMetricsForLast3Years();
+            return new GMetricChartDataDto(List.of(), List.of(), List.of(), List.of(), List.of());
         }
         final Year start = Year.from(earliest);
         final Year end = Year.now();
@@ -70,45 +70,13 @@ class GMetricMonthAggregator {
     }
 
     private LocalDate earliestDate(final List<GMetricEntity> metrics, final List<HcpScoreEntity> handicaps) {
-        final LocalDate metricDate = metrics.stream()
-                .map(GMetricEntity::getDate)
+        return Stream.concat(
+                        metrics.stream().map(GMetricEntity::getDate),
+                        handicaps.stream().map(HcpScoreEntity::getDate)
+                )
                 .filter(Objects::nonNull)
                 .min(LocalDate::compareTo)
                 .orElse(null);
-        final LocalDate handicapDate = handicaps.stream()
-                .map(HcpScoreEntity::getDate)
-                .filter(Objects::nonNull)
-                .min(LocalDate::compareTo)
-                .orElse(null);
-        if (metricDate == null) {
-            return handicapDate;
-        }
-        if (handicapDate == null || !handicapDate.isBefore(metricDate)) {
-            return metricDate;
-        }
-        return handicapDate;
-    }
-
-    private GMetricChartDataDto emptyMetricsForLast3Years() {
-        final Year end = Year.now();
-        final Year start = Year.from(end).minusYears(3);
-
-        final List<String> labels = new ArrayList<>();
-        final List<Double> lostBalls = new ArrayList<>();
-        final List<Double> doubleBogey = new ArrayList<>();
-        final List<Double> bogey = new ArrayList<>();
-        final List<Double> handicap = new ArrayList<>();
-
-        Year cursor = start;
-        for (int i = 0; i < 3; i++) {
-            labels.add(fmtYear.format(cursor));
-            lostBalls.add(0.0);
-            doubleBogey.add(0.0);
-            bogey.add(0.0);
-            handicap.add(0.0);
-            cursor = cursor.plusYears(1);
-        }
-        return new GMetricChartDataDto(labels, lostBalls, doubleBogey, bogey, handicap);
     }
 
     private @NonNull GMetricChartDataDto buildMonthlyChartData(
@@ -139,7 +107,7 @@ class GMetricMonthAggregator {
             cursor = cursor.plusMonths(1);
         }
 
-        log.debug("Chart for user {} months={} labels={}", userId, labels.size(), labels.size());
+        log.debug("Chart for user {} months={} labels={}", userId, labels.size(), labels);
         return new GMetricChartDataDto(labels, lostBalls, doubleBogey, bogey, handicap);
     }
 
@@ -173,7 +141,7 @@ class GMetricMonthAggregator {
 
         trimLeadingEmptyTimeBuckets(labels, lostBalls, doubleBogey, bogey, handicap);
 
-        log.debug("Chart for user {} years={} labels={}", userId, labels.size(), labels.size());
+        log.debug("Chart for user {} years={} labels={}", userId, labels.size(), labels);
         return new GMetricChartDataDto(labels, lostBalls, doubleBogey, bogey, handicap);
     }
 
@@ -214,7 +182,7 @@ class GMetricMonthAggregator {
         if (value == null) {
             return null;
         }
-        return BigDecimal.valueOf(value).setScale(1, RoundingMode.HALF_UP).doubleValue();
+        return Math.round(value * 10.0) / 10.0;
     }
 
     private Map<Year, Double> yearlyAveragesFrom(String userId, GMetricType type, Year fromDateInclusive) {

@@ -3,7 +3,7 @@ Feature: Metrics page showing metrics
 
   @metrics-page
   Scenario: Show metric page
-    Given I am an authenticated user
+    Given I am authenticated for the metrics page
     And I have only twenty played rounds for the same course over three years
     When I open the metrics page
     Then My metrics chart is shown

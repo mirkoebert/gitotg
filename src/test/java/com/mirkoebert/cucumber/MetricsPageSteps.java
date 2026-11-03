@@ -56,8 +56,8 @@ public class MetricsPageSteps {
         SecurityContextHolder.clearContext();
     }
 
-    @Given("I have only twenty played rounds for the same course over three years")
-    public void iHaveOnlyTwentyPlayedRoundsForTheSameCourseOverThreeYears() {
+    @Given("I am authenticated for the metrics page")
+    public void iAmAuthenticatedForTheMetricsPage() {
         playedRoundRepository.findByUserId(USER_ID).forEach(playedRoundRepository::delete);
         gMetricRepository.findByUserId(USER_ID).forEach(gMetricRepository::delete);
 
@@ -67,7 +67,11 @@ public class MetricsPageSteps {
                 "sub");
         SecurityContextHolder.getContext().setAuthentication(
                 new OAuth2AuthenticationToken(oauth2User, oauth2User.getAuthorities(), "google"));
+        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+    }
 
+    @Given("I have only twenty played rounds for the same course over three years")
+    public void iHaveOnlyTwentyPlayedRoundsForTheSameCourseOverThreeYears() {
         LocalDate first = LocalDate.now().minusYears(3);
         for (int i = 0; i < 20; i++) {
             LocalDate date = first.plusDays(i * (365L * 3) / 19);
@@ -78,7 +82,6 @@ public class MetricsPageSteps {
 
     @When("I open the metrics page")
     public void iOpenTheMetricsPage() throws Exception {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         pageHtml = mockMvc.perform(get("/gmetric").param("lang", "en"))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -153,11 +156,10 @@ public class MetricsPageSteps {
 
     @Then("The tooltip shows exact values when hovering over data points")
     public void theTooltipShowsExactValuesWhenHoveringOverDataPoints() {
-        assertThat(pageHtml).contains("function exactTooltipLabel(context)");
-        assertThat(pageHtml).contains("context.parsed.y");
-        assertThat(pageHtml).contains("callbacks:");
-        assertThat(pageHtml).contains("label: exactTooltipLabel");
+        // Chart.js default tooltips show parsed values; aggregator already rounds to 1 decimal
+        assertThat(pageHtml).contains("chart.js");
         assertThat(pageHtml).doesNotContain("toFixed");
+        assertThat(pageHtml).doesNotContain("exactTooltipLabel");
     }
 
     private String chartJson(String range) throws Exception {

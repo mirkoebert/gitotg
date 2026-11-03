@@ -49,37 +49,24 @@
     let currentRange = 'lastYear';
     let loadToken = 0;
 
-    function exactTooltipLabel(context) {
-        const value = context.parsed.y;
-        if (value === null || value === undefined) {
-            return context.dataset.label + ': ';
-        }
-        return context.dataset.label + ': ' + value;
-    }
-
-    function smoothDataset(label, borderColor, backgroundColor) {
+    function lineDataset(label, borderColor, backgroundColor) {
         return {
             label: label,
             data: [],
             borderColor: borderColor,
             backgroundColor: backgroundColor,
-            borderWidth: 2.5,
             tension: 0.4,
-            cubicInterpolationMode: 'monotone',
             fill: false,
-            spanGaps: true,
-            pointRadius: 2,
-            pointHoverRadius: 5,
-            pointHitRadius: 8
+            spanGaps: true
         };
     }
 
     function datasetTemplates() {
         return [
-            smoothDataset(labelLostBalls, 'rgba(220, 53, 69, 1)', 'rgba(220, 53, 69, 0.15)'),
-            smoothDataset(labelDoubleBogey, 'rgba(255, 193, 7, 1)', 'rgba(255, 193, 7, 0.15)'),
-            smoothDataset(labelBogey, 'rgba(13, 110, 253, 1)', 'rgba(13, 110, 253, 0.15)'),
-            smoothDataset(labelHandicap, 'rgba(25, 135, 84, 1)', 'rgba(25, 135, 84, 0.15)')
+            lineDataset(labelLostBalls, 'rgba(220, 53, 69, 1)', 'rgba(220, 53, 69, 0.15)'),
+            lineDataset(labelDoubleBogey, 'rgba(255, 193, 7, 1)', 'rgba(255, 193, 7, 0.15)'),
+            lineDataset(labelBogey, 'rgba(13, 110, 253, 1)', 'rgba(13, 110, 253, 0.15)'),
+            lineDataset(labelHandicap, 'rgba(25, 135, 84, 1)', 'rgba(25, 135, 84, 0.15)')
         ];
     }
 
@@ -97,36 +84,13 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
-                animation: {
-                    duration: 450,
-                    easing: 'easeOutQuart'
-                },
-                elements: {
-                    line: {
-                        tension: 0.4,
-                        cubicInterpolationMode: 'monotone',
-                        borderJoinStyle: 'round',
-                        borderCapStyle: 'round'
-                    },
-                    point: {
-                        radius: 2,
-                        hoverRadius: 5
-                    }
-                },
                 plugins: {
                     legend: {position: 'top'},
-                    title: {display: true, text: chartTitle},
-                    tooltip: {
-                        enabled: true,
-                        callbacks: {
-                            label: exactTooltipLabel
-                        }
-                    }
+                    title: {display: true, text: chartTitle}
                 },
                 scales: {
                     y: {
-                        beginAtZero: true,
-                        ticks: {precision: 0}
+                        beginAtZero: true
                     },
                     x: {
                         ticks: {
@@ -135,10 +99,6 @@
                             maxTicksLimit: 12
                         }
                     }
-                },
-                interaction: {
-                    mode: 'index',
-                    intersect: false
                 }
             }
         });
