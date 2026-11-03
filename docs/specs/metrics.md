@@ -7,6 +7,7 @@ Metrics are:
 - Double Bogey+
 - Bogey+
 - Handicap
+- Eclectic
 
 ## Current behavior
 Show the user a chart with golf metrics (gmetrics) over time. There is a switcher for the time range: All, Last year
@@ -51,6 +52,11 @@ The metric is aggregated by month (exists). Extend class `GMetricMonthAggregator
 - Tooltip should show exact values when hovering over data points
 - The values in the tooltip have max 1 place like 2.5
 
+Eclectic values calculation
+- calc an eclectic value for each month
+- based on the last 10 rounds not newer then the month
+- if there are less than 10 rounds then return no value
+
 ### Constraints
 - No new dependencies
 
@@ -68,3 +74,4 @@ And The chart updates dynamically when the time range is changed
 And The chart is responsive and works on mobile and desktop                                                                                                                                                                                                                                                                                      
 And Each metric is displayed with a distinct color                                                                                                                                                                                                                                                                                               
 And The tooltip shows exact values when hovering over data points
+And The chart contains all metic types: Lost Balls, Double Bogey+,Bogey+ , Handicap, Eclectic
