@@ -150,8 +150,9 @@ public class MetricsPageSteps {
         while (matcher.find()) {
             colors.add(matcher.group(1) + "," + matcher.group(2) + "," + matcher.group(3));
         }
-        assertThat(colors).hasSize(4).doesNotHaveDuplicates();
+        assertThat(colors).hasSize(5).doesNotHaveDuplicates();
         assertThat(pageHtml).contains("data.handicap");
+        assertThat(pageHtml).contains("data.eclectic");
     }
 
     @Then("The tooltip shows exact values when hovering over data points")
@@ -162,6 +163,21 @@ public class MetricsPageSteps {
         assertThat(pageHtml).doesNotContain("exactTooltipLabel");
     }
 
+    @Then("The chart contains all metric types: Lost Balls, Double Bogey+, Bogey+, Handicap, Eclectic")
+    public void theChartContainsAllMetricTypes() throws Exception {
+        assertThat(pageHtml).contains("Lost Balls");
+        assertThat(pageHtml).contains("Double Bogey+");
+        assertThat(pageHtml).contains("Bogey+");
+        assertThat(pageHtml).contains("Handicap");
+        assertThat(pageHtml).contains("Eclectic");
+        assertThat(pageHtml).contains("labelEclectic");
+        assertThat(pageHtml).contains("data.eclectic");
+
+        String chart = lastYearChart != null ? lastYearChart : chartJson("lastYear");
+        assertThat(chart).contains("\"eclectic\"");
+        assertThat(chart).containsPattern("\"eclectic\"\\s*:\\s*\\[[^\\]]*[0-9]");
+    }
+
     private String chartJson(String range) throws Exception {
         MvcResult result = mockMvc.perform(get("/api/gmetric/chart-data").param("range", range))
                 .andExpect(status().isOk())
@@ -170,6 +186,7 @@ public class MetricsPageSteps {
                 .andExpect(jsonPath("$.doubleBogey").isArray())
                 .andExpect(jsonPath("$.bogey").isArray())
                 .andExpect(jsonPath("$.handicap").isArray())
+                .andExpect(jsonPath("$.eclectic").isArray())
                 .andReturn();
         return result.getResponse().getContentAsString();
     }

@@ -1,5 +1,6 @@
 package com.mirkoebert.golfmetric;
 
+import com.mirkoebert.golfmetric.eclectic.EclecticService;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,8 +14,11 @@ import java.time.Year;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -27,16 +31,20 @@ class GMetricMonthAggregatorTest {
     private GMetricRepository repo;
     @Mock
     private HcpRepository hcpRepository;
+    @Mock
+    private EclecticService eclecticService;
     private GMetricMonthAggregator cut;
 
     @BeforeEach
     void setUp() {
-        cut = new GMetricMonthAggregator(repo, hcpRepository);
+        cut = new GMetricMonthAggregator(repo, hcpRepository, eclecticService);
         // default: no data for any type unless a test overrides it
         for (GMetricType type : GMetricType.values()) {
             lenient().when(repo.findByUserIdAndType("u", type)).thenReturn(List.of());
         }
         lenient().when(hcpRepository.findByUserId("u")).thenReturn(List.of());
+        lenient().when(eclecticService.getEclecticByMonth(eq("u"), any(), any())).thenReturn(Map.of());
+        lenient().when(eclecticService.getEclecticByYear(eq("u"), any(), any())).thenReturn(Map.of());
     }
 
     private static GMetricEntity metric(LocalDate date, GMetricType type, int value) {
@@ -52,8 +60,23 @@ class GMetricMonthAggregatorTest {
         assertThat(result.doubleBogey()).hasSize(12).containsOnlyNulls();
         assertThat(result.bogey()).hasSize(12).containsOnlyNulls();
         assertThat(result.handicap()).hasSize(12).containsOnlyNulls();
+        assertThat(result.eclectic()).hasSize(12).containsOnlyNulls();
         assertThat(result.labels().getLast()).isEqualTo(FMT.format(YearMonth.now()));
         assertThat(result.labels().getFirst()).isEqualTo(FMT.format(YearMonth.now().minusMonths(11)));
+    }
+
+    @Test
+    void getMetricsForRange_lastYear_includesMonthlyEclecticSeries() {
+        YearMonth now = YearMonth.now();
+        when(eclecticService.getEclecticByMonth(eq("u"), eq(now.minusMonths(11)), eq(now)))
+                .thenReturn(Map.of(now, 36.0, now.minusMonths(2), 40.0));
+
+        GMetricChartDataDto result = cut.getMetricsForRange("lastYear", "u");
+
+        assertThat(result.eclectic()).hasSize(12);
+        assertThat(result.eclectic().getLast()).isEqualTo(36.0);
+        assertThat(result.eclectic().get(9)).isEqualTo(40.0);
+        assertThat(result.eclectic().getFirst()).isNull();
     }
 
     @Test
@@ -76,6 +99,7 @@ class GMetricMonthAggregatorTest {
         assertThat(result.lostBalls()).hasSize(24);
         assertThat(result.doubleBogey()).hasSize(24);
         assertThat(result.handicap()).hasSize(24).containsOnlyNulls();
+        assertThat(result.eclectic()).hasSize(24).containsOnlyNulls();
     }
 
     @Test
@@ -142,6 +166,7 @@ class GMetricMonthAggregatorTest {
         assertThat(result.doubleBogey()).isEmpty();
         assertThat(result.bogey()).isEmpty();
         assertThat(result.handicap()).isEmpty();
+        assertThat(result.eclectic()).isEmpty();
     }
 
     @Test
@@ -173,6 +198,8 @@ class GMetricMonthAggregatorTest {
                 handicap(metricDate, 20.0),
                 handicap(metricDate.plusDays(10), 21.0)
         ));
+        when(eclecticService.getEclecticByYear(eq("u"), eq(Year.from(handicapStart)), eq(Year.now())))
+                .thenReturn(Map.of(Year.now(), 36.0));
 
         GMetricChartDataDto result = cut.getMetricsForRange("all", "u");
 
@@ -182,6 +209,8 @@ class GMetricMonthAggregatorTest {
         assertThat(result.handicap().getLast()).isEqualTo(20.5);
         assertThat(result.lostBalls().getFirst()).isNull();
         assertThat(result.bogey().getLast()).isEqualTo(3.0);
+        assertThat(result.eclectic().getLast()).isEqualTo(36.0);
+        assertThat(result.eclectic().getFirst()).isNull();
     }
 
     private static HcpScoreEntity handicap(LocalDate date, double hcp) {

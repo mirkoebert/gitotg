@@ -10,8 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -112,5 +115,81 @@ class EclecticServiceTest {
         assertTrue(r);
 
         assertThat(cut.getHomeCourseName(testUser)).hasToString(testCourseName);
+    }
+
+    @Test
+    void getEclecticByMonth_omitsMonthsWithFewerThan10RoundsAndKeysByYearMonth() {
+        List<Integer> older = List.of(9, 9, 9, 9, 9, 9, 9, 9, 9);
+        List<Integer> newer = List.of(4, 4, 4, 4, 4, 4, 4, 4, 4);
+        for (int i = 0; i < 9; i++) {
+            assertTrue(courseService.submitRound(
+                    testUser, testCourseName, LocalDate.of(2025, 1, 1).plusDays(i), older, 0));
+        }
+        // 10th round completes the window in February
+        assertTrue(courseService.submitRound(
+                testUser, testCourseName, LocalDate.of(2025, 2, 5), older, 0));
+        for (int i = 0; i < 10; i++) {
+            assertTrue(courseService.submitRound(
+                    testUser, testCourseName, LocalDate.of(2025, 3, 1).plusDays(i), newer, 0));
+        }
+
+        Map<YearMonth, Double> byMonth = cut.getEclecticByMonth(
+                testUser, YearMonth.of(2024, 12), YearMonth.of(2025, 3));
+
+        assertThat(byMonth).doesNotContainKey(YearMonth.of(2024, 12));
+        assertThat(byMonth).doesNotContainKey(YearMonth.of(2025, 1));
+        assertThat(byMonth).containsEntry(YearMonth.of(2025, 2), 81.0);
+        assertThat(byMonth).containsEntry(YearMonth.of(2025, 3), 36.0);
+    }
+
+    @Test
+    void getEclecticByYear_usesYearEndAsOfNotMidYearAverage() {
+        List<Integer> midYear = List.of(9, 9, 9, 9, 9, 9, 9, 9, 9);
+        List<Integer> lateYear = List.of(4, 4, 4, 4, 4, 4, 4, 4, 4);
+        for (int i = 0; i < 10; i++) {
+            assertTrue(courseService.submitRound(
+                    testUser, testCourseName, LocalDate.of(2025, 6, 1).plusDays(i), midYear, 0));
+        }
+        for (int i = 0; i < 10; i++) {
+            assertTrue(courseService.submitRound(
+                    testUser, testCourseName, LocalDate.of(2025, 11, 1).plusDays(i), lateYear, 0));
+        }
+
+        Map<Year, Double> byYear = cut.getEclecticByYear(testUser, Year.of(2025), Year.of(2025));
+        Map<YearMonth, Double> june = cut.getEclecticByMonth(
+                testUser, YearMonth.of(2025, 6), YearMonth.of(2025, 6));
+        Map<YearMonth, Double> december = cut.getEclecticByMonth(
+                testUser, YearMonth.of(2025, 12), YearMonth.of(2025, 12));
+
+        assertThat(june).containsEntry(YearMonth.of(2025, 6), 81.0);
+        assertThat(december).containsEntry(YearMonth.of(2025, 12), 36.0);
+        assertThat(byYear).containsEntry(Year.of(2025), 36.0);
+        assertThat(byYear.get(Year.of(2025))).isEqualTo(december.get(YearMonth.of(2025, 12)));
+        assertThat(byYear.get(Year.of(2025))).isNotEqualTo(june.get(YearMonth.of(2025, 6)));
+    }
+
+    @Test
+    void getEclecticByMonth_usesHomeCourseAsOfEachMonth_notOverallMostPlayed() {
+        List<Integer> courseAScores = List.of(9, 9, 9, 9, 9, 9, 9, 9, 9);
+        List<Integer> courseBScores = List.of(4, 4, 4, 4, 4, 4, 4, 4, 4);
+        // January: 10 rounds on course A only
+        for (int i = 0; i < 10; i++) {
+            assertTrue(courseService.submitRound(
+                    testUser, testCourseName, LocalDate.of(2025, 1, 1).plusDays(i), courseAScores, 0));
+        }
+        // Later: 15 rounds on course B so overall home becomes B
+        for (int i = 0; i < 15; i++) {
+            assertTrue(courseService.submitRound(
+                    testUser, otherTestCourseName, LocalDate.of(2025, 4, 1).plusDays(i), courseBScores, 0));
+        }
+
+        assertThat(cut.getHomeCourseName(testUser)).isEqualTo(otherTestCourseName);
+
+        Map<YearMonth, Double> byMonth = cut.getEclecticByMonth(
+                testUser, YearMonth.of(2025, 1), YearMonth.of(2025, 4));
+
+        // January must still use course A (then-home), not overall home B (which had 0 rounds then)
+        assertThat(byMonth).containsEntry(YearMonth.of(2025, 1), 81.0);
+        assertThat(byMonth).containsEntry(YearMonth.of(2025, 4), 36.0);
     }
 }

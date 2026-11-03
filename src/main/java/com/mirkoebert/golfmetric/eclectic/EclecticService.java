@@ -5,9 +5,13 @@ import com.mirkoebert.handicap.HcpScoreDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.Year;
+import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -16,6 +20,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class EclecticService {
+
+    private static final int ECLECTIC_ROUND_WINDOW = 10;
 
     private final GolfCourseCatalog catalog;
     private final PlayedRoundRepository playedRoundRepository;
@@ -70,6 +76,116 @@ public class EclecticService {
             log.info("Can't calc eclectic hcp {}", e.getMessage());
             return null;
         }
+    }
+
+    public @NonNull Map<YearMonth, Double> getEclecticByMonth(
+            final String userId,
+            final YearMonth start,
+            final YearMonth end
+    ) {
+        final Map<YearMonth, Double> result = new HashMap<>();
+        try {
+            final List<PlayedRoundEntity> allRounds = loadAllRoundsSorted(userId);
+            YearMonth cursor = start;
+            while (!cursor.isAfter(end)) {
+                Double value = eclecticAsOf(allRounds, cursor.atEndOfMonth());
+                if (value != null) {
+                    result.put(cursor, value);
+                }
+                cursor = cursor.plusMonths(1);
+            }
+        } catch (Exception e) {
+            log.info("Can't calc monthly eclectic for {}: {}", userId, e.getMessage());
+        }
+        return result;
+    }
+
+    /**
+     * Yearly chart point: last {@value #ECLECTIC_ROUND_WINDOW} rounds on the as-of home course
+     * not newer than 31 Dec of that year (same rule as monthly, at year end).
+     */
+    public @NonNull Map<Year, Double> getEclecticByYear(
+            final String userId,
+            final Year start,
+            final Year end
+    ) {
+        final Map<Year, Double> result = new HashMap<>();
+        try {
+            final List<PlayedRoundEntity> allRounds = loadAllRoundsSorted(userId);
+            final int years = (int) ChronoUnit.YEARS.between(start, end) + 1;
+            Year cursor = start;
+            for (int i = 0; i < years; i++) {
+                Double value = eclecticAsOf(allRounds, cursor.atMonth(12).atEndOfMonth());
+                if (value != null) {
+                    result.put(cursor, value);
+                }
+                cursor = cursor.plusYears(1);
+            }
+        } catch (Exception e) {
+            log.info("Can't calc yearly eclectic for {}: {}", userId, e.getMessage());
+        }
+        return result;
+    }
+
+    private @NonNull List<PlayedRoundEntity> loadAllRoundsSorted(final String userId) {
+        return playedRoundRepository.findByUserId(userId)
+                .stream()
+                .filter(r -> r.getDate() != null && r.getCourseName() != null)
+                .sorted(Comparator
+                        .comparing(PlayedRoundEntity::getDate, Comparator.reverseOrder())
+                        .thenComparing(PlayedRoundEntity::getId, Comparator.reverseOrder()))
+                .toList();
+    }
+
+    /**
+     * Home course at {@code asOfInclusive} is the most-played course among rounds
+     * on or before that date. Eclectic uses the last {@value #ECLECTIC_ROUND_WINDOW}
+     * rounds on that course in the same window; fewer than 10 → null.
+     */
+    private @Nullable Double eclecticAsOf(
+            final List<PlayedRoundEntity> allRoundsSortedDesc,
+            final LocalDate asOfInclusive
+    ) {
+        final String courseName = homeCourseNameAsOf(allRoundsSortedDesc, asOfInclusive);
+        if (courseName == null) {
+            return null;
+        }
+        final GolfCourse course = catalog.findByName(courseName).orElse(null);
+        if (course == null) {
+            return null;
+        }
+        final List<PlayedRoundEntity> window = allRoundsSortedDesc.stream()
+                .filter(r -> courseName.equals(r.getCourseName()))
+                .filter(r -> !r.getDate().isAfter(asOfInclusive))
+                .limit(ECLECTIC_ROUND_WINDOW)
+                .toList();
+        if (window.size() < ECLECTIC_ROUND_WINDOW) {
+            return null;
+        }
+        return (double) eclecticSum(course, window);
+    }
+
+    private @Nullable String homeCourseNameAsOf(
+            final List<PlayedRoundEntity> allRounds,
+            final LocalDate asOfInclusive
+    ) {
+        final Map<String, Long> counts = allRounds.stream()
+                .filter(r -> !r.getDate().isAfter(asOfInclusive))
+                .map(PlayedRoundEntity::getCourseName)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        return counts.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
+    }
+
+    private int eclecticSum(final GolfCourse course, final List<PlayedRoundEntity> rounds) {
+        int countOfHoles = course.getHoles().size();
+        int sum = 0;
+        for (int i = 0; i < countOfHoles; i++) {
+            sum += getBestShotCountForHole(i, rounds);
+        }
+        return sum;
     }
 
     private int getBestShotCountForHole(int i, final List<PlayedRoundEntity> playedRoundsOfYear) {
