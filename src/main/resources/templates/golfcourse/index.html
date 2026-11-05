@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="#{golfcourse.title}">Gitotg: Golf Course</title>
+    <title th:text="#{golfcourse.title}">Gitotg: Played Rounds</title>
     <meta charset="UTF-8">
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -10,7 +10,7 @@
 <body class="container mt-3 mt-md-5">
 <div th:insert="~{fragments/navbar :: navbar}"></div>
 
-<h1 class="text-center mb-4" th:text="#{golfcourse.heading}">Golf Course</h1>
+<h1 class="text-center mb-4" th:text="#{golfcourse.heading}">Played Rounds</h1>
 
 <div th:if="${error}" class="alert alert-danger" th:text="#{${error}}"></div>
 

@@ -38,7 +38,7 @@ class GolfCoursePrimaryControllerIT {
     @SneakyThrows
     @Test
     void index_rendersImportForm() {
-        String html = mockMvc.perform(get("/golfcourse"))
+        String html = mockMvc.perform(get("/golfcourse").param("lang", "en"))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -49,6 +49,19 @@ class GolfCoursePrimaryControllerIT {
         assertThat(html).contains("/api/golfcourse/import");
         assertThat(html).contains("name=\"file\"");
         assertThat(html).contains("csv-import.js");
+        assertThat(html).contains("<title>Gitotg: Played Rounds</title>");
+        assertThat(html).contains(">Played Rounds</h1>");
+        assertThat(html).contains(">Golf Course</label>");
+
+        String german = mockMvc.perform(get("/golfcourse").param("lang", "de"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(german).contains("<title>Gitotg: Gespielte Runden</title>");
+        assertThat(german).contains(">Gespielte Runden</h1>");
+        assertThat(german).contains(">Golfplatz</label>");
     }
 
     @SneakyThrows
