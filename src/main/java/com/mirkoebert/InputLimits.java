@@ -20,7 +20,7 @@ public final class InputLimits {
     public static final int METRIC_MAX = 99;
 
     public static final int HOLE_STROKES_MIN = 1;
-    public static final int HOLE_STROKES_MAX = 20;
+    public static final int HOLE_STROKES_MAX = 16;
 
     public static final int COUNT_MIN = 0;
     public static final int COUNT_MAX = 42;

@@ -105,7 +105,7 @@ public class CourseService {
             return null;
         }
         if (course.getHoles().size() == 9) {
-            return (float) lostBalls;
+            return (float)lostBalls;
         } else if (course.getHoles().size() == 18) {
             return  (float)lostBalls / 2;
         }
