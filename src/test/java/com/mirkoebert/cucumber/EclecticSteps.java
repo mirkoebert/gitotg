@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 public class EclecticSteps {
 
-    private static final String USER_ID = "gherkin-eclectic-user";
+    static final String USER_ID = "gherkin-eclectic-user";
 
     @Autowired
     private WebApplicationContext webApplicationContext;
@@ -36,7 +36,7 @@ public class EclecticSteps {
     private PlayedRoundRepository playedRoundRepository;
 
     private MockMvc mockMvc;
-    private String cockpitHtml;
+    static String cockpitHtml;
 
     @After
     public void clearAuthentication() {

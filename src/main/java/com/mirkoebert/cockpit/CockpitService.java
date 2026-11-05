@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Service;
 
+import java.time.Year;
 import java.util.NoSuchElementException;
 
 @Service
@@ -54,7 +55,8 @@ public class CockpitService {
                 advisorService.getAdvise(userId),
                 eclecticService.getEclecticHcpForLast10Rounds(userId),
                 homeCourse,
-                coursePar(homeCourse)
+                coursePar(homeCourse),
+                courseService.countRoundsInYear(userId, Year.now().getValue())
         );
     }
 

@@ -29,6 +29,11 @@ public class CourseService {
         return playedRoundRepository.findTop10ByUserIdOrderByDateDesc(userId);
     }
 
+    public int countRoundsInYear(@NonNull final String userId, final int year) {
+        return Math.toIntExact(playedRoundRepository.countByUserIdAndDateBetween(
+                userId, LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31)));
+    }
+
     public boolean submitRound(
             @NonNull final String userId,
             @NonNull final String courseName,

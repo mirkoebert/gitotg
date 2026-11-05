@@ -21,7 +21,8 @@ public record CockpitView(
         String advice,
         Integer eclectic,
         String homeCourse,
-        Integer coursePar
+        Integer coursePar,
+        int roundsThisYear
 ) {
 
     public record MetricSnapshot(Float value, LocalDate date) {
