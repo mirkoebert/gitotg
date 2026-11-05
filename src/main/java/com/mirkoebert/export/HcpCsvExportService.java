@@ -1,7 +1,7 @@
 package com.mirkoebert.export;
 
-import com.mirkoebert.golfcourse.PlayedRoundEntity;
-import com.mirkoebert.golfcourse.PlayedRoundRepository;
+import com.mirkoebert.playedrounds.PlayedRoundEntity;
+import com.mirkoebert.playedrounds.PlayedRoundRepository;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.golfmetric.GMetricRepository;
 import com.mirkoebert.handicap.HcpRepository;

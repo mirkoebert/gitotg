@@ -1,4 +1,4 @@
-package com.mirkoebert.golfcourse;
+package com.mirkoebert.playedrounds;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

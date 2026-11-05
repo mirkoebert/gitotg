@@ -1,4 +1,4 @@
-package com.mirkoebert.golfcourse;
+package com.mirkoebert.playedrounds;
 
 import com.mirkoebert.golfmetric.GMetricRepository;
 import org.junit.jupiter.api.Test;

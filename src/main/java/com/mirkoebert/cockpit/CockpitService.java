@@ -3,7 +3,7 @@ package com.mirkoebert.cockpit;
 import com.mirkoebert.advisor.AdvisorService;
 import com.mirkoebert.checklist.ChecklistService;
 import com.mirkoebert.goal.GoalEnum;
-import com.mirkoebert.golfcourse.CourseService;
+import com.mirkoebert.playedrounds.CourseService;
 import com.mirkoebert.golfmetric.GMetricService;
 import com.mirkoebert.golfmetric.GMetricType;
 import com.mirkoebert.golfmetric.eclectic.EclecticService;

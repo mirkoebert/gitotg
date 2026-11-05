@@ -1,8 +1,8 @@
 package com.mirkoebert.cucumber;
 
-import com.mirkoebert.golfcourse.CourseService;
-import com.mirkoebert.golfcourse.PlayedRoundEntity;
-import com.mirkoebert.golfcourse.PlayedRoundRepository;
+import com.mirkoebert.playedrounds.CourseService;
+import com.mirkoebert.playedrounds.PlayedRoundEntity;
+import com.mirkoebert.playedrounds.PlayedRoundRepository;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;

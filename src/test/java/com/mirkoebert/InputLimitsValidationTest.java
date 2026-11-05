@@ -1,6 +1,6 @@
 package com.mirkoebert;
 
-import com.mirkoebert.golfcourse.PlayedRoundDto;
+import com.mirkoebert.playedrounds.PlayedRoundDto;
 import com.mirkoebert.handicap.HcpScoreDTO;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;

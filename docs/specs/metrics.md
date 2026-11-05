@@ -9,6 +9,7 @@ Metrics are:
 - Handicap
 - Eclectic
 
+
 ## Current behavior
 Show the user a chart with golf metrics (gmetrics) over time. There is a switcher for the time range: All, Last year
 

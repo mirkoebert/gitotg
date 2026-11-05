@@ -1,6 +1,6 @@
 package com.mirkoebert.golfmetric.eclectic;
 
-import com.mirkoebert.golfcourse.*;
+import com.mirkoebert.playedrounds.*;
 import com.mirkoebert.handicap.HcpScoreDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;

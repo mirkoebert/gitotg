@@ -1,4 +1,4 @@
-package com.mirkoebert.golfcourse;
+package com.mirkoebert.playedrounds;
 
 import com.mirkoebert.user.CurrentUser;
 import com.mirkoebert.user.CurrentUserService;

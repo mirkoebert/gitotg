@@ -1,7 +1,7 @@
 package com.mirkoebert.cockpit;
 
 import com.mirkoebert.checklist.ChecklistProgress;
-import com.mirkoebert.golfcourse.PlayedRoundEntity;
+import com.mirkoebert.playedrounds.PlayedRoundEntity;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.handicap.HcpScoreOutFormattedDTO;
 

@@ -1,4 +1,4 @@
-package com.mirkoebert.golfcourse;
+package com.mirkoebert.playedrounds;
 
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;

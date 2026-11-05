@@ -1,16 +1,18 @@
-package com.mirkoebert.golfcourse;
+package com.mirkoebert.playedrounds;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Hole {
+public class GolfCourse {
 
-    private int number;
-    private int par;
+    private String name;
+    private List<Hole> holes;
 }
