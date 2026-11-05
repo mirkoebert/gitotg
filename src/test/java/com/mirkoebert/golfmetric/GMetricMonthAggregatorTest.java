@@ -52,8 +52,8 @@ class GMetricMonthAggregatorTest {
     }
 
     @Test
-    void getMetricsForRange_nullRange_defaultsTo12MonthWindowWithNoData() {
-        GMetricChartDataDto result = cut.getMetricsForRange(null, "u");
+    void getMetricsForRange_lastYear_emptyDataUses12MonthWindow() {
+        GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.LAST_YEAR, "u");
 
         assertThat(result.labels()).hasSize(12);
         assertThat(result.lostBalls()).hasSize(12).containsOnlyNulls();
@@ -71,7 +71,7 @@ class GMetricMonthAggregatorTest {
         when(eclecticService.getEclecticByMonth(eq("u"), eq(now.minusMonths(11)), eq(now)))
                 .thenReturn(Map.of(now, 36.0, now.minusMonths(2), 40.0));
 
-        GMetricChartDataDto result = cut.getMetricsForRange("lastYear", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.LAST_YEAR, "u");
 
         assertThat(result.eclectic()).hasSize(12);
         assertThat(result.eclectic().getLast()).isEqualTo(36.0);
@@ -89,7 +89,7 @@ class GMetricMonthAggregatorTest {
                 metric(outside.atDay(10), GMetricType.BOGEY_PLUS, 9)
         ));
 
-        GMetricChartDataDto result = cut.getMetricsForRange("lastTwoYears", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.LAST_TWO_YEARS, "u");
 
         assertThat(result.labels()).hasSize(24);
         assertThat(result.labels().getFirst()).isEqualTo(FMT.format(now.minusMonths(23)));
@@ -116,7 +116,7 @@ class GMetricMonthAggregatorTest {
                 handicap(currentMonth.minusMonths(13).atDay(1), 40.0)
         ));
 
-        GMetricChartDataDto result = cut.getMetricsForRange("lastYear", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.LAST_YEAR, "u");
 
         assertThat(result.lostBalls().getLast()).isEqualTo(1.7);
         assertThat(result.handicap()).hasSize(12);
@@ -133,7 +133,7 @@ class GMetricMonthAggregatorTest {
                 handicap(now.atDay(12), 3.0)
         ));
 
-        GMetricChartDataDto result = cut.getMetricsForRange("lastTwoYears", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.LAST_TWO_YEARS, "u");
 
         assertThat(result.handicap()).hasSize(24);
         assertThat(result.handicap().get(10)).isEqualTo(40.0);
@@ -148,7 +148,7 @@ class GMetricMonthAggregatorTest {
                 metric(currentMonth.atEndOfMonth(), GMetricType.LOST_BALLS_PER_9HOLES, 4)
         ));
 
-        GMetricChartDataDto result = cut.getMetricsForRange("lastYear", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.LAST_YEAR, "u");
 
         assertThat(result.lostBalls().getLast()).isEqualTo(3.0);
         assertThat(result.doubleBogey().getLast()).isNull();
@@ -159,7 +159,7 @@ class GMetricMonthAggregatorTest {
     void getMetricsForRange_all_emptyRepo_returnsEmptySeries() {
         when(repo.findByUserId("u")).thenReturn(List.of());
 
-        GMetricChartDataDto result = cut.getMetricsForRange("all", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.ALL, "u");
 
         assertThat(result.labels()).isEmpty();
         assertThat(result.lostBalls()).isEmpty();
@@ -176,7 +176,7 @@ class GMetricMonthAggregatorTest {
         when(repo.findByUserId("u")).thenReturn(List.of(earliestEntry));
         when(repo.findByUserIdAndType("u", GMetricType.BOGEY_PLUS)).thenReturn(List.of(earliestEntry));
 
-        GMetricChartDataDto result = cut.getMetricsForRange("ALL", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.ALL, "u");
 
         // 5 months ago through the current month inclusive
         assertThat(result.labels()).hasSize(1);
@@ -201,7 +201,7 @@ class GMetricMonthAggregatorTest {
         when(eclecticService.getEclecticByYear(eq("u"), eq(Year.from(handicapStart)), eq(Year.now())))
                 .thenReturn(Map.of(Year.now(), 36.0));
 
-        GMetricChartDataDto result = cut.getMetricsForRange("all", "u");
+        GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.ALL, "u");
 
         assertThat(result.labels().getFirst()).isEqualTo(FMT_YEAR.format(Year.from(handicapStart)));
         assertThat(result.labels().getLast()).isEqualTo(FMT_YEAR.format(Year.now()));

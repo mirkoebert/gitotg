@@ -37,12 +37,12 @@ public class GMetricRestController {
 
     @GetMapping("/api/gmetric/chart-data")
     public ResponseEntity<GMetricChartDataDto> getChartData(
-            @RequestParam(defaultValue = GMetricMonthAggregator.RANGE_LAST_YEAR) @Size(max = 88) String range
+            @RequestParam(defaultValue = GMetricRange.DEFAULT_PARAM) @Size(max = 88) String range
     ) {
         log.info("gmetric getChartData range={}", range);
         final CurrentUser u = currentUserService.getCurrentUser();
         final String userId = u.id();
         log.info("for user {}", userId);
-        return ResponseEntity.ok(monthAggregator.getMetricsForRange(range, userId));
+        return ResponseEntity.ok(monthAggregator.getMetricsForRange(GMetricRange.fromParam(range), userId));
     }
 }

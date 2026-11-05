@@ -22,13 +22,6 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 class GMetricMonthAggregator {
 
-    public static final String RANGE_LAST_YEAR = "lastYear";
-    public static final String RANGE_LAST_TWO_YEARS = "lastTwoYears";
-    public static final String RANGE_ALL = "all";
-
-    private static final int LAST_YEAR_MONTHS = 12;
-    private static final int LAST_TWO_YEARS_MONTHS = 24;
-
     private final GMetricRepository repo;
     private final HcpRepository hcpRepository;
     private final EclecticService eclecticService;
@@ -36,19 +29,14 @@ class GMetricMonthAggregator {
     private final DateTimeFormatter fmtYear = DateTimeFormatter.ofPattern("yyyy");
 
     /**
-     * Builds chart series for the given timeframe: monthly for
-     * {@value #RANGE_LAST_YEAR} / {@value #RANGE_LAST_TWO_YEARS}, yearly for {@value #RANGE_ALL}.
-     *
-     * @param range {@value #RANGE_LAST_YEAR} (default), {@value #RANGE_LAST_TWO_YEARS}, or {@value #RANGE_ALL}
+     * Builds chart series for the given timeframe. {@link GMetricRange#LAST_YEAR} and
+     * {@link GMetricRange#LAST_TWO_YEARS} are monthly. {@link GMetricRange#ALL} is yearly.
      */
-    public @NonNull GMetricChartDataDto getMetricsForRange(final String range, final String userId) {
-        if (RANGE_ALL.equalsIgnoreCase(range)) {
-            return chartForAll(userId);
-        }
-        if (RANGE_LAST_TWO_YEARS.equalsIgnoreCase(range)) {
-            return chartForLastMonths(userId, LAST_TWO_YEARS_MONTHS);
-        }
-        return chartForLastMonths(userId, LAST_YEAR_MONTHS);
+    public @NonNull GMetricChartDataDto getMetricsForRange(final @NonNull GMetricRange range, final String userId) {
+        return switch (range) {
+            case ALL -> chartForAll(userId);
+            case LAST_YEAR, LAST_TWO_YEARS -> chartForLastMonths(userId, range.months());
+        };
     }
 
     private @NonNull GMetricChartDataDto chartForLastMonths(@NonNull final String userId, final int months) {
