@@ -66,6 +66,28 @@ class GolfCoursePrimaryControllerIT {
 
     @SneakyThrows
     @Test
+    void index_describesPlayedRoundCsvWithCourseAndEighteenHoles() {
+        String html = mockMvc.perform(get("/golfcourse").param("lang", "en"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(html).contains("DATE, COURSE, HOLE_1…HOLE_18, LOST_BALLS");
+        assertThat(html).doesNotContain("HOLE_1…HOLE_9");
+
+        String german = mockMvc.perform(get("/golfcourse").param("lang", "de"))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        assertThat(german).contains("DATE, COURSE, HOLE_1…HOLE_18, LOST_BALLS");
+        assertThat(german).doesNotContain("HOLE_1…HOLE_9");
+    }
+
+    @SneakyThrows
+    @Test
     void deleteRound() {
         mockMvc.perform(post("/golfcourse/delete").param("roundId", "1"))
                 .andExpect(status().isFound()) // 302
