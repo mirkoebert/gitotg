@@ -30,6 +30,7 @@ Prefer `mvnd` (Maven Daemon) over `mvn`
 - **Never modify or delete an existing test to make it pass.**
   If a test seems wrong, stop and ask.
 - Every bug fix needs a regression test.
+- NVD_API_KEY is set, maven verify can be used
 
 ## Dependencies and configuration
 - No secrets in the repo. Configuration via `application-*.yml` and env vars.

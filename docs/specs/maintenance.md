@@ -16,4 +16,4 @@ Fix all CVE by updating dependencies.
 ## Working agreement
 1. read pom.xml
 2. read suppress.xml
-2. Propose a plan and wait for my OK.
+3Propose a plan and wait for my OK.
