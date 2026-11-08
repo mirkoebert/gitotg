@@ -3,7 +3,7 @@
 ### Goal
 Fix all CVE by updating dependencies.
 
-## Behavior
+@AGENTS.md## Behavior
 - Update parent to latest stable version
 - Update all self-managed dependencies to latest stable versions
 - Update all maven plugins to latest stable versions
