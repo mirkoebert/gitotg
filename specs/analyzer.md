@@ -18,9 +18,9 @@
 Metric calculation, Metric types, Don't modify any other RestController
 
 ## Tasks
-- [ ] Create a new Java package 'analytics' for the new code
-- [ ] Create a new playwright test for the new 'Analytics' page
-- [ ] Create a new page 'Analytics' and put it in the menu under goals
-- [ ] Create a test first for the new controller 'AnalyticsRestController'
-- [ ] Create a new rest controller that returns the analytics result list
-- [ ] Implement
+- [x] Create a new Java package 'analytics' for the new code
+- [x] Create a new playwright test for the new 'Analytics' page
+- [x] Create a new page 'Analytics' and put it in the menu under goals
+- [x] Create a test first for the new controller 'AnalyticsRestController'
+- [x] Create a new rest controller that returns the analytics result list
+- [x] Implement

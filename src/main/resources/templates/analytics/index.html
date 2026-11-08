@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html th:lang="${#locale.language}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="#{analytics.title}">Gitotg: Analytics</title>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <th:block th:insert="~{fragments/head :: favicons}"></th:block>
+</head>
+<body class="container mt-3 mt-md-5">
+<div th:insert="~{fragments/navbar :: navbar}"></div>
+
+<h1 class="text-center mb-4" th:text="#{analytics.heading}">Analytics</h1>
+
+<div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+        <p th:if="${weaknesses.empty}" th:text="#{analytics.empty}">No weaknesses found.</p>
+        <ul class="list-group" id="weaknesses" th:unless="${weaknesses.empty}">
+            <li class="list-group-item" th:each="item : ${weaknesses}" th:text="${item}">short game</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>
