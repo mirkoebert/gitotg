@@ -24,19 +24,13 @@ public class AnalyticsService {
     private final PlayedRoundRepository playedRoundRepository;
     private final WeaknessAnalyzer weaknessAnalyzer;
 
-    public @NonNull List<String> weaknesses(@NonNull String userId) {
+    public @NonNull List<String> weaknesses(@NonNull final String userId) {
         return weaknessAnalyzer.analyze(snapshot(userId, LocalDate.now()));
     }
 
-    private GolfSnapshot snapshot(String userId, LocalDate today) {
-        List<DatedHandicap> handicaps = hcpRepository.findByUserId(userId).stream()
-                .filter(score -> score.getDate() != null && score.getHcp() != null)
-                .map(score -> new DatedHandicap(score.getDate(), score.getHcp()))
-                .toList();
-        Double handicap = handicaps.stream()
-                .max(Comparator.comparing(DatedHandicap::date))
-                .map(DatedHandicap::handicap)
-                .orElse(null);
+    private GolfSnapshot snapshot(final String userId, final LocalDate today) {
+        List<DatedHandicap> handicaps = hcpRepository.findByUserId(userId).stream().filter((final var score) -> score.getDate() != null && score.getHcp() != null).map((final var score) -> new DatedHandicap(score.getDate(), score.getHcp())).toList();
+        Double handicap = handicaps.stream().max(Comparator.comparing(DatedHandicap::date)).map(DatedHandicap::handicap).orElse(null);
 
         int[] entries = shortGameEntries(userId);
         Integer shortGameIndex = singleTestResultRepository.countByUserId(userId) == 0
@@ -45,24 +39,20 @@ public class AnalyticsService {
 
         PlayedRoundEntity latestRound = latestRound(userId);
         int year = today.getYear();
-        Integer lostBalls = latestRound == null ? null : latestRound.getLostBalls();
+        Integer lostBalls = latestRound == null
+                ? null
+                : latestRound.getLostBalls();
+        Double lostBallCount = lostBalls == null
+                ? null
+                : lostBalls.doubleValue();
+        LocalDate lastPlayedRound = latestRound == null
+                ? null
+                : latestRound.getDate();
 
-        return new GolfSnapshot(
-                handicap,
-                shortGameIndex,
-                lostBalls == null ? null : lostBalls.doubleValue(),
-                handicaps,
-                playedRoundRepository.countByUserIdAndDateBetween(
-                        userId, LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31)),
-                playedRoundRepository.countByUserIdAndDateBetween(
-                        userId, LocalDate.of(year - 1, 1, 1), LocalDate.of(year - 1, 12, 31)),
-                entries,
-                latestRound == null ? null : latestRound.getDate(),
-                today
-        );
+        return new GolfSnapshot(handicap, shortGameIndex, lostBallCount, handicaps, playedRoundRepository.countByUserIdAndDateBetween(userId, LocalDate.of(year, 1, 1), LocalDate.of(year, 12, 31)), playedRoundRepository.countByUserIdAndDateBetween(userId, LocalDate.of(year - 1, 1, 1), LocalDate.of(year - 1, 12, 31)), entries, lastPlayedRound, today);
     }
 
-    private int[] shortGameEntries(String userId) {
+    private int[] shortGameEntries(final String userId) {
         int[] entries = new int[GolfSnapshot.SHORT_GAME_TEST_COUNT];
         for (SingleTestResultEntity result : singleTestResultRepository.findAllByUserId(userId)) {
             Integer testId = result.getTestId();
@@ -73,10 +63,7 @@ public class AnalyticsService {
         return entries;
     }
 
-    private PlayedRoundEntity latestRound(String userId) {
-        return playedRoundRepository.findByUserId(userId).stream()
-                .filter(round -> round.getDate() != null)
-                .max(Comparator.comparing(PlayedRoundEntity::getDate))
-                .orElse(null);
+    private PlayedRoundEntity latestRound(final String userId) {
+        return playedRoundRepository.findByUserId(userId).stream().filter((final var round) -> round.getDate() != null).max(Comparator.comparing(PlayedRoundEntity::getDate)).orElse(null);
     }
 }

@@ -14,7 +14,7 @@ public class AnalyticsPrimaryController {
     private final CurrentUserService currentUserService;
 
     @GetMapping("/analytics")
-    public String page(Model model) {
+    public String page(final Model model) {
         String userId = currentUserService.getCurrentUser().id();
         model.addAttribute("weaknesses", analyticsService.weaknesses(userId));
         return "analytics/index";

@@ -38,8 +38,7 @@ class AnalyticsRestControllerIT {
     @BeforeEach
     void loggedInUserWithAHighHandicap() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        when(currentUserService.getCurrentUser())
-                .thenReturn(new CurrentUser(USER, "Tester", "tester@example.com", null));
+        when(currentUserService.getCurrentUser()).thenReturn(new CurrentUser(USER, "Tester", "tester@example.com", null));
         cleanup();
         save(USER, 25.0);
         save(OTHER_USER, 5.0);
@@ -53,20 +52,10 @@ class AnalyticsRestControllerIT {
 
     @Test
     void weaknesses_returnsTheSignedInUsersList() throws Exception {
-        mockMvc.perform(get("/api/analytics"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(4))
-                .andExpect(jsonPath("$[0]").value("course management"))
-                .andExpect(jsonPath("$[1]").value("mental game"))
-                .andExpect(jsonPath("$[2]").value("playing"))
-                .andExpect(jsonPath("$[3]").value("short game"));
+        mockMvc.perform(get("/api/analytics")).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(4)).andExpect(jsonPath("$[0]").value("course management")).andExpect(jsonPath("$[1]").value("mental game")).andExpect(jsonPath("$[2]").value("playing")).andExpect(jsonPath("$[3]").value("short game"));
     }
 
-    private void save(String userId, double handicap) {
-        hcpRepository.save(HcpScoreEntity.builder()
-                .userId(userId)
-                .date(LocalDate.now())
-                .hcp(handicap)
-                .build());
+    private void save(final String userId, final double handicap) {
+        hcpRepository.save(HcpScoreEntity.builder().userId(userId).date(LocalDate.now()).hcp(handicap).build());
     }
 }

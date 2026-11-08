@@ -56,11 +56,7 @@ class AnalyticsPagePlaywrightIT {
 
     @BeforeEach
     void startBrowserAndSeedHandicap() {
-        hcpRepository.save(HcpScoreEntity.builder()
-                .userId(USER_ID)
-                .date(LocalDate.now())
-                .hcp(25.0)
-                .build());
+        hcpRepository.save(HcpScoreEntity.builder().userId(USER_ID).date(LocalDate.now()).hcp(25.0).build());
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
         page = browser.newPage();
@@ -100,10 +96,8 @@ class AnalyticsPagePlaywrightIT {
 
         @Bean
         @Order(0)
-        SecurityFilterChain analyticsPlaywrightChain(HttpSecurity http) throws Exception {
-            http.securityMatcher("/analytics")
-                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                    .addFilterAfter(new SignedInUserFilter(), SecurityContextHolderFilter.class);
+        SecurityFilterChain analyticsPlaywrightChain(final HttpSecurity http) throws Exception {
+            http.securityMatcher("/analytics").authorizeHttpRequests((final var auth) -> auth.anyRequest().permitAll()).addFilterAfter(new SignedInUserFilter(), SecurityContextHolderFilter.class);
             return http.build();
         }
     }
@@ -111,18 +105,10 @@ class AnalyticsPagePlaywrightIT {
     static final class SignedInUserFilter extends OncePerRequestFilter {
 
         @Override
-        protected void doFilterInternal(
-                HttpServletRequest request,
-                HttpServletResponse response,
-                FilterChain filterChain
-        ) throws ServletException, IOException {
-            OAuth2User principal = new DefaultOAuth2User(
-                    List.of(new SimpleGrantedAuthority("ROLE_USER")),
-                    Map.of("sub", USER_ID, "name", "Analytics Tester"),
-                    "sub");
+        protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain) throws ServletException, IOException {
+            OAuth2User principal = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority("ROLE_USER")), Map.of("sub", USER_ID, "name", "Analytics Tester"), "sub");
             SecurityContext context = SecurityContextHolder.createEmptyContext();
-            context.setAuthentication(new OAuth2AuthenticationToken(
-                    principal, principal.getAuthorities(), "playwright"));
+            context.setAuthentication(new OAuth2AuthenticationToken(principal, principal.getAuthorities(), "playwright"));
             SecurityContextHolder.setContext(context);
             try {
                 filterChain.doFilter(request, response);

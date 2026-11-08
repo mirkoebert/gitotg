@@ -46,8 +46,7 @@ class WeaknessAnalyzerTest {
 
     @Test
     void analyze_addsLongGameAndMentalGame_whenLostBallsAreGreaterThanOne() {
-        assertThat(cut.analyze(baseline().lostBalls(1.1).build()))
-                .containsExactly("long game", "mental game");
+        assertThat(cut.analyze(baseline().lostBalls(1.1).build())).containsExactly("long game", "mental game");
     }
 
     @Test
@@ -72,77 +71,42 @@ class WeaknessAnalyzerTest {
 
     @Test
     void analyze_addsClubs_whenHandicapDropsBelow30InTheLastYear() {
-        GolfSnapshot snapshot = baseline()
-                .handicap(20.0)
-                .shortGameIndex(20)
-                .handicaps(
-                        new DatedHandicap(TODAY.minusMonths(8), 32.0),
-                        new DatedHandicap(TODAY.minusMonths(2), 20.0))
-                .build();
+        GolfSnapshot snapshot = baseline().handicap(20.0).shortGameIndex(20).handicaps(new DatedHandicap(TODAY.minusMonths(8), 32.0), new DatedHandicap(TODAY.minusMonths(2), 20.0)).build();
 
         assertThat(cut.analyze(snapshot)).containsExactly("clubs");
     }
 
     @Test
     void analyze_addsClubs_whenHandicapDropsBelow18InTheLastYear() {
-        GolfSnapshot snapshot = baseline()
-                .handicap(17.0)
-                .shortGameIndex(17)
-                .handicaps(
-                        new DatedHandicap(TODAY.minusMonths(6), 19.0),
-                        new DatedHandicap(TODAY.minusMonths(1), 17.0))
-                .build();
+        GolfSnapshot snapshot = baseline().handicap(17.0).shortGameIndex(17).handicaps(new DatedHandicap(TODAY.minusMonths(6), 19.0), new DatedHandicap(TODAY.minusMonths(1), 17.0)).build();
 
         assertThat(cut.analyze(snapshot)).containsExactly("clubs");
     }
 
     @Test
     void analyze_addsClubsOnce_whenTheSameDropCrosses30And18() {
-        GolfSnapshot snapshot = baseline()
-                .handicap(17.0)
-                .shortGameIndex(17)
-                .handicaps(
-                        new DatedHandicap(TODAY.minusYears(2), 36.0),
-                        new DatedHandicap(TODAY.minusMonths(3), 17.0))
-                .build();
+        GolfSnapshot snapshot = baseline().handicap(17.0).shortGameIndex(17).handicaps(new DatedHandicap(TODAY.minusYears(2), 36.0), new DatedHandicap(TODAY.minusMonths(3), 17.0)).build();
 
         assertThat(cut.analyze(snapshot)).containsExactly("clubs");
     }
 
     @Test
     void analyze_skipsClubs_whenTheDropIsOlderThanOneYear() {
-        GolfSnapshot snapshot = baseline()
-                .handicap(10.0)
-                .shortGameIndex(10)
-                .handicaps(
-                        new DatedHandicap(TODAY.minusYears(2), 40.0),
-                        new DatedHandicap(TODAY.minusYears(1).minusDays(1), 10.0),
-                        new DatedHandicap(TODAY, 10.0))
-                .build();
+        GolfSnapshot snapshot = baseline().handicap(10.0).shortGameIndex(10).handicaps(new DatedHandicap(TODAY.minusYears(2), 40.0), new DatedHandicap(TODAY.minusYears(1).minusDays(1), 10.0), new DatedHandicap(TODAY, 10.0)).build();
 
         assertThat(cut.analyze(snapshot)).containsExactly("no progress");
     }
 
     @Test
     void analyze_addsNoProgress_whenHandicapIsUnchangedForAtLeastOneYear() {
-        GolfSnapshot snapshot = baseline()
-                .handicaps(
-                        new DatedHandicap(TODAY.minusYears(1), 15.0),
-                        new DatedHandicap(TODAY, 15.0))
-                .build();
+        GolfSnapshot snapshot = baseline().handicaps(new DatedHandicap(TODAY.minusYears(1), 15.0), new DatedHandicap(TODAY, 15.0)).build();
 
         assertThat(cut.analyze(snapshot)).containsExactly("no progress");
     }
 
     @Test
     void analyze_skipsNoProgress_whenTheHandicapMovedDuringTheYear() {
-        GolfSnapshot snapshot = baseline()
-                .handicap(14.0)
-                .shortGameIndex(14)
-                .handicaps(
-                        new DatedHandicap(TODAY.minusYears(1), 15.0),
-                        new DatedHandicap(TODAY, 14.0))
-                .build();
+        GolfSnapshot snapshot = baseline().handicap(14.0).shortGameIndex(14).handicaps(new DatedHandicap(TODAY.minusYears(1), 15.0), new DatedHandicap(TODAY, 14.0)).build();
 
         assertThat(cut.analyze(snapshot)).isEmpty();
     }
@@ -167,8 +131,7 @@ class WeaknessAnalyzerTest {
 
     @Test
     void analyze_addsPlaying_whenTheLastRoundIsMoreThanOneMonthAgo() {
-        assertThat(cut.analyze(baseline().lastRound(TODAY.minusMonths(1).minusDays(1)).build()))
-                .containsExactly("playing");
+        assertThat(cut.analyze(baseline().lastRound(TODAY.minusMonths(1).minusDays(1)).build())).containsExactly("playing");
     }
 
     @Test
@@ -199,54 +162,44 @@ class WeaknessAnalyzerTest {
         private int[] entries = fiveEach();
         private LocalDate lastRound = TODAY;
 
-        SnapshotBuilder handicap(Double value) {
+        SnapshotBuilder handicap(final Double value) {
             this.handicap = value;
             return this;
         }
 
-        SnapshotBuilder shortGameIndex(Integer value) {
+        SnapshotBuilder shortGameIndex(final Integer value) {
             this.shortGameIndex = value;
             return this;
         }
 
-        SnapshotBuilder lostBalls(Double value) {
+        SnapshotBuilder lostBalls(final Double value) {
             this.lostBalls = value;
             return this;
         }
 
-        SnapshotBuilder handicaps(DatedHandicap... values) {
+        SnapshotBuilder handicaps(final DatedHandicap... values) {
             this.handicaps = List.of(values);
             return this;
         }
 
-        SnapshotBuilder rounds(long thisYear, long lastYear) {
+        SnapshotBuilder rounds(final long thisYear, final long lastYear) {
             this.roundsThisYear = thisYear;
             this.roundsLastYear = lastYear;
             return this;
         }
 
-        SnapshotBuilder entries(int[] values) {
+        SnapshotBuilder entries(final int[] values) {
             this.entries = values;
             return this;
         }
 
-        SnapshotBuilder lastRound(LocalDate value) {
+        SnapshotBuilder lastRound(final LocalDate value) {
             this.lastRound = value;
             return this;
         }
 
         GolfSnapshot build() {
-            return new GolfSnapshot(
-                    handicap,
-                    shortGameIndex,
-                    lostBalls,
-                    new ArrayList<>(handicaps),
-                    roundsThisYear,
-                    roundsLastYear,
-                    entries,
-                    lastRound,
-                    TODAY
-            );
+            return new GolfSnapshot(handicap, shortGameIndex, lostBalls, new ArrayList<>(handicaps), roundsThisYear, roundsLastYear, entries, lastRound, TODAY);
         }
     }
 }
