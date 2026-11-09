@@ -18,778 +18,923 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
-
 import static com.mirkoebert.export.CsvImportService.MAX_CSV_LINES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 class CsvImportServiceTest {
-
-    private static final String TEST_USER = "csv-import-test-user";
-    @Autowired
-    private CsvImportService cut;
-    @Autowired
-    private HcpRepository hcpRepository;
-    @Autowired
-    private SingleTestResultRepository singleTestResultRepository;
-    @Autowired
-    private GMetricRepository gMetricRepository;
-    @Autowired
-    private PlayedRoundRepository playedRoundRepository;
-    @Autowired
-    private HcpCsvExportService hcpCsvExportService;
-    @Autowired
-    private PointsToSgiHcpFunction pointsToSgiHcpFunction;
-
-    @BeforeEach
-    void cleanup() {
-        hcpRepository.findByUserId(TEST_USER).forEach(hcpRepository::delete);
-        singleTestResultRepository.findAllByUserId(TEST_USER).forEach(singleTestResultRepository::delete);
-        gMetricRepository.findByUserId(TEST_USER).forEach(gMetricRepository::delete);
-        playedRoundRepository.findByUserId(TEST_USER).forEach(playedRoundRepository::delete);
-    }
-
-    // HCP tests
-
-    @SneakyThrows
-    @Test
-    void importHcpData_insertsWhenNoExisting() {
-        final String csv = "date,hcp\n2025-01-31,25.5\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importHcpData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-
-        List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        HcpScoreEntity saved = all.getFirst();
-        assertThat(saved.getUserId()).isEqualTo(TEST_USER);
-        assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 31));
-        assertThat(saved.getHcp()).isEqualTo(25.5);
-    }
-
-    @SneakyThrows
-    @Test
-    void importHcpData_removesExistingUserDataBeforeImport() {
-        hcpRepository.save(HcpScoreEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2024, 1, 1))
-                .hcp(30.0)
-                .build());
-        hcpRepository.save(HcpScoreEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2024, 6, 1))
-                .hcp(28.0)
-                .build());
-        assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(2);
-
-        final String csv = "date,hcp\n2025-01-21,25.5\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importHcpData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        assertThat(all.getFirst().getHcp()).isEqualTo(25.5);
-        assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
-        assertThat(hcpRepository.findByUserIdAndDate(TEST_USER, LocalDate.of(2024, 1, 1))).isEmpty();
-    }
-
-    @SneakyThrows
-    @Test
-    void importHcpData_replacesPreviousImportCompletely() {
-        String csv1 = "date,hcp\n2025-01-21,20.0\n2025-02-01,19.0\n";
-        cut.importHcpData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
-        assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(2);
-
-        String csv2 = "date,hcp\n2025-01-21,25.5\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv2.getBytes());
-
-        int count = cut.importHcpData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        assertThat(all.getFirst().getHcp()).isEqualTo(25.5);
-        assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
-        assertThat(hcpRepository.findByUserIdAndDate(TEST_USER, LocalDate.of(2025, 2, 1))).isEmpty();
-    }
-
-    @SneakyThrows
-    @Test
-    void importHcpData_skipsInvalidRowsAndCountsOnlyValid() {
-        final String csv = "date,hcp\n2025-01-01,\n,25.5\n2025-01-02,30.0\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importHcpData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-
-        List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-    }
-
-    @SneakyThrows
-    @Test
-    void importHcpData_skipsValuesOutsideNumericLimits() {
-        final String csv = "date,hcp\n2025-01-01,200.0\n2025-01-02,-50.0\n2025-01-03,20.0\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importHcpData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(1);
-        assertThat(hcpRepository.findByUserId(TEST_USER).getFirst().getHcp()).isEqualTo(20.0);
-    }
-
-    @Test
-    void importHcpData_returnsZeroForNoValidRows() {
-        // Seed data must still be cleared even when CSV has no valid rows
-        hcpRepository.save(HcpScoreEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2024, 3, 1))
-                .hcp(22.0)
-                .build());
-
-        String csv = "date,hcp\n,25.5\n";
-        InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importHcpData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(0);
-        assertThat(hcpRepository.findByUserId(TEST_USER)).isEmpty();
-    }
-
-    // SGI tests
-
-    @SneakyThrows
-    @Test
-    void importSgiData_insertsAndComputesHcpWhenNoExisting() {
-        final String csv = "date,points,testId,testType\n2025-01-01,5,1,SGI\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importSgiData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-
-        List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        SingleTestResultEntity saved = all.getFirst();
-        assertThat(saved.getUserId()).isEqualTo(TEST_USER);
-        assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
-        assertThat(saved.getPoints()).isEqualTo(5);
-        assertThat(saved.getTestId()).isEqualTo(1);
-        assertThat(saved.getTestType()).isEqualTo(TestSuite.SGI);
-        // compute expected using real function
-        int expectedHcp = pointsToSgiHcpFunction.apply(1, 5);
-        assertThat(saved.getHcp()).isEqualTo(expectedHcp);
-    }
-
-    @SneakyThrows
-    @Test
-    void importSgiData_replacesWhenSameDateAndTestIdExists() {
-        // first
-        String csv1 = "date,points,testId,testType\n2025-01-21,5,1,SGI\n";
-        cut.importSgiData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
-
-        // second same date+testId, different points
-        String csv2 = "date,points,testId,testType\n2025-01-21,4,1,SGI\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv2.getBytes());
-
-        int count = cut.importSgiData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-
-        List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        SingleTestResultEntity saved = all.getFirst();
-        assertThat(saved.getPoints()).isEqualTo(4); // replaced
-        int expectedHcp = pointsToSgiHcpFunction.apply(1, 4);
-        assertThat(saved.getHcp()).isEqualTo(expectedHcp);
-    }
-
-    @SneakyThrows
-    @Test
-    void importSgiData_skipsInvalidRows() {
-        final String csv = "date,points,testId,testType\n2025-01-01,5,1,SGI\n,5,1,SGI\n2025-01-02,,2,SGI\n2025-01-03,7,,SGI\n2025-01-04,8,4,\n2025-01-05,9,5,SGI\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importSgiData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(2);
-
-        List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
-        assertThat(all).hasSize(2);
-    }
-
-    @SneakyThrows
-    @Test
-    void importSgiData_skipsValuesOutsideNumericLimits() {
-        final String csv = "date,points,testId,testType\n2025-01-01,99,1,SGI\n2025-01-02,5,99,SGI\n2025-01-03,5,1,SGI\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importSgiData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        assertThat(singleTestResultRepository.findAllByUserId(TEST_USER)).hasSize(1);
-    }
-
-    @SneakyThrows
-    @Test
-    void importSgiData_returnsZeroForNoValidRows() {
-        String csv = "date,points,testId,testType\n,10,1,SGI\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importSgiData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(0);
-
-        List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
-        assertThat(all).isEmpty();
-    }
-
-    @SneakyThrows
-    @Test
-    void importSgiData_loadsShortGameCsvFromClasspath() {
-        singleTestResultRepository.save(SingleTestResultEntity.builder()
-                .date(LocalDate.of(2025, 6, 21))
-                .hcp(pointsToSgiHcpFunction.apply(1, 2))
-                .points(2)
-                .userId(TEST_USER)
-                .testType(TestSuite.SGI)
-                .testId(1)
-                .build());
-        singleTestResultRepository.save(SingleTestResultEntity.builder()
-                .date(LocalDate.of(2025, 6, 22))
-                .hcp(pointsToSgiHcpFunction.apply(2, 3))
-                .points(3)
-                .userId(TEST_USER)
-                .testType(TestSuite.SGI)
-                .testId(2)
-                .build());
-        assertThat(singleTestResultRepository.countByUserId(TEST_USER)).isEqualTo(2);
-
-        @Cleanup InputStream is = getClass().getClassLoader().getResourceAsStream("2026-07-23-short-game.csv");
-        assertThat(is).isNotNull();
-
-        int count = cut.importSgiData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(12);
-
-        final List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
-        assertThat(all).hasSize(12);
-        assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
-        assertThat(all).allMatch(e -> e.getTestType() == TestSuite.SGI);
-        assertThat(all).allMatch(e -> e.getHcp() != null);
-
-        // spot-check a row from each date in the fixture
-        SingleTestResultEntity july23Test7 = all.stream()
-                .filter(e -> e.getDate().equals(LocalDate.of(2026, 7, 23)) && e.getTestId() == 7)
-                .findFirst()
-                .orElseThrow();
-        assertThat(july23Test7.getPoints()).isEqualTo(5);
-        assertThat(july23Test7.getHcp()).isEqualTo(pointsToSgiHcpFunction.apply(7, 5));
-
-        SingleTestResultEntity june21Test1 = all.stream()
-                .filter(e -> e.getDate().equals(LocalDate.of(2025, 6, 21)) && e.getTestId() == 1)
-                .findFirst()
-                .orElseThrow();
-        assertThat(june21Test1.getPoints()).isEqualTo(2);
-        assertThat(june21Test1.getHcp()).isEqualTo(pointsToSgiHcpFunction.apply(1, 2));
-
-        count = cut.importSgiData(is, TEST_USER);
-        assertThat(count).isZero();
-    }
-
-    // GMetric tests
-
-    @SneakyThrows
-    @Test
-    void importGMetricData_insertsWhenNoExisting() {
-        final String csv = "date,metricValue,type\n2025-01-31,3,LOST_BALLS_PER_9HOLES\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importGMetricData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-
-        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        GMetricEntity saved = all.getFirst();
-        assertThat(saved.getUserId()).isEqualTo(TEST_USER);
-        assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 31));
-        assertThat(saved.getMetricValue()).isEqualTo(3);
-        assertThat(saved.getType()).isEqualTo(GMetricType.LOST_BALLS_PER_9HOLES);
-    }
-
-    @SneakyThrows
-    @Test
-    void importGMetricData_removesExistingUserDataBeforeImport() {
-        gMetricRepository.save(GMetricEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2024, 1, 1))
-                .metricValue(99)
-                .type(GMetricType.LOST_BALLS_PER_9HOLES)
-                .build());
-        gMetricRepository.save(GMetricEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2024, 2, 1))
-                .metricValue(88)
-                .type(GMetricType.BOGEY_PLUS)
-                .build());
-        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
-
-        final String csv = "date,metricValue,type\n2025-01-21,5,DOUBLE_BOGEY_PLUS\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importGMetricData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
-        assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
-        assertThat(all.getFirst().getType()).isEqualTo(GMetricType.DOUBLE_BOGEY_PLUS);
-        assertThat(gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2024, 1, 1), GMetricType.LOST_BALLS_PER_9HOLES))
-                .isEmpty();
-    }
-
-    @SneakyThrows
-    @Test
-    void importGMetricData_replacesPreviousImportCompletely() {
-        String csv1 = "date,metricValue,type\n2025-01-21,2,BOGEY_PLUS\n2025-01-21,1,LOST_BALLS_PER_9HOLES\n";
-        cut.importGMetricData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
-        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
-
-        String csv2 = "date,metricValue,type\n2025-01-21,5,BOGEY_PLUS\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv2.getBytes());
-
-        int count = cut.importGMetricData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
-        assertThat(all.getFirst().getType()).isEqualTo(GMetricType.BOGEY_PLUS);
-        assertThat(gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2025, 1, 21), GMetricType.LOST_BALLS_PER_9HOLES))
-                .isEmpty();
-    }
-
-    @SneakyThrows
-    @Test
-    void importGMetricData_allowsSameDateDifferentType() {
-        String csv = "date,metricValue,type\n2025-01-21,2,BOGEY_PLUS\n2025-01-21,1,LOST_BALLS_PER_9HOLES\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importGMetricData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(2);
-        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
-    }
-
-    @SneakyThrows
-    @Test
-    void importGMetricData_skipsInvalidRows() {
-        final String csv = "date,metricValue,type\n2025-01-01,3,\n,2,BOGEY_PLUS\n2025-01-02,4,DOUBLE_BOGEY_PLUS\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importGMetricData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(1);
-    }
-
-    @SneakyThrows
-    @Test
-    void importGMetricData_skipsValuesOutsideNumericLimits() {
-        final String csv = "date,metricValue,type\n2025-01-01,1000,LOST_BALLS_PER_9HOLES\n2025-01-02,3,BOGEY_PLUS\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importGMetricData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(1);
-        assertThat(gMetricRepository.findByUserId(TEST_USER).getFirst().getMetricValue()).isEqualTo(3);
-    }
-
-    @SneakyThrows
-    @Test
-    void importGMetricData_loadsFixtureCsvFromClasspath() {
-        // Pre-seed data that must be removed by import
-        gMetricRepository.save(GMetricEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2020, 1, 1))
-                .metricValue(1)
-                .type(GMetricType.DOUBLE_BOGEY_PLUS)
-                .build());
-
-        @Cleanup InputStream is = getClass().getClassLoader().getResourceAsStream("2026-07-26-gmetric.csv");
-        assertThat(is).isNotNull();
-
-        int count = cut.importGMetricData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(5);
-
-        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(5);
-        assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
-        assertThat(gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2020, 1, 1), GMetricType.DOUBLE_BOGEY_PLUS))
-                .isEmpty();
-
-        GMetricEntity lostBalls = gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 7, 26), GMetricType.LOST_BALLS_PER_9HOLES)
-                .orElseThrow();
-        assertThat(lostBalls.getMetricValue()).isEqualTo(2);
-
-        GMetricEntity bogey = gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2025, 6, 15), GMetricType.BOGEY_PLUS)
-                .orElseThrow();
-        assertThat(bogey.getMetricValue()).isEqualTo(2);
-
-        // Re-import same fixture: still exactly fixture rows
-        @Cleanup InputStream again = getClass().getClassLoader().getResourceAsStream("2026-07-26-gmetric.csv");
-        assertThat(again).isNotNull();
-        int secondCount = cut.importGMetricData(again, TEST_USER);
-        assertThat(secondCount).isEqualTo(5);
-        assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(5);
-    }
-
-    // Played-round tests
-
-    @SneakyThrows
-    @Test
-    void importPlayedRoundData_loadsGolfResultsCsvFromClasspath() {
-        playedRoundRepository.save(PlayedRoundEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2020, 1, 1))
-                .courseName("Tessin")
-                .holeStrokes(List.of(4, 5, 3, 4, 4, 5, 4, 4, 3))
-                .lostBalls(0)
-                .build());
-        assertThat(playedRoundRepository.findByUserId(TEST_USER)).hasSize(1);
-
-        @Cleanup InputStream is = getClass().getClassLoader().getResourceAsStream("Golf_Results.csv");
-        assertThat(is).isNotNull();
-
-        int count = cut.importPlayedRoundData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(16);
-
-        List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(16);
-        assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
-        assertThat(all).allMatch(e -> "Fischland".equals(e.getCourseName()));
-        assertThat(all).noneMatch(e -> e.getDate().equals(LocalDate.of(2020, 1, 1)));
-        assertThat(all).noneMatch(e -> e.getDate().equals(LocalDate.of(2026, 6, 10)));
-
-        PlayedRoundEntity april8 = all.stream()
-                .filter(e -> e.getDate().equals(LocalDate.of(2026, 4, 8)))
-                .findFirst()
-                .orElseThrow();
-        assertThat(april8.getHoleStrokes()).containsExactly(6, 5, 3, 7, 5, 5, 5, 6, 5);
-        assertThat(april8.getLostBalls()).isNull();
-        assertThat(april8.getBogeysPlus()).isEqualTo(8);
-        assertThat(april8.getDoubleBogeysPlus()).isEqualTo(3);
-
-        // submitRound also writes the three derived gmetric snapshots
-        assertThat(gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.BOGEY_PLUS)
-                .get().getMetricValue()).isEqualTo(8);
-        assertThat(gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.DOUBLE_BOGEY_PLUS)
-                .get().getMetricValue()).isEqualTo(3);
-
-
-        PlayedRoundEntity aug12 = all.stream()
-                .filter(e -> e.getDate().equals(LocalDate.of(2026, 8, 12)))
-                .findFirst()
-                .orElseThrow();
-        assertThat(aug12.getHoleStrokes()).containsExactly(7, 6, 4, 6, 6, 6, 8, 4, 5);
-        assertThat(aug12.getLostBalls()).isEqualTo(2);
-
-        assertThat(all.stream().filter(e -> e.getDate().equals(LocalDate.of(2026, 5, 16))).count()).isEqualTo(2);
-
-        @Cleanup InputStream again = getClass().getClassLoader().getResourceAsStream("Golf_Results.csv");
-        assertThat(again).isNotNull();
-        int secondCount = cut.importPlayedRoundData(again, TEST_USER);
-        assertThat(secondCount).isEqualTo(16);
-        assertThat(playedRoundRepository.findByUserId(TEST_USER)).hasSize(16);
-    }
-
-    @SneakyThrows
-    @Test
-    void importPlayedRoundData_roundTripsCourseAndEveryHole() {
-        final String otherUser = "csv-import-other-user";
-        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 3, 1), "Fischland", 2,
-                List.of(5, 4, 3, 5, 3, 4, 4, 3, 4)));
-        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 3, 2), "Tessin", 1,
-                List.of(4, 5, 3, 4, 4, 5, 4, 4, 3)));
-        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 4, 2), "Grambek", 5,
-                List.of(4, 5, 3, 4, 4, 4, 3, 4, 4, 4, 3, 4, 5, 4, 5, 4, 3, 4)));
-        playedRoundRepository.save(round(otherUser, LocalDate.of(2026, 3, 1), "Tessin", 9,
-                List.of(4, 5, 3, 4, 4, 5, 4, 4, 3)));
-
-        String csv = hcpCsvExportService.exportAllPlayedRoundsToCsv(TEST_USER);
-        int count = cut.importPlayedRoundData(
-                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)), TEST_USER);
-
-        assertThat(count).isEqualTo(3);
-        List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
-        assertThat(all).extracting(PlayedRoundEntity::getCourseName)
-                .containsExactlyInAnyOrder("Fischland", "Tessin", "Grambek");
-
-        PlayedRoundEntity fischland = roundOn(all, LocalDate.of(2026, 3, 1));
-        assertThat(fischland.getCourseName()).isEqualTo("Fischland");
-        assertThat(fischland.getHoleStrokes()).containsExactly(5, 4, 3, 5, 3, 4, 4, 3, 4);
-        assertThat(fischland.getLostBalls()).isEqualTo(2);
-
-        PlayedRoundEntity grambek = roundOn(all, LocalDate.of(2026, 4, 2));
-        assertThat(grambek.getCourseName()).isEqualTo("Grambek");
-        assertThat(grambek.getHoleStrokes()).hasSize(18);
-        assertThat(grambek.getLostBalls()).isEqualTo(5);
-        assertThat(gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 2), GMetricType.LOST_BALLS_PER_9HOLES)
-                .orElseThrow()
-                .getMetricValue()).isEqualTo(2.5f);
-
-        assertThat(playedRoundRepository.findByUserId(otherUser)).hasSize(1);
-
-        int secondCount = cut.importPlayedRoundData(
-                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)), TEST_USER);
-        assertThat(secondCount).isEqualTo(3);
-        assertThat(playedRoundRepository.findByUserId(TEST_USER))
-                .extracting(PlayedRoundEntity::getCourseName)
-                .containsExactlyInAnyOrder("Fischland", "Tessin", "Grambek");
-
-        playedRoundRepository.findByUserId(otherUser).forEach(playedRoundRepository::delete);
-    }
-
-    @SneakyThrows
-    @Test
-    void importPlayedRoundData_skipsRowsWhoseCourseDoesNotMatchTheHoleCount() {
-        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 4, 3), "Grambek", 0,
-                List.of(4, 5, 3, 4, 4, 4, 3, 4, 4)));
-        playedRoundRepository.save(round(TEST_USER, LocalDate.of(2026, 4, 4), "Nowhere", 0,
-                List.of(5, 4, 3, 5, 3, 4, 4, 3, 4)));
-        String csv = hcpCsvExportService.exportAllPlayedRoundsToCsv(TEST_USER);
-
-        int count = cut.importPlayedRoundData(
-                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)), TEST_USER);
-
-        assertThat(count).isZero();
-        assertThat(playedRoundRepository.findByUserId(TEST_USER)).isEmpty();
-    }
-
-    @SneakyThrows
-    @Test
-    void importGMetricData_acceptsUppercaseHeaders() {
-        final String csv = "DATE,METRICVALUE,TYPE\n2026-03-01,7,DOUBLE_BOGEY_PLUS\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes());
-
-        int count = cut.importGMetricData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        GMetricEntity saved = gMetricRepository
-                .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 3, 1), GMetricType.DOUBLE_BOGEY_PLUS)
-                .orElseThrow();
-        assertThat(saved.getMetricValue()).isEqualTo(7);
-    }
-
-    @Test
-    void stripUtf8Bom_removesOnlyALeadingBom() {
-        byte[] bom = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
-        byte[] plain = "date,hcp".getBytes(StandardCharsets.UTF_8);
-        byte[] withBom = new byte[bom.length + plain.length];
-        System.arraycopy(bom, 0, withBom, 0, bom.length);
-        System.arraycopy(plain, 0, withBom, bom.length, plain.length);
-
-        assertThat(CsvImportService.stripUtf8Bom(withBom)).isEqualTo(plain);
-        assertThat(CsvImportService.stripUtf8Bom(plain)).isEqualTo(plain);
-        assertThat(CsvImportService.stripUtf8Bom(new byte[0])).isEmpty();
-    }
-
-    @SneakyThrows
-    @Test
-    void importHcpData_readsUtf8AndIgnoresTheSpreadsheetBom() {
-        // "CSV UTF-8" from a spreadsheet: BOM first, and non-ASCII text in the file
-        final String csv = "\uFEFFdate,hcp\n2025-01-31,25.5\n";
-        @Cleanup InputStream is = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
-
-        int count = cut.importHcpData(is, TEST_USER);
-
-        assertThat(count).isEqualTo(1);
-        assertThat(hcpRepository.findByUserId(TEST_USER).getFirst().getDate())
-                .isEqualTo(LocalDate.of(2025, 1, 31));
-    }
-
-    @Test
-    void countLines_countsHeaderAndDataAndAMissingTrailingNewline() {
-        assertThat(CsvImportService.countLines(new byte[0])).isZero();
-        assertThat(CsvImportService.countLines("date,hcp\n".getBytes())).isEqualTo(1);
-        assertThat(CsvImportService.countLines("date,hcp\n2025-01-01,20.0\n".getBytes())).isEqualTo(2);
-        assertThat(CsvImportService.countLines("date,hcp\n2025-01-01,20.0".getBytes())).isEqualTo(2);
-    }
-
-    @SneakyThrows
-    @Test
-    void importHcpData_acceptsExactlyMaxLinesIncludingHeader() {
-        int dataRows = MAX_CSV_LINES - 1;
-        String csv = hcpCsv(dataRows);
-
-        int count = cut.importHcpData(new ByteArrayInputStream(csv.getBytes()), TEST_USER);
-
-        assertThat(count).isEqualTo(dataRows);
-        assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(dataRows);
-    }
-
-    @SneakyThrows
-    @Test
-    void importHcpData_rejectsOverMaxLinesAndKeepsExistingData() {
-        hcpRepository.save(HcpScoreEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2024, 1, 1))
-                .hcp(30.0)
-                .build());
-
-        String csv = hcpCsv(MAX_CSV_LINES);
-
-        assertThatThrownBy(() -> cut.importHcpData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
-                .isInstanceOf(CsvImportTooManyLinesException.class)
-                .extracting(ex -> ((CsvImportTooManyLinesException) ex).getMaxLines())
-                .isEqualTo(MAX_CSV_LINES);
-
-        List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        assertThat(all.getFirst().getHcp()).isEqualTo(30.0);
-    }
-
-    @SneakyThrows
-    @Test
-    void importSgiData_rejectsOverMaxLinesAndKeepsExistingData() {
-        singleTestResultRepository.save(SingleTestResultEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2024, 1, 1))
-                .points(5)
-                .testId(1)
-                .testType(TestSuite.SGI)
-                .hcp(31)
-                .build());
-
-        String csv = sgiCsv();
-
-        assertThatThrownBy(() -> cut.importSgiData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
-                .isInstanceOf(CsvImportTooManyLinesException.class);
-
-        List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        assertThat(all.getFirst().getPoints()).isEqualTo(5);
-    }
-
-    @SneakyThrows
-    @Test
-    void importGMetricData_rejectsOverMaxLinesAndKeepsExistingData() {
-        gMetricRepository.save(GMetricEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2024, 1, 1))
-                .metricValue(2)
-                .type(GMetricType.LOST_BALLS_PER_9HOLES)
-                .build());
-
-        String csv = gmetricCsv();
-
-        assertThatThrownBy(() -> cut.importGMetricData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
-                .isInstanceOf(CsvImportTooManyLinesException.class);
-
-        List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        assertThat(all.getFirst().getMetricValue()).isEqualTo(2);
-    }
-
-    @SneakyThrows
-    @Test
-    void importPlayedRoundData_rejectsOverMaxLinesAndKeepsExistingData() {
-        playedRoundRepository.save(PlayedRoundEntity.builder()
-                .userId(TEST_USER)
-                .date(LocalDate.of(2024, 1, 1))
-                .courseName("Fischland")
-                .holeStrokes(List.of(5, 4, 2, 5, 3, 4, 4, 3, 4))
-                .lostBalls(1)
-                .build());
-
-        String csv = playedRoundCsv();
-
-        assertThatThrownBy(() -> cut.importPlayedRoundData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
-                .isInstanceOf(CsvImportTooManyLinesException.class);
-
-        List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
-        assertThat(all).hasSize(1);
-        assertThat(all.getFirst().getLostBalls()).isEqualTo(1);
-    }
-
-    private static String hcpCsv(int dataRows) {
-        StringBuilder csv = new StringBuilder("date,hcp\n");
-        for (int i = 0; i < dataRows; i++) {
-            csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
-                    .append(',').append(20 + (i % 10)).append(".0\n");
+        private static final String TEST_USER = "csv-import-test-user";
+        @Autowired
+        private CsvImportService cut;
+        @Autowired
+        private HcpRepository hcpRepository;
+        @Autowired
+        private SingleTestResultRepository singleTestResultRepository;
+        @Autowired
+        private GMetricRepository gMetricRepository;
+        @Autowired
+        private PlayedRoundRepository playedRoundRepository;
+        @Autowired
+        private HcpCsvExportService hcpCsvExportService;
+        @Autowired
+        private PointsToSgiHcpFunction pointsToSgiHcpFunction;
+
+        @BeforeEach
+        void cleanup() {
+                hcpRepository.findByUserId(TEST_USER).forEach(hcpRepository::delete);
+                singleTestResultRepository.findAllByUserId(TEST_USER).forEach(singleTestResultRepository::delete);
+                gMetricRepository.findByUserId(TEST_USER).forEach(gMetricRepository::delete);
+                playedRoundRepository.findByUserId(TEST_USER).forEach(playedRoundRepository::delete);
         }
-        return csv.toString();
-    }
 
-    private static String sgiCsv() {
-        val csv = new StringBuilder("date,points,testId,testType\n");
-        for (int i = 0; i < CsvImportService.MAX_CSV_LINES; i++) {
-            csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
-                    .append(',').append(i % 10)
-                    .append(',').append((i % 8) + 1)
-                    .append(",SGI\n");
+        // HCP tests
+        @SneakyThrows
+        @Test
+        void importHcpData_insertsWhenNoExisting() {
+                final String csv = "date,hcp\n2025-01-31,25.5\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importHcpData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+
+                List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                HcpScoreEntity saved = all.getFirst();
+                assertThat(saved.getUserId()).isEqualTo(TEST_USER);
+                assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 31));
+                assertThat(saved.getHcp()).isEqualTo(25.5);
         }
-        return csv.toString();
-    }
 
-    private static String gmetricCsv() {
-        val csv = new StringBuilder("date,metricValue,type\n");
-        for (int i = 0; i < CsvImportService.MAX_CSV_LINES; i++) {
-            csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
-                    .append(',').append(i % 5)
-                    .append(",LOST_BALLS\n");
+        @SneakyThrows
+        @Test
+        void importHcpData_removesExistingUserDataBeforeImport() {
+                hcpRepository.save(HcpScoreEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2024, 1, 1))
+                        .hcp(30.0)
+                        .build()
+                );
+                hcpRepository.save(HcpScoreEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2024, 6, 1))
+                        .hcp(28.0)
+                        .build()
+                );
+                assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(2);
+
+                final String csv = "date,hcp\n2025-01-21,25.5\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importHcpData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                assertThat(all.getFirst().getHcp()).isEqualTo(25.5);
+                assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
+                assertThat(hcpRepository.findByUserIdAndDate(TEST_USER, LocalDate.of(2024, 1, 1))).isEmpty();
         }
-        return csv.toString();
-    }
 
-    private static PlayedRoundEntity round(
-            String userId, LocalDate date, String course, int lostBalls, List<Integer> strokes) {
-        return PlayedRoundEntity.builder()
-                .userId(userId)
-                .date(date)
-                .courseName(course)
-                .lostBalls(lostBalls)
-                .holeStrokes(strokes)
-                .build();
-    }
+        @SneakyThrows
+        @Test
+        void importHcpData_replacesPreviousImportCompletely() {
+                String csv1 = "date,hcp\n2025-01-21,20.0\n2025-02-01,19.0\n";
+                cut.importHcpData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
+                assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(2);
 
-    private static PlayedRoundEntity roundOn(List<PlayedRoundEntity> rounds, LocalDate date) {
-        return rounds.stream().filter(e -> date.equals(e.getDate())).findFirst().orElseThrow();
-    }
+                String csv2 = "date,hcp\n2025-01-21,25.5\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv2.getBytes());
 
-    private static String playedRoundCsv() {
-        val csv = new StringBuilder("DATE,HOLE_1,HOLE_2,HOLE_3,HOLE_4,HOLE_5,HOLE_6,HOLE_7,HOLE_8,HOLE_9,LOST_BALLS\n");
-        for (int i = 0; i < CsvImportService.MAX_CSV_LINES; i++) {
-            csv.append("2025-01-").append("%02d".formatted((i % 28) + 1))
-                    .append(",5,4,2,5,3,4,4,3,4,0\n");
+                int count = cut.importHcpData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                assertThat(all.getFirst().getHcp()).isEqualTo(25.5);
+                assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
+                assertThat(hcpRepository.findByUserIdAndDate(TEST_USER, LocalDate.of(2025, 2, 1))).isEmpty();
         }
-        return csv.toString();
-    }
 
+        @SneakyThrows
+        @Test
+        void importHcpData_skipsInvalidRowsAndCountsOnlyValid() {
+                final String csv = "date,hcp\n2025-01-01,\n,25.5\n2025-01-02,30.0\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importHcpData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+
+                List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+        }
+
+        @SneakyThrows
+        @Test
+        void importHcpData_skipsValuesOutsideNumericLimits() {
+                final String csv = "date,hcp\n2025-01-01,200.0\n2025-01-02,-50.0\n2025-01-03,20.0\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importHcpData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(1);
+                assertThat(hcpRepository.findByUserId(TEST_USER).getFirst().getHcp()).isEqualTo(20.0);
+        }
+
+        @Test
+        void importHcpData_returnsZeroForNoValidRows() {
+                // Seed data must still be cleared even when CSV has no valid rows
+                hcpRepository.save(HcpScoreEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2024, 3, 1))
+                        .hcp(22.0)
+                        .build()
+                );
+
+                String csv = "date,hcp\n,25.5\n";
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importHcpData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(0);
+                assertThat(hcpRepository.findByUserId(TEST_USER)).isEmpty();
+        }
+
+        // SGI tests
+        @SneakyThrows
+        @Test
+        void importSgiData_insertsAndComputesHcpWhenNoExisting() {
+                final String csv = "date,points,testId,testType\n2025-01-01,5,1,SGI\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importSgiData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+
+                List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                SingleTestResultEntity saved = all.getFirst();
+                assertThat(saved.getUserId()).isEqualTo(TEST_USER);
+                assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 1));
+                assertThat(saved.getPoints()).isEqualTo(5);
+                assertThat(saved.getTestId()).isEqualTo(1);
+                assertThat(saved.getTestType()).isEqualTo(TestSuite.SGI);
+                // compute expected using real function
+                int expectedHcp = pointsToSgiHcpFunction.apply(1, 5);
+                assertThat(saved.getHcp()).isEqualTo(expectedHcp);
+        }
+
+        @SneakyThrows
+        @Test
+        void importSgiData_replacesWhenSameDateAndTestIdExists() {
+                // first
+                String csv1 = "date,points,testId,testType\n2025-01-21,5,1,SGI\n";
+                cut.importSgiData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
+                // second same date+testId, different points
+                String csv2 = "date,points,testId,testType\n2025-01-21,4,1,SGI\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv2.getBytes());
+
+                int count = cut.importSgiData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+
+                List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                SingleTestResultEntity saved = all.getFirst();
+                // replaced
+                assertThat(saved.getPoints()).isEqualTo(4);
+                int expectedHcp = pointsToSgiHcpFunction.apply(1, 4);
+                assertThat(saved.getHcp()).isEqualTo(expectedHcp);
+        }
+
+        @SneakyThrows
+        @Test
+        void importSgiData_skipsInvalidRows() {
+                final String csv =
+                                "date,points,testId,testType\n2025-01-01,5,1,SGI\n,5,1,SGI\n2025-"
+                                + "01-02,,2,SGI\n2025-01-03,7,,SGI\n2025-01-04,8,4,\n2025-01-05,9,5,"
+                                + "SGI\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importSgiData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(2);
+
+                List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
+                assertThat(all).hasSize(2);
+        }
+
+        @SneakyThrows
+        @Test
+        void importSgiData_skipsValuesOutsideNumericLimits() {
+                final String csv =
+                                "date,points,testId,testType\n2025-01-01,99,1,SGI\n2025-01-02,5,99,"
+                                + "SGI\n2025-01-03,5,1,SGI\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importSgiData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                assertThat(singleTestResultRepository.findAllByUserId(TEST_USER)).hasSize(1);
+        }
+
+        @SneakyThrows
+        @Test
+        void importSgiData_returnsZeroForNoValidRows() {
+                String csv = "date,points,testId,testType\n,10,1,SGI\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importSgiData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(0);
+
+                List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
+                assertThat(all).isEmpty();
+        }
+
+        @SneakyThrows
+        @Test
+        void importSgiData_loadsShortGameCsvFromClasspath() {
+                singleTestResultRepository.save(SingleTestResultEntity
+                        .builder()
+                        .date(LocalDate.of(2025, 6, 21))
+                        .hcp(pointsToSgiHcpFunction.apply(1, 2))
+                        .points(2)
+                        .userId(TEST_USER)
+                        .testType(TestSuite.SGI)
+                        .testId(1)
+                        .build()
+                );
+                singleTestResultRepository.save(SingleTestResultEntity
+                        .builder()
+                        .date(LocalDate.of(2025, 6, 22))
+                        .hcp(pointsToSgiHcpFunction.apply(2, 3))
+                        .points(3)
+                        .userId(TEST_USER)
+                        .testType(TestSuite.SGI)
+                        .testId(2)
+                        .build()
+                );
+                assertThat(singleTestResultRepository.countByUserId(TEST_USER)).isEqualTo(2);
+
+                @Cleanup
+                InputStream is = getClass().getClassLoader().getResourceAsStream("2026-07-23-short-game.csv");
+                assertThat(is).isNotNull();
+
+                int count = cut.importSgiData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(12);
+
+                final List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
+                assertThat(all).hasSize(12);
+                assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
+                assertThat(all).allMatch(e -> e.getTestType() == TestSuite.SGI);
+                assertThat(all).allMatch(e -> e.getHcp() != null);
+                // spot-check a row from each date in the fixture
+                SingleTestResultEntity july23Test7 = all
+                        .stream()
+                        .filter(e -> e.getDate().equals(LocalDate.of(2026, 7, 23)) && e.getTestId() == 7)
+                        .findFirst()
+                        .orElseThrow();
+                assertThat(july23Test7.getPoints()).isEqualTo(5);
+                assertThat(july23Test7.getHcp()).isEqualTo(pointsToSgiHcpFunction.apply(7, 5));
+
+                SingleTestResultEntity june21Test1 = all
+                        .stream()
+                        .filter(e -> e.getDate().equals(LocalDate.of(2025, 6, 21)) && e.getTestId() == 1)
+                        .findFirst()
+                        .orElseThrow();
+                assertThat(june21Test1.getPoints()).isEqualTo(2);
+                assertThat(june21Test1.getHcp()).isEqualTo(pointsToSgiHcpFunction.apply(1, 2));
+
+                count = cut.importSgiData(is, TEST_USER);
+                assertThat(count).isZero();
+        }
+
+        // GMetric tests
+        @SneakyThrows
+        @Test
+        void importGMetricData_insertsWhenNoExisting() {
+                final String csv = "date,metricValue,type\n2025-01-31,3,LOST_BALLS_PER_9HOLES\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importGMetricData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+
+                List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                GMetricEntity saved = all.getFirst();
+                assertThat(saved.getUserId()).isEqualTo(TEST_USER);
+                assertThat(saved.getDate()).isEqualTo(LocalDate.of(2025, 1, 31));
+                assertThat(saved.getMetricValue()).isEqualTo(3);
+                assertThat(saved.getType()).isEqualTo(GMetricType.LOST_BALLS_PER_9HOLES);
+        }
+
+        @SneakyThrows
+        @Test
+        void importGMetricData_removesExistingUserDataBeforeImport() {
+                gMetricRepository.save(GMetricEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2024, 1, 1))
+                        .metricValue(99)
+                        .type(GMetricType.LOST_BALLS_PER_9HOLES)
+                        .build()
+                );
+                gMetricRepository.save(GMetricEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2024, 2, 1))
+                        .metricValue(88)
+                        .type(GMetricType.BOGEY_PLUS)
+                        .build()
+                );
+                assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
+
+                final String csv = "date,metricValue,type\n2025-01-21,5,DOUBLE_BOGEY_PLUS\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importGMetricData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                assertThat(all.getFirst().getDate()).isEqualTo(LocalDate.of(2025, 1, 21));
+                assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
+                assertThat(all.getFirst().getType()).isEqualTo(GMetricType.DOUBLE_BOGEY_PLUS);
+                assertThat(gMetricRepository.findByUserIdAndDateAndType(
+                                TEST_USER,
+                                LocalDate.of(2024, 1, 1),
+                                GMetricType.LOST_BALLS_PER_9HOLES
+                ))
+                        .isEmpty();
+        }
+
+        @SneakyThrows
+        @Test
+        void importGMetricData_replacesPreviousImportCompletely() {
+                String csv1 = "date,metricValue,type\n2025-01-21,2,BOGEY_PLUS\n2025-01-21,1,LOST_BALLS_PER_9HOLES\n";
+                cut.importGMetricData(new ByteArrayInputStream(csv1.getBytes()), TEST_USER);
+                assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
+
+                String csv2 = "date,metricValue,type\n2025-01-21,5,BOGEY_PLUS\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv2.getBytes());
+
+                int count = cut.importGMetricData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                assertThat(all.getFirst().getMetricValue()).isEqualTo(5);
+                assertThat(all.getFirst().getType()).isEqualTo(GMetricType.BOGEY_PLUS);
+                assertThat(gMetricRepository.findByUserIdAndDateAndType(
+                                TEST_USER,
+                                LocalDate.of(2025, 1, 21),
+                                GMetricType.LOST_BALLS_PER_9HOLES
+                ))
+                        .isEmpty();
+        }
+
+        @SneakyThrows
+        @Test
+        void importGMetricData_allowsSameDateDifferentType() {
+                String csv = "date,metricValue,type\n2025-01-21,2,BOGEY_PLUS\n2025-01-21,1,LOST_BALLS_PER_9HOLES\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importGMetricData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(2);
+                assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(2);
+        }
+
+        @SneakyThrows
+        @Test
+        void importGMetricData_skipsInvalidRows() {
+                final String csv =
+                                "date,metricValue,type\n2025-01-01,3,\n,2,BOGEY_PLUS\n2025-01-02,4,DOUBLE_BOGEY_PLUS\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importGMetricData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(1);
+        }
+
+        @SneakyThrows
+        @Test
+        void importGMetricData_skipsValuesOutsideNumericLimits() {
+                final String csv =
+                                "date,metricValue,type\n2025-01-01,1000,LOST_BALLS_PER_9HOLES\n"
+                                + "2025-01-02,3,BOGEY_PLUS\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importGMetricData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(1);
+                assertThat(gMetricRepository.findByUserId(TEST_USER).getFirst().getMetricValue()).isEqualTo(3);
+        }
+
+        @SneakyThrows
+        @Test
+        void importGMetricData_loadsFixtureCsvFromClasspath() {
+                // Pre-seed data that must be removed by import
+                gMetricRepository.save(GMetricEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2020, 1, 1))
+                        .metricValue(1)
+                        .type(GMetricType.DOUBLE_BOGEY_PLUS)
+                        .build()
+                );
+
+                @Cleanup
+                InputStream is = getClass().getClassLoader().getResourceAsStream("2026-07-26-gmetric.csv");
+                assertThat(is).isNotNull();
+
+                int count = cut.importGMetricData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(5);
+
+                List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(5);
+                assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
+                assertThat(gMetricRepository.findByUserIdAndDateAndType(
+                                TEST_USER,
+                                LocalDate.of(2020, 1, 1),
+                                GMetricType.DOUBLE_BOGEY_PLUS
+                ))
+                        .isEmpty();
+
+                GMetricEntity lostBalls = gMetricRepository
+                        .findByUserIdAndDateAndType(
+                                        TEST_USER,
+                                        LocalDate.of(2026, 7, 26),
+                                        GMetricType.LOST_BALLS_PER_9HOLES
+                        )
+                        .orElseThrow();
+                assertThat(lostBalls.getMetricValue()).isEqualTo(2);
+
+                GMetricEntity bogey = gMetricRepository
+                        .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2025, 6, 15), GMetricType.BOGEY_PLUS)
+                        .orElseThrow();
+                assertThat(bogey.getMetricValue()).isEqualTo(2);
+                // Re-import same fixture: still exactly fixture rows
+                @Cleanup
+                InputStream again = getClass().getClassLoader().getResourceAsStream("2026-07-26-gmetric.csv");
+                assertThat(again).isNotNull();
+                int secondCount = cut.importGMetricData(again, TEST_USER);
+                assertThat(secondCount).isEqualTo(5);
+                assertThat(gMetricRepository.findByUserId(TEST_USER)).hasSize(5);
+        }
+
+        // Played-round tests
+        @SneakyThrows
+        @Test
+        void importPlayedRoundData_loadsGolfResultsCsvFromClasspath() {
+                playedRoundRepository.save(PlayedRoundEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2020, 1, 1))
+                        .courseName("Tessin")
+                        .holeStrokes(List.of(4, 5, 3, 4, 4, 5, 4, 4, 3))
+                        .lostBalls(0)
+                        .build()
+                );
+                assertThat(playedRoundRepository.findByUserId(TEST_USER)).hasSize(1);
+
+                @Cleanup
+                InputStream is = getClass().getClassLoader().getResourceAsStream("Golf_Results.csv");
+                assertThat(is).isNotNull();
+
+                int count = cut.importPlayedRoundData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(16);
+
+                List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(16);
+                assertThat(all).allMatch(e -> e.getUserId().equals(TEST_USER));
+                assertThat(all).allMatch(e -> "Fischland".equals(e.getCourseName()));
+                assertThat(all).noneMatch(e -> e.getDate().equals(LocalDate.of(2020, 1, 1)));
+                assertThat(all).noneMatch(e -> e.getDate().equals(LocalDate.of(2026, 6, 10)));
+
+                PlayedRoundEntity april8 =
+                                all
+                        .stream()
+                        .filter(e -> e.getDate().equals(LocalDate.of(2026, 4, 8)))
+                        .findFirst()
+                        .orElseThrow();
+                assertThat(april8.getHoleStrokes()).containsExactly(6, 5, 3, 7, 5, 5, 5, 6, 5);
+                assertThat(april8.getLostBalls()).isNull();
+                assertThat(april8.getBogeysPlus()).isEqualTo(8);
+                assertThat(april8.getDoubleBogeysPlus()).isEqualTo(3);
+                // submitRound also writes the three derived gmetric snapshots
+                assertThat(gMetricRepository
+                        .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.BOGEY_PLUS)
+                        .get()
+                        .getMetricValue()
+                )
+                        .isEqualTo(8);
+                assertThat(gMetricRepository
+                        .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 4, 8), GMetricType.DOUBLE_BOGEY_PLUS)
+                        .get()
+                        .getMetricValue()
+                )
+                        .isEqualTo(3);
+
+                PlayedRoundEntity aug12 = all
+                        .stream()
+                        .filter(e -> e.getDate().equals(LocalDate.of(2026, 8, 12)))
+                        .findFirst()
+                        .orElseThrow();
+                assertThat(aug12.getHoleStrokes()).containsExactly(7, 6, 4, 6, 6, 6, 8, 4, 5);
+                assertThat(aug12.getLostBalls()).isEqualTo(2);
+
+                assertThat(all
+                        .stream()
+                        .filter(e -> e.getDate().equals(LocalDate.of(2026, 5, 16)))
+                        .count()).isEqualTo(2);
+
+                @Cleanup
+                InputStream again = getClass().getClassLoader().getResourceAsStream("Golf_Results.csv");
+                assertThat(again).isNotNull();
+                int secondCount = cut.importPlayedRoundData(again, TEST_USER);
+                assertThat(secondCount).isEqualTo(16);
+                assertThat(playedRoundRepository.findByUserId(TEST_USER)).hasSize(16);
+        }
+
+        @SneakyThrows
+        @Test
+        void importPlayedRoundData_roundTripsCourseAndEveryHole() {
+                final String otherUser = "csv-import-other-user";
+                playedRoundRepository.save(
+                                round(
+                                                TEST_USER,
+                                                LocalDate.of(2026, 3, 1),
+                                                "Fischland",
+                                                2,
+                                                List.of(5, 4, 3, 5, 3, 4, 4, 3, 4)
+                                )
+                );
+                playedRoundRepository.save(
+                                round(
+                                                TEST_USER,
+                                                LocalDate.of(2026, 3, 2),
+                                                "Tessin",
+                                                1,
+                                                List.of(4, 5, 3, 4, 4, 5, 4, 4, 3)
+                                )
+                );
+                playedRoundRepository.save(
+                                round(
+                                                TEST_USER,
+                                                LocalDate.of(2026, 4, 2),
+                                                "Grambek",
+                                                5,
+                                                List.of(4, 5, 3, 4, 4, 4, 3, 4, 4, 4, 3, 4, 5, 4, 5, 4, 3, 4)
+                                )
+                );
+                playedRoundRepository.save(
+                                round(
+                                                otherUser,
+                                                LocalDate.of(2026, 3, 1),
+                                                "Tessin",
+                                                9,
+                                                List.of(4, 5, 3, 4, 4, 5, 4, 4, 3)
+                                )
+                );
+
+                String csv = hcpCsvExportService.exportAllPlayedRoundsToCsv(TEST_USER);
+                int count = cut.importPlayedRoundData(
+                                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)),
+                                TEST_USER
+                );
+
+                assertThat(count).isEqualTo(3);
+                List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
+                assertThat(all)
+                        .extracting(PlayedRoundEntity::getCourseName)
+                        .containsExactlyInAnyOrder("Fischland", "Tessin", "Grambek");
+
+                PlayedRoundEntity fischland = roundOn(all, LocalDate.of(2026, 3, 1));
+                assertThat(fischland.getCourseName()).isEqualTo("Fischland");
+                assertThat(fischland.getHoleStrokes()).containsExactly(5, 4, 3, 5, 3, 4, 4, 3, 4);
+                assertThat(fischland.getLostBalls()).isEqualTo(2);
+
+                PlayedRoundEntity grambek = roundOn(all, LocalDate.of(2026, 4, 2));
+                assertThat(grambek.getCourseName()).isEqualTo("Grambek");
+                assertThat(grambek.getHoleStrokes()).hasSize(18);
+                assertThat(grambek.getLostBalls()).isEqualTo(5);
+                assertThat(gMetricRepository
+                        .findByUserIdAndDateAndType(
+                                        TEST_USER,
+                                        LocalDate.of(2026, 4, 2),
+                                        GMetricType.LOST_BALLS_PER_9HOLES
+                        )
+                        .orElseThrow()
+                        .getMetricValue()
+                )
+                        .isEqualTo(2.5f);
+
+                assertThat(playedRoundRepository.findByUserId(otherUser)).hasSize(1);
+
+                int secondCount = cut.importPlayedRoundData(
+                                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)),
+                                TEST_USER
+                );
+                assertThat(secondCount).isEqualTo(3);
+                assertThat(playedRoundRepository.findByUserId(TEST_USER))
+                        .extracting(PlayedRoundEntity::getCourseName)
+                        .containsExactlyInAnyOrder("Fischland", "Tessin", "Grambek");
+
+                playedRoundRepository.findByUserId(otherUser).forEach(playedRoundRepository::delete);
+        }
+
+        @SneakyThrows
+        @Test
+        void importPlayedRoundData_skipsRowsWhoseCourseDoesNotMatchTheHoleCount() {
+                playedRoundRepository.save(
+                                round(
+                                                TEST_USER,
+                                                LocalDate.of(2026, 4, 3),
+                                                "Grambek",
+                                                0,
+                                                List.of(4, 5, 3, 4, 4, 4, 3, 4, 4)
+                                )
+                );
+                playedRoundRepository.save(
+                                round(
+                                                TEST_USER,
+                                                LocalDate.of(2026, 4, 4),
+                                                "Nowhere",
+                                                0,
+                                                List.of(5, 4, 3, 5, 3, 4, 4, 3, 4)
+                                )
+                );
+                String csv = hcpCsvExportService.exportAllPlayedRoundsToCsv(TEST_USER);
+
+                int count = cut.importPlayedRoundData(
+                                new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8)),
+                                TEST_USER
+                );
+
+                assertThat(count).isZero();
+                assertThat(playedRoundRepository.findByUserId(TEST_USER)).isEmpty();
+        }
+
+        @SneakyThrows
+        @Test
+        void importGMetricData_acceptsUppercaseHeaders() {
+                final String csv = "DATE,METRICVALUE,TYPE\n2026-03-01,7,DOUBLE_BOGEY_PLUS\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes());
+
+                int count = cut.importGMetricData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                GMetricEntity saved = gMetricRepository
+                        .findByUserIdAndDateAndType(TEST_USER, LocalDate.of(2026, 3, 1), GMetricType.DOUBLE_BOGEY_PLUS)
+                        .orElseThrow();
+                assertThat(saved.getMetricValue()).isEqualTo(7);
+        }
+
+        @Test
+        void stripUtf8Bom_removesOnlyALeadingBom() {
+                byte[] bom = {(byte) 0xEF, (byte) 0xBB, (byte) 0xBF};
+                byte[] plain = "date,hcp".getBytes(StandardCharsets.UTF_8);
+                byte[] withBom = new byte[bom.length + plain.length];
+                System.arraycopy(bom, 0, withBom, 0, bom.length);
+                System.arraycopy(plain, 0, withBom, bom.length, plain.length);
+
+                assertThat(CsvImportService.stripUtf8Bom(withBom)).isEqualTo(plain);
+                assertThat(CsvImportService.stripUtf8Bom(plain)).isEqualTo(plain);
+                assertThat(CsvImportService.stripUtf8Bom(new byte[0])).isEmpty();
+        }
+
+        @SneakyThrows
+        @Test
+        void importHcpData_readsUtf8AndIgnoresTheSpreadsheetBom() {
+                // "CSV UTF-8" from a spreadsheet: BOM first, and non-ASCII text in the file
+                final String csv = "﻿date,hcp\n2025-01-31,25.5\n";
+                @Cleanup
+                InputStream is = new ByteArrayInputStream(csv.getBytes(StandardCharsets.UTF_8));
+
+                int count = cut.importHcpData(is, TEST_USER);
+
+                assertThat(count).isEqualTo(1);
+                assertThat(hcpRepository.findByUserId(TEST_USER).getFirst().getDate()).isEqualTo(LocalDate.of(
+                                2025,
+                                1,
+                                31
+                ));
+        }
+
+        @Test
+        void countLines_countsHeaderAndDataAndAMissingTrailingNewline() {
+                assertThat(CsvImportService.countLines(new byte[0])).isZero();
+                assertThat(CsvImportService.countLines("date,hcp\n".getBytes())).isEqualTo(1);
+                assertThat(CsvImportService.countLines("date,hcp\n2025-01-01,20.0\n".getBytes())).isEqualTo(2);
+                assertThat(CsvImportService.countLines("date,hcp\n2025-01-01,20.0".getBytes())).isEqualTo(2);
+        }
+
+        @SneakyThrows
+        @Test
+        void importHcpData_acceptsExactlyMaxLinesIncludingHeader() {
+                int dataRows = MAX_CSV_LINES - 1;
+                String csv = hcpCsv(dataRows);
+
+                int count = cut.importHcpData(new ByteArrayInputStream(csv.getBytes()), TEST_USER);
+
+                assertThat(count).isEqualTo(dataRows);
+                assertThat(hcpRepository.findByUserId(TEST_USER)).hasSize(dataRows);
+        }
+
+        @SneakyThrows
+        @Test
+        void importHcpData_rejectsOverMaxLinesAndKeepsExistingData() {
+                hcpRepository.save(HcpScoreEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2024, 1, 1))
+                        .hcp(30.0)
+                        .build()
+                );
+
+                String csv = hcpCsv(MAX_CSV_LINES);
+
+                assertThatThrownBy(() -> cut.importHcpData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
+                        .isInstanceOf(CsvImportTooManyLinesException.class)
+                        .extracting(ex -> ((CsvImportTooManyLinesException) ex).getMaxLines())
+                        .isEqualTo(MAX_CSV_LINES);
+
+                List<HcpScoreEntity> all = hcpRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                assertThat(all.getFirst().getHcp()).isEqualTo(30.0);
+        }
+
+        @SneakyThrows
+        @Test
+        void importSgiData_rejectsOverMaxLinesAndKeepsExistingData() {
+                singleTestResultRepository.save(SingleTestResultEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2024, 1, 1))
+                        .points(5)
+                        .testId(1)
+                        .testType(TestSuite.SGI)
+                        .hcp(31)
+                        .build()
+                );
+
+                String csv = sgiCsv();
+
+                assertThatThrownBy(() -> cut.importSgiData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
+                        .isInstanceOf(CsvImportTooManyLinesException.class);
+
+                List<SingleTestResultEntity> all = singleTestResultRepository.findAllByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                assertThat(all.getFirst().getPoints()).isEqualTo(5);
+        }
+
+        @SneakyThrows
+        @Test
+        void importGMetricData_rejectsOverMaxLinesAndKeepsExistingData() {
+                gMetricRepository.save(GMetricEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2024, 1, 1))
+                        .metricValue(2)
+                        .type(GMetricType.LOST_BALLS_PER_9HOLES)
+                        .build()
+                );
+
+                String csv = gmetricCsv();
+
+                assertThatThrownBy(() -> cut.importGMetricData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
+                        .isInstanceOf(CsvImportTooManyLinesException.class);
+
+                List<GMetricEntity> all = gMetricRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                assertThat(all.getFirst().getMetricValue()).isEqualTo(2);
+        }
+
+        @SneakyThrows
+        @Test
+        void importPlayedRoundData_rejectsOverMaxLinesAndKeepsExistingData() {
+                playedRoundRepository.save(PlayedRoundEntity
+                        .builder()
+                        .userId(TEST_USER)
+                        .date(LocalDate.of(2024, 1, 1))
+                        .courseName("Fischland")
+                        .holeStrokes(List.of(5, 4, 2, 5, 3, 4, 4, 3, 4))
+                        .lostBalls(1)
+                        .build()
+                );
+
+                String csv = playedRoundCsv();
+
+                assertThatThrownBy(() -> cut.importPlayedRoundData(new ByteArrayInputStream(csv.getBytes()), TEST_USER))
+                        .isInstanceOf(CsvImportTooManyLinesException.class);
+
+                List<PlayedRoundEntity> all = playedRoundRepository.findByUserId(TEST_USER);
+                assertThat(all).hasSize(1);
+                assertThat(all.getFirst().getLostBalls()).isEqualTo(1);
+        }
+
+        private static String hcpCsv(int dataRows) {
+                StringBuilder csv = new StringBuilder("date,hcp\n");
+                for (int i = 0; i < dataRows; i++) {
+                        csv.append("2025-01-").append("%02d".formatted((i % 28) + 1)).append(',').append(20
+                                        + (i % 10)).append(".0\n");
+                }
+                return csv.toString();
+        }
+
+        private static String sgiCsv() {
+                val csv = new StringBuilder("date,points,testId,testType\n");
+                for (int i = 0; i < CsvImportService.MAX_CSV_LINES; i++) {
+                        csv
+                                .append("2025-01-")
+                                .append("%02d".formatted((i % 28) + 1))
+                                .append(',')
+                                .append(i % 10)
+                                .append(',')
+                                .append((i % 8) + 1)
+                                .append(",SGI\n");
+                }
+                return csv.toString();
+        }
+
+        private static String gmetricCsv() {
+                val csv = new StringBuilder("date,metricValue,type\n");
+                for (int i = 0; i < CsvImportService.MAX_CSV_LINES; i++) {
+                        csv.append("2025-01-").append("%02d".formatted((i % 28) + 1)).append(',').append(i % 5).append(
+                                        ",LOST_BALLS\n"
+                        );
+                }
+                return csv.toString();
+        }
+
+        private static PlayedRoundEntity round(
+                        String userId,
+                        LocalDate date,
+                        String course,
+                        int lostBalls,
+                        List<Integer> strokes
+        ) {
+                return PlayedRoundEntity
+                        .builder()
+                        .userId(userId)
+                        .date(date)
+                        .courseName(course)
+                        .lostBalls(lostBalls)
+                        .holeStrokes(strokes)
+                        .build();
+        }
+
+        private static PlayedRoundEntity roundOn(List<PlayedRoundEntity> rounds, LocalDate date) {
+                return rounds
+                        .stream()
+                        .filter(e -> date.equals(e.getDate()))
+                        .findFirst()
+                        .orElseThrow();
+        }
+
+        private static String playedRoundCsv() {
+                val csv = new StringBuilder(
+                                "DATE,HOLE_1,HOLE_2,HOLE_3,HOLE_4,HOLE_5,HOLE_6,HOLE_7,HOLE_8,HOLE_9,LOST_BALLS\n"
+                );
+                for (int i = 0; i < CsvImportService.MAX_CSV_LINES; i++) {
+                        csv.append("2025-01-").append("%02d".formatted((i % 28) + 1)).append(",5,4,2,5,3,4,4,3,4,0\n");
+                }
+                return csv.toString();
+        }
 }

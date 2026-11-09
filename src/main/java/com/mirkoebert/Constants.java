@@ -4,7 +4,5 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class Constants {
-
-    public static final short HCP_Epsilon = 1;
-
+        public static final short HCP_Epsilon = 1;
 }

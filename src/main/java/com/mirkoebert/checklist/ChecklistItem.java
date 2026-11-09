@@ -11,5 +11,4 @@ import org.jspecify.annotations.Nullable;
  * @param nameKey key of the item label, always present
  * @param descKey key of the optional explanation, {@code null} when the bundle defines none
  */
-public record ChecklistItem(long id, String nameKey, @Nullable String descKey) {
-}
+public record ChecklistItem(long id, String nameKey, @Nullable String descKey) {}

@@ -9,40 +9,36 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
 
 @RestController
 @Slf4j
 @RequiredArgsConstructor
 public class GMetricRestController {
+        private final GMetricService gMetricService;
+        private final GMetricMonthAggregator monthAggregator;
+        private final CurrentUserService currentUserService;
 
-    private final GMetricService gMetricService;
-    private final GMetricMonthAggregator monthAggregator;
-    private final CurrentUserService currentUserService;
+        @GetMapping("/api/gmetric")
+        public ResponseEntity<List<GMetricEntity>> getGMetrics(@RequestParam(required = false) GMetricType type) {
+                final CurrentUser u = currentUserService.getCurrentUser();
+                final String userId = u.id();
+                log.info("getGMetrics for user {} type {}", userId, type);
 
-    @GetMapping("/api/gmetric")
-    public ResponseEntity<List<GMetricEntity>> getGMetrics(
-            @RequestParam(required = false) GMetricType type
-    ) {
-        final CurrentUser u = currentUserService.getCurrentUser();
-        final String userId = u.id();
-        log.info("getGMetrics for user {} type {}", userId, type);
+                final List<GMetricEntity> metrics = type == null
+                                ? gMetricService.findByUserId(userId)
+                                : gMetricService.findByUserIdAndType(userId, type);
+                return ResponseEntity.ok(metrics);
+        }
 
-        final List<GMetricEntity> metrics = type == null
-                ? gMetricService.findByUserId(userId)
-                : gMetricService.findByUserIdAndType(userId, type);
-        return ResponseEntity.ok(metrics);
-    }
-
-    @GetMapping("/api/gmetric/chart-data")
-    public ResponseEntity<GMetricChartDataDto> getChartData(
-            @RequestParam(defaultValue = GMetricRange.DEFAULT_PARAM) @Size(max = 88) String range
-    ) {
-        log.info("gmetric getChartData range={}", range);
-        final CurrentUser u = currentUserService.getCurrentUser();
-        final String userId = u.id();
-        log.info("for user {}", userId);
-        return ResponseEntity.ok(monthAggregator.getMetricsForRange(GMetricRange.fromParam(range), userId));
-    }
+        @GetMapping("/api/gmetric/chart-data")
+        public ResponseEntity<GMetricChartDataDto> getChartData(
+                        @RequestParam(defaultValue = GMetricRange.DEFAULT_PARAM) @Size(max = 88) String range
+        ) {
+                log.info("gmetric getChartData range={}", range);
+                final CurrentUser u = currentUserService.getCurrentUser();
+                final String userId = u.id();
+                log.info("for user {}", userId);
+                return ResponseEntity.ok(monthAggregator.getMetricsForRange(GMetricRange.fromParam(range), userId));
+        }
 }

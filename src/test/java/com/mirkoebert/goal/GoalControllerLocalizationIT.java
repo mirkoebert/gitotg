@@ -10,7 +10,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
@@ -24,58 +23,62 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest
 class GoalControllerLocalizationIT {
+        @Autowired
+        private WebApplicationContext webApplicationContext;
+        @MockitoBean
+        private CurrentUserService currentUserService;
+        private MockMvc mockMvc;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-    @MockitoBean
-    private CurrentUserService currentUserService;
-    private MockMvc mockMvc;
+        @BeforeEach
+        void loggedIn() {
+                // no security filters - the controller reads the user through CurrentUserService, which is mocked
+                mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+                when(currentUserService.getCurrentUser()).thenReturn(
+                                new CurrentUser("user-1", "Tester", "tester@example.com", null)
+                );
+        }
 
-    @BeforeEach
-    void loggedIn() {
-        // no security filters - the controller reads the user through CurrentUserService, which is mocked
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        when(currentUserService.getCurrentUser())
-                .thenReturn(new CurrentUser("user-1", "Tester", "tester@example.com", null));
-    }
+        @Test
+        void goalPage_rendersTheChecklistInEnglish() throws Exception {
+                mockMvc
+                        .perform(get("/goal/break100").param("lang", "en"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("action=\"/goal/break100\"")))
+                        .andExpect(content().string(containsString("Break 100")))
+                        .andExpect(content().string(containsString("Improve your grip")))
+                        .andExpect(content().string(containsString("learn the right grip")))
+                        // an unresolved key would be rendered literally
+                        .andExpect(content().string(not(containsString("checklist.break100."))));
+        }
 
-    @Test
-    void goalPage_rendersTheChecklistInEnglish() throws Exception {
-        mockMvc.perform(get("/goal/break100").param("lang", "en"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("action=\"/goal/break100\"")))
-                .andExpect(content().string(containsString("Break 100")))
-                .andExpect(content().string(containsString("Improve your grip")))
-                .andExpect(content().string(containsString("learn the right grip")))
-                // an unresolved key would be rendered literally
-                .andExpect(content().string(not(containsString("checklist.break100."))));
-    }
+        @Test
+        void goalPage_rendersTheChecklistInGerman() throws Exception {
+                mockMvc
+                        .perform(get("/goal/break100").param("lang", "de"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("Die 100 knacken")))
+                        .andExpect(content().string(containsString("Griff verbessern")))
+                        .andExpect(content().string(containsString("lerne den richtigen Griff")))
+                        .andExpect(content().string(not(containsString("checklist.break100."))));
+        }
 
-    @Test
-    void goalPage_rendersTheChecklistInGerman() throws Exception {
-        mockMvc.perform(get("/goal/break100").param("lang", "de"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Die 100 knacken")))
-                .andExpect(content().string(containsString("Griff verbessern")))
-                .andExpect(content().string(containsString("lerne den richtigen Griff")))
-                .andExpect(content().string(not(containsString("checklist.break100."))));
-    }
+        @Test
+        void allTimePage_rendersTheChecklistInEnglishAndGerman() throws Exception {
+                mockMvc
+                        .perform(get("/goal/alltime").param("lang", "en"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("action=\"/goal/alltime\"")))
+                        .andExpect(content().string(containsString("All time")))
+                        .andExpect(content().string(containsString("Play St. Andrews")))
+                        .andExpect(content().string(containsString("Win a tournament brutto")))
+                        .andExpect(content().string(not(containsString("checklist.alltime."))));
 
-    @Test
-    void allTimePage_rendersTheChecklistInEnglishAndGerman() throws Exception {
-        mockMvc.perform(get("/goal/alltime").param("lang", "en"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("action=\"/goal/alltime\"")))
-                .andExpect(content().string(containsString("All time")))
-                .andExpect(content().string(containsString("Play St. Andrews")))
-                .andExpect(content().string(containsString("Win a tournament brutto")))
-                .andExpect(content().string(not(containsString("checklist.alltime."))));
-
-        mockMvc.perform(get("/goal/alltime").param("lang", "de"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Allzeit")))
-                .andExpect(content().string(containsString("St. Andrews spielen")))
-                .andExpect(content().string(containsString("Ein Turnier brutto gewinnen")))
-                .andExpect(content().string(not(containsString("checklist.alltime."))));
-    }
+                mockMvc
+                        .perform(get("/goal/alltime").param("lang", "de"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("Allzeit")))
+                        .andExpect(content().string(containsString("St. Andrews spielen")))
+                        .andExpect(content().string(containsString("Ein Turnier brutto gewinnen")))
+                        .andExpect(content().string(not(containsString("checklist.alltime."))));
+        }
 }

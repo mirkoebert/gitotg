@@ -19,7 +19,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,308 +33,337 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class CsvImportService {
+        /**
+         * Maximum CSV records per import, including the header row.
+         */
+        public static final int MAX_CSV_LINES = 420;
+        /**
+         * Default course when the CSV has no course column (9-hole Fischland layout).
+         */
+        static final String DEFAULT_PLAYED_ROUND_COURSE = "Fischland";
+        private final HcpRepository hcpRepo;
+        private final SingleTestResultRepository sgiRepo;
+        private final GMetricRepository gMetricRepo;
+        private final PlayedRoundRepository playedRoundRepo;
+        private final CourseService courseService;
+        private final PointsToSgiHcpFunction pointsToSgiHcpFunction;
 
-    /** Maximum CSV records per import, including the header row. */
-    public static final int MAX_CSV_LINES = 420;
+        @Transactional
+        public int importHcpData(InputStream inputStream, String userId) {
+                try (InputStream limited = limitCsvLines(inputStream);
+                                InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
+                                CSVReader csvReader = new CSVReader(reader)
+                ) {
+                        HeaderColumnNameTranslateMappingStrategy<HcpScoreEntity> strategy =
+                                        new HeaderColumnNameTranslateMappingStrategy<>();
+                        strategy.setType(HcpScoreEntity.class);
+                        Map<String, String> columnMapping = new HashMap<>();
+                        columnMapping.put("date", "date");
+                        columnMapping.put("DATE", "date");
+                        columnMapping.put("hcp", "hcp");
+                        columnMapping.put("HCP", "hcp");
+                        strategy.setColumnMapping(columnMapping);
 
-    /** Default course when the CSV has no course column (9-hole Fischland layout). */
-    static final String DEFAULT_PLAYED_ROUND_COURSE = "Fischland";
+                        CsvToBean<HcpScoreEntity> csvToBean = new CsvToBeanBuilder<HcpScoreEntity>(csvReader)
+                                .withMappingStrategy(strategy)
+                                .withIgnoreLeadingWhiteSpace(true)
+                                .build();
 
-    private final HcpRepository hcpRepo;
-    private final SingleTestResultRepository sgiRepo;
-    private final GMetricRepository gMetricRepo;
-    private final PlayedRoundRepository playedRoundRepo;
-    private final CourseService courseService;
-    private final PointsToSgiHcpFunction pointsToSgiHcpFunction;
-
-    @Transactional
-    public int importHcpData(InputStream inputStream, String userId) {
-        try (InputStream limited = limitCsvLines(inputStream);
-             InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
-             CSVReader csvReader = new CSVReader(reader)) {
-
-            HeaderColumnNameTranslateMappingStrategy<HcpScoreEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
-            strategy.setType(HcpScoreEntity.class);
-            Map<String, String> columnMapping = new HashMap<>();
-            columnMapping.put("date", "date");
-            columnMapping.put("DATE", "date");
-            columnMapping.put("hcp", "hcp");
-            columnMapping.put("HCP", "hcp");
-            strategy.setColumnMapping(columnMapping);
-
-            CsvToBean<HcpScoreEntity> csvToBean = new CsvToBeanBuilder<HcpScoreEntity>(csvReader)
-                    .withMappingStrategy(strategy)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-
-            List<HcpScoreEntity> beans = csvToBean.parse();
-            removeAllOldHcpForUser(userId);
-            int count = 0;
-            for (HcpScoreEntity bean : beans) {
-                if (bean.getDate() != null && inRange(bean.getHcp(), InputLimits.HCP_MIN, InputLimits.HCP_MAX)) {
-                    bean.setId(0);
-                    bean.setUserId(userId);
-                    hcpRepo.save(bean);
-                    count++;
+                        List<HcpScoreEntity> beans = csvToBean.parse();
+                        removeAllOldHcpForUser(userId);
+                        int count = 0;
+                        for (HcpScoreEntity bean : beans) {
+                                if (bean.getDate() != null
+                                                && inRange(bean.getHcp(), InputLimits.HCP_MIN, InputLimits.HCP_MAX)) {
+                                        bean.setId(0);
+                                        bean.setUserId(userId);
+                                        hcpRepo.save(bean);
+                                        count++;
+                                }
+                        }
+                        log.info("Imported {} HCP records for user {}", count, userId);
+                        return count;
+                } catch (Exception e) {
+                        throw importFailed(e, userId, "HCP");
                 }
-            }
-            log.info("Imported {} HCP records for user {}", count, userId);
-            return count;
-        } catch (Exception e) {
-            throw importFailed(e, userId, "HCP");
         }
-    }
 
-    private void removeAllOldHcpForUser(final String userId) {
-        final List<HcpScoreEntity> toRemove = hcpRepo.findByUserId(userId);
-        log.info("Remove {} old HCP records from db for user {}.", toRemove.size(), userId);
-        hcpRepo.deleteAll(toRemove);
-    }
+        private void removeAllOldHcpForUser(final String userId) {
+                final List<HcpScoreEntity> toRemove = hcpRepo.findByUserId(userId);
+                log.info("Remove {} old HCP records from db for user {}.", toRemove.size(), userId);
+                hcpRepo.deleteAll(toRemove);
+        }
 
-    @Transactional
-    public int importSgiData(InputStream inputStream, final String userId) {
-        try (InputStream limited = limitCsvLines(inputStream);
-             InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
-             CSVReader csvReader = new CSVReader(reader)) {
+        @Transactional
+        public int importSgiData(InputStream inputStream, final String userId) {
+                try (InputStream limited = limitCsvLines(inputStream);
+                                InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
+                                CSVReader csvReader = new CSVReader(reader)
+                ) {
+                        HeaderColumnNameTranslateMappingStrategy<SingleTestResultEntity> strategy =
+                                        new HeaderColumnNameTranslateMappingStrategy<>();
+                        strategy.setType(SingleTestResultEntity.class);
+                        Map<String, String> columnMapping = new HashMap<>();
+                        columnMapping.put("date", "date");
+                        columnMapping.put("DATE", "date");
+                        columnMapping.put("points", "points");
+                        columnMapping.put("POINTS", "points");
+                        columnMapping.put("testId", "testId");
+                        columnMapping.put("TESTID", "testId");
+                        columnMapping.put("testType", "testType");
+                        columnMapping.put("TESTTYPE", "testType");
+                        strategy.setColumnMapping(columnMapping);
 
-            HeaderColumnNameTranslateMappingStrategy<SingleTestResultEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
-            strategy.setType(SingleTestResultEntity.class);
-            Map<String, String> columnMapping = new HashMap<>();
-            columnMapping.put("date", "date");
-            columnMapping.put("DATE", "date");
-            columnMapping.put("points", "points");
-            columnMapping.put("POINTS", "points");
-            columnMapping.put("testId", "testId");
-            columnMapping.put("TESTID", "testId");
-            columnMapping.put("testType", "testType");
-            columnMapping.put("TESTTYPE", "testType");
-            strategy.setColumnMapping(columnMapping);
+                        CsvToBean<SingleTestResultEntity> csvToBean = new CsvToBeanBuilder<SingleTestResultEntity>(
+                                        csvReader
+                        )
+                                .withMappingStrategy(strategy)
+                                .withIgnoreLeadingWhiteSpace(true)
+                                .build();
 
-            CsvToBean<SingleTestResultEntity> csvToBean = new CsvToBeanBuilder<SingleTestResultEntity>(csvReader)
-                    .withMappingStrategy(strategy)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-
-            List<SingleTestResultEntity> sres = csvToBean.parse();
-            int count = 0;
-            removeAllOldEntitiesForUser(userId);
-            for (SingleTestResultEntity sre : sres) {
-                if (sre.getDate() != null
-                        && inRange(sre.getPoints(), InputLimits.SGI_POINTS_MIN, InputLimits.SGI_POINTS_MAX)
-                        && inRange(sre.getTestId(), InputLimits.SGI_TEST_ID_MIN, InputLimits.SGI_TEST_ID_MAX)
-                        && sre.getTestType() != null) {
-                    sre.setUserId(userId);
-                    Integer computedHcp = pointsToSgiHcpFunction.apply(sre.getTestId(), sre.getPoints());
-                    sre.setHcp(computedHcp);
-                    sgiRepo.save(sre);
-                    count++;
-                } else {
-                    log.warn("Ignore line with incomplete data {}", sre);
+                        List<SingleTestResultEntity> sres = csvToBean.parse();
+                        int count = 0;
+                        removeAllOldEntitiesForUser(userId);
+                        for (SingleTestResultEntity sre : sres) {
+                                if (sre.getDate() != null
+                                                && inRange(
+                                                                sre.getPoints(),
+                                                                InputLimits.SGI_POINTS_MIN,
+                                                                InputLimits.SGI_POINTS_MAX
+                                )
+                                                && inRange(
+                                                                sre.getTestId(),
+                                                                InputLimits.SGI_TEST_ID_MIN,
+                                                                InputLimits.SGI_TEST_ID_MAX
+                                )
+                                                && sre.getTestType() != null) {
+                                        sre.setUserId(userId);
+                                        Integer computedHcp =
+                                                        pointsToSgiHcpFunction.apply(sre.getTestId(), sre.getPoints());
+                                        sre.setHcp(computedHcp);
+                                        sgiRepo.save(sre);
+                                        count++;
+                                } else {
+                                        log.warn("Ignore line with incomplete data {}", sre);
+                                }
+                        }
+                        log.info("Imported {} SGI records for user {}", count, userId);
+                        return count;
+                } catch (Exception e) {
+                        throw importFailed(e, userId, "SGI");
                 }
-            }
-            log.info("Imported {} SGI records for user {}", count, userId);
-            return count;
-        } catch (Exception e) {
-            throw importFailed(e, userId, "SGI");
         }
-    }
 
-    private void removeAllOldEntitiesForUser(final String userId) {
-        final List<SingleTestResultEntity> toRemove = sgiRepo.findAllByUserId(userId);
-        log.info("Remove {} old SGI records from db.", toRemove.size());
-        sgiRepo.deleteAll(toRemove);
-    }
+        private void removeAllOldEntitiesForUser(final String userId) {
+                final List<SingleTestResultEntity> toRemove = sgiRepo.findAllByUserId(userId);
+                log.info("Remove {} old SGI records from db.", toRemove.size());
+                sgiRepo.deleteAll(toRemove);
+        }
 
-    private void removeAllOldGMetricsForUser(final String userId) {
-        final List<GMetricEntity> toRemove = gMetricRepo.findByUserId(userId);
-        log.info("Remove {} old gmetric records from db for user {}.", toRemove.size(), userId);
-        gMetricRepo.deleteAll(toRemove);
-    }
+        private void removeAllOldGMetricsForUser(final String userId) {
+                final List<GMetricEntity> toRemove = gMetricRepo.findByUserId(userId);
+                log.info("Remove {} old gmetric records from db for user {}.", toRemove.size(), userId);
+                gMetricRepo.deleteAll(toRemove);
+        }
 
-    @Transactional
-    public int importGMetricData(InputStream inputStream,final String userId) {
-        try (InputStream limited = limitCsvLines(inputStream);
-             InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
-             CSVReader csvReader = new CSVReader(reader)) {
+        @Transactional
+        public int importGMetricData(InputStream inputStream, final String userId) {
+                try (InputStream limited = limitCsvLines(inputStream);
+                                InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
+                                CSVReader csvReader = new CSVReader(reader)
+                ) {
+                        HeaderColumnNameTranslateMappingStrategy<GMetricEntity> strategy =
+                                        new HeaderColumnNameTranslateMappingStrategy<>();
+                        strategy.setType(GMetricEntity.class);
+                        Map<String, String> columnMapping = new HashMap<>();
+                        columnMapping.put("date", "date");
+                        columnMapping.put("DATE", "date");
+                        columnMapping.put("metricValue", "metricValue");
+                        columnMapping.put("METRICVALUE", "metricValue");
+                        columnMapping.put("type", "type");
+                        columnMapping.put("TYPE", "type");
+                        strategy.setColumnMapping(columnMapping);
 
-            HeaderColumnNameTranslateMappingStrategy<GMetricEntity> strategy = new HeaderColumnNameTranslateMappingStrategy<>();
-            strategy.setType(GMetricEntity.class);
-            Map<String, String> columnMapping = new HashMap<>();
-            columnMapping.put("date", "date");
-            columnMapping.put("DATE", "date");
-            columnMapping.put("metricValue", "metricValue");
-            columnMapping.put("METRICVALUE", "metricValue");
-            columnMapping.put("type", "type");
-            columnMapping.put("TYPE", "type");
-            strategy.setColumnMapping(columnMapping);
+                        CsvToBean<GMetricEntity> csvToBean = new CsvToBeanBuilder<GMetricEntity>(csvReader)
+                                .withMappingStrategy(strategy)
+                                .withIgnoreLeadingWhiteSpace(true)
+                                .build();
 
-            CsvToBean<GMetricEntity> csvToBean = new CsvToBeanBuilder<GMetricEntity>(csvReader)
-                    .withMappingStrategy(strategy)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-
-            List<GMetricEntity> beans = csvToBean.parse();
-            removeAllOldGMetricsForUser(userId);
-            int count = 0;
-            for (GMetricEntity bean : beans) {
-                if (bean.getDate() != null
-                        && bean.getType() != null
-                        && inRange(bean.getMetricValue(), InputLimits.METRIC_MIN, InputLimits.METRIC_MAX)) {
-                    bean.setId(0);
-                    bean.setUserId(userId);
-                    gMetricRepo.save(bean);
-                    count++;
-                } else {
-                    log.warn("Ignore gmetric line with incomplete data {}", bean);
+                        List<GMetricEntity> beans = csvToBean.parse();
+                        removeAllOldGMetricsForUser(userId);
+                        int count = 0;
+                        for (GMetricEntity bean : beans) {
+                                if (bean.getDate() != null
+                                                && bean.getType() != null
+                                                && inRange(
+                                                                bean.getMetricValue(),
+                                                                InputLimits.METRIC_MIN,
+                                                                InputLimits.METRIC_MAX
+                                )) {
+                                        bean.setId(0);
+                                        bean.setUserId(userId);
+                                        gMetricRepo.save(bean);
+                                        count++;
+                                } else {
+                                        log.warn("Ignore gmetric line with incomplete data {}", bean);
+                                }
+                        }
+                        log.info("Imported {} gmetric records for user {}", count, userId);
+                        return count;
+                } catch (Exception e) {
+                        throw importFailed(e, userId, "GMetric");
                 }
-            }
-            log.info("Imported {} gmetric records for user {}", count, userId);
-            return count;
-        } catch (Exception e) {
-            throw importFailed(e, userId, "GMetric");
         }
-    }
 
-    @Transactional
-    public int importPlayedRoundData(InputStream inputStream, String userId) {
-        try (InputStream limited = limitCsvLines(inputStream);
-             InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
-             CSVReader csvReader = new CSVReader(reader)) {
+        @Transactional
+        public int importPlayedRoundData(InputStream inputStream, String userId) {
+                try (InputStream limited = limitCsvLines(inputStream);
+                                InputStreamReader reader = new InputStreamReader(limited, StandardCharsets.UTF_8);
+                                CSVReader csvReader = new CSVReader(reader)
+                ) {
+                        HeaderColumnNameTranslateMappingStrategy<PlayedRoundCsvRow> strategy =
+                                        new HeaderColumnNameTranslateMappingStrategy<>();
+                        strategy.setType(PlayedRoundCsvRow.class);
+                        strategy.setColumnMapping(playedRoundColumnMapping());
 
-            HeaderColumnNameTranslateMappingStrategy<PlayedRoundCsvRow> strategy =
-                    new HeaderColumnNameTranslateMappingStrategy<>();
-            strategy.setType(PlayedRoundCsvRow.class);
-            strategy.setColumnMapping(playedRoundColumnMapping());
+                        CsvToBean<PlayedRoundCsvRow> csvToBean = new CsvToBeanBuilder<PlayedRoundCsvRow>(csvReader)
+                                .withMappingStrategy(strategy)
+                                .withIgnoreLeadingWhiteSpace(true)
+                                .build();
 
-            CsvToBean<PlayedRoundCsvRow> csvToBean = new CsvToBeanBuilder<PlayedRoundCsvRow>(csvReader)
-                    .withMappingStrategy(strategy)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .build();
-
-            List<PlayedRoundCsvRow> rows = csvToBean.parse();
-            removeAllOldPlayedRoundsForUser(userId);
-            int count = 0;
-            for (PlayedRoundCsvRow row : rows) {
-                if (savePlayedRoundIfValid(row, userId)) {
-                    count++;
+                        List<PlayedRoundCsvRow> rows = csvToBean.parse();
+                        removeAllOldPlayedRoundsForUser(userId);
+                        int count = 0;
+                        for (PlayedRoundCsvRow row : rows) {
+                                if (savePlayedRoundIfValid(row, userId)) {
+                                        count++;
+                                }
+                        }
+                        log.info("Imported {} played-round records for user {}", count, userId);
+                        return count;
+                } catch (Exception e) {
+                        throw importFailed(e, userId, "PlayedRound");
                 }
-            }
-            log.info("Imported {} played-round records for user {}", count, userId);
-            return count;
-        } catch (Exception e) {
-            throw importFailed(e, userId, "PlayedRound");
-        }
-    }
-
-    private void removeAllOldPlayedRoundsForUser(final String userId) {
-        final List<PlayedRoundEntity> toRemove = playedRoundRepo.findByUserId(userId);
-        log.info("Remove {} old played-round records from db for user {}.", toRemove.size(), userId);
-        playedRoundRepo.deleteAll(toRemove);
-    }
-
-    private static Map<String, String> playedRoundColumnMapping() {
-        Map<String, String> columnMapping = new HashMap<>();
-        columnMapping.put("date", "date");
-        columnMapping.put("DATE", "date");
-        columnMapping.put("course", "course");
-        columnMapping.put("COURSE", "course");
-        for (int i = 1; i <= 18; i++) {
-            columnMapping.put("hole_" + i, "hole" + i);
-            columnMapping.put("HOLE_" + i, "hole" + i);
-        }
-        columnMapping.put("lostBalls", "lostBalls");
-        columnMapping.put("LOST_BALLS", "lostBalls");
-        columnMapping.put("lost_balls", "lostBalls");
-        return columnMapping;
-    }
-
-    private boolean savePlayedRoundIfValid(final PlayedRoundCsvRow row, final String userId) {
-        List<Integer> holeStrokes = row.holeStrokesOrNullIfIncomplete();
-        if (row.getDate() == null || holeStrokes == null) {
-            log.warn("Ignore played-round line with incomplete data {}", row);
-            return false;
-        }
-        for (Integer strokes : holeStrokes) {
-            if (!inRange(strokes, InputLimits.HOLE_STROKES_MIN, InputLimits.HOLE_STROKES_MAX)) {
-                log.warn("Ignore played-round line with out-of-range hole strokes {}", row);
-                return false;
-            }
-        }
-        final Integer lostBalls = row.getLostBalls();
-        if ((lostBalls != null) && (!inRange(lostBalls, InputLimits.COUNT_MIN, InputLimits.COUNT_MAX))) {
-                log.warn("Ignore played-round line with out-of-range lost balls {}", row);
-                return false;
         }
 
-        boolean saved = courseService.submitRound(userId, courseName(row), row.getDate(), holeStrokes, lostBalls);
-        if (!saved) {
-            log.warn("Ignore played-round line rejected by CourseService {}", row);
+        private void removeAllOldPlayedRoundsForUser(final String userId) {
+                final List<PlayedRoundEntity> toRemove = playedRoundRepo.findByUserId(userId);
+                log.info("Remove {} old played-round records from db for user {}.", toRemove.size(), userId);
+                playedRoundRepo.deleteAll(toRemove);
         }
-        return saved;
-    }
 
-    /** Files written before the course column existed are 9-hole Fischland rounds. */
-    private static String courseName(final PlayedRoundCsvRow row) {
-        final String course = row.getCourse();
-        if (course == null || course.isBlank()) {
-            return DEFAULT_PLAYED_ROUND_COURSE;
+        private static Map<String, String> playedRoundColumnMapping() {
+                Map<String, String> columnMapping = new HashMap<>();
+                columnMapping.put("date", "date");
+                columnMapping.put("DATE", "date");
+                columnMapping.put("course", "course");
+                columnMapping.put("COURSE", "course");
+                for (int i = 1; i <= 18; i++) {
+                        columnMapping.put("hole_" + i, "hole" + i);
+                        columnMapping.put("HOLE_" + i, "hole" + i);
+                }
+                columnMapping.put("lostBalls", "lostBalls");
+                columnMapping.put("LOST_BALLS", "lostBalls");
+                columnMapping.put("lost_balls", "lostBalls");
+                return columnMapping;
         }
-        return course.trim();
-    }
 
-    private static RuntimeException importFailed(Exception e, String userId, String kind) {
-        if (e instanceof CsvImportTooManyLinesException tooMany) {
-            throw tooMany;
-        }
-        log.error("Failed to import {} CSV for user {}", kind, userId, e);
-        throw new RuntimeException(kind + " CSV import failed: " + e.getMessage(), e);
-    }
+        private boolean savePlayedRoundIfValid(final PlayedRoundCsvRow row, final String userId) {
+                List<Integer> holeStrokes = row.holeStrokesOrNullIfIncomplete();
+                if (row.getDate() == null || holeStrokes == null) {
+                        log.warn("Ignore played-round line with incomplete data {}", row);
+                        return false;
+                }
+                for (Integer strokes : holeStrokes) {
+                        if (!inRange(strokes, InputLimits.HOLE_STROKES_MIN, InputLimits.HOLE_STROKES_MAX)) {
+                                log.warn("Ignore played-round line with out-of-range hole strokes {}", row);
+                                return false;
+                        }
+                }
+                final Integer lostBalls = row.getLostBalls();
+                if ((lostBalls != null) && (!inRange(lostBalls, InputLimits.COUNT_MIN, InputLimits.COUNT_MAX))) {
+                        log.warn("Ignore played-round line with out-of-range lost balls {}", row);
+                        return false;
+                }
 
-    /**
-     * Rejects the file before OpenCSV parses it so a too-large import never
-     * deletes existing rows. Counts physical lines, including the header.
-     * Also drops a UTF-8 BOM, which spreadsheets add when saving as "CSV UTF-8"
-     * and which would otherwise become part of the first column name.
-     */
-    static InputStream limitCsvLines(InputStream inputStream) throws IOException {
-        byte[] data = stripUtf8Bom(inputStream.readAllBytes());
-        if (countLines(data) > MAX_CSV_LINES) {
-            throw new CsvImportTooManyLinesException(MAX_CSV_LINES);
+                boolean saved =
+                                courseService.submitRound(
+                                                userId,
+                                                courseName(row),
+                                                row.getDate(),
+                                                holeStrokes,
+                                                lostBalls
+                );
+                if (!saved) {
+                        log.warn("Ignore played-round line rejected by CourseService {}", row);
+                }
+                return saved;
         }
-        return new ByteArrayInputStream(data);
-    }
 
-    static byte[] stripUtf8Bom(byte[] data) {
-        if (data.length >= 3
-                && (data[0] & 0xFF) == 0xEF
-                && (data[1] & 0xFF) == 0xBB
-                && (data[2] & 0xFF) == 0xBF) {
-            return Arrays.copyOfRange(data, 3, data.length);
+        /**
+         * Files written before the course column existed are 9-hole Fischland rounds.
+         */
+        private static String courseName(final PlayedRoundCsvRow row) {
+                final String course = row.getCourse();
+                if (course == null || course.isBlank()) {
+                        return DEFAULT_PLAYED_ROUND_COURSE;
+                }
+                return course.trim();
         }
-        return data;
-    }
 
-    static boolean inRange(Number value, int min, int max) {
-        if (value == null) {
-            return false;
+        private static RuntimeException importFailed(Exception e, String userId, String kind) {
+                if (e instanceof CsvImportTooManyLinesException tooMany) {
+                        throw tooMany;
+                }
+                log.error("Failed to import {} CSV for user {}", kind, userId, e);
+                throw new RuntimeException(kind + " CSV import failed: " + e.getMessage(), e);
         }
-        double v = value.doubleValue();
-        return v >= min && v <= max;
-    }
 
-    static int countLines(byte[] data) {
-        if (data.length == 0) {
-            return 0;
+        /**
+         * Rejects the file before OpenCSV parses it so a too-large import never
+         * deletes existing rows. Counts physical lines, including the header.
+         * Also drops a UTF-8 BOM, which spreadsheets add when saving as "CSV UTF-8"
+         * and which would otherwise become part of the first column name.
+         */
+        static InputStream limitCsvLines(InputStream inputStream) throws IOException {
+                byte[] data = stripUtf8Bom(inputStream.readAllBytes());
+                if (countLines(data) > MAX_CSV_LINES) {
+                        throw new CsvImportTooManyLinesException(MAX_CSV_LINES);
+                }
+                return new ByteArrayInputStream(data);
         }
-        int lines = 0;
-        for (byte b : data) {
-            if (b == '\n') {
-                lines++;
-            }
+
+        static byte[] stripUtf8Bom(byte[] data) {
+                if (data.length >= 3
+                                && (data[0] & 0xFF) == 0xEF
+                                && (data[1] & 0xFF) == 0xBB
+                                && (data[2] & 0xFF) == 0xBF) {
+                        return Arrays.copyOfRange(data, 3, data.length);
+                }
+                return data;
         }
-        if (data[data.length - 1] != '\n') {
-            lines++;
+
+        static boolean inRange(Number value, int min, int max) {
+                if (value == null) {
+                        return false;
+                }
+                double v = value.doubleValue();
+                return v >= min && v <= max;
         }
-        return lines;
-    }
+
+        static int countLines(byte[] data) {
+                if (data.length == 0) {
+                        return 0;
+                }
+                int lines = 0;
+                for (byte b : data) {
+                        if (b == '\n') {
+                                lines++;
+                        }
+                }
+                if (data[data.length - 1] != '\n') {
+                        lines++;
+                }
+                return lines;
+        }
 }

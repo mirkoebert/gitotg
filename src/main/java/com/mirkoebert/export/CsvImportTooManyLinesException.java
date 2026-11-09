@@ -8,12 +8,10 @@ import lombok.Getter;
  */
 @Getter
 public class CsvImportTooManyLinesException extends RuntimeException {
+        private final int maxLines;
 
-    private final int maxLines;
-
-    public CsvImportTooManyLinesException(int maxLines) {
-        super("CSV import exceeds the maximum of " + maxLines + " lines");
-        this.maxLines = maxLines;
-    }
-
+        public CsvImportTooManyLinesException(int maxLines) {
+                super("CSV import exceeds the maximum of " + maxLines + " lines");
+                this.maxLines = maxLines;
+        }
 }

@@ -8,10 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 @Slf4j
 public class LoginPrimaryController {
-
-    @GetMapping("/login")
-    public String loginPage() {
-        log.info("Login page");
-        return "login";
-    }
+        @GetMapping("/login")
+        public String loginPage() {
+                log.info("Login page");
+                return "login";
+        }
 }

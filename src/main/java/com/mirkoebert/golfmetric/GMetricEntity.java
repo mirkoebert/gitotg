@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 
 @Entity
@@ -17,24 +16,21 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GMetricEntity {
-
-    @Id
-    @GeneratedValue
-    @CsvIgnore
-    private long id;
-    @CsvIgnore
-    private String userId;
-    @CsvBindByName(column = "date")
-    @CsvDate("yyyy-MM-dd")
-    private LocalDate date;
-
-    /**
-     * not named {@code value} (reserved in H2).
-     */
-    @CsvBindByName(column = "metricValue")
-    private float metricValue;
-
-    @CsvBindByName(column = "type")
-    @Enumerated(EnumType.STRING)
-    private GMetricType type;
+        @Id
+        @GeneratedValue
+        @CsvIgnore
+        private long id;
+        @CsvIgnore
+        private String userId;
+        @CsvBindByName(column = "date")
+        @CsvDate("yyyy-MM-dd")
+        private LocalDate date;
+        /**
+         * not named {@code value} (reserved in H2).
+         */
+        @CsvBindByName(column = "metricValue")
+        private float metricValue;
+        @CsvBindByName(column = "type")
+        @Enumerated(EnumType.STRING)
+        private GMetricType type;
 }

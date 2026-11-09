@@ -10,8 +10,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HcpScoreOutFormattedDTO {
-
-    private String date;
-    private String hcp;
-    private String trend;
+        private String date;
+        private String hcp;
+        private String trend;
 }

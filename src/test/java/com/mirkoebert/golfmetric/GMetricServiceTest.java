@@ -5,68 +5,80 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GMetricServiceTest {
+        @Mock
+        private GMetricRepository repo;
+        @InjectMocks
+        private GMetricService cut;
 
-    @Mock
-    private GMetricRepository repo;
+        @Test
+        void findByUserId_delegatesToRepositoryOrderedByDateDesc() {
+                GMetricEntity entity = GMetricEntity
+                        .builder()
+                        .userId("u1")
+                        .date(LocalDate.of(2026, 1, 1))
+                        .metricValue(2)
+                        .type(GMetricType.LOST_BALLS_PER_9HOLES)
+                        .build();
+                when(repo.findByUserIdOrderByDateDesc("u1")).thenReturn(List.of(entity));
 
-    @InjectMocks
-    private GMetricService cut;
+                List<GMetricEntity> result = cut.findByUserId("u1");
 
-    @Test
-    void findByUserId_delegatesToRepositoryOrderedByDateDesc() {
-        GMetricEntity entity = GMetricEntity.builder()
-                .userId("u1").date(LocalDate.of(2026, 1, 1)).metricValue(2).type(GMetricType.LOST_BALLS_PER_9HOLES).build();
-        when(repo.findByUserIdOrderByDateDesc("u1")).thenReturn(List.of(entity));
+                assertThat(result).containsExactly(entity);
+                verify(repo).findByUserIdOrderByDateDesc("u1");
+        }
 
-        List<GMetricEntity> result = cut.findByUserId("u1");
+        @Test
+        void findByUserIdAndType_delegatesToRepositoryWithType() {
+                GMetricEntity entity = GMetricEntity
+                        .builder()
+                        .userId("u2")
+                        .date(LocalDate.of(2026, 1, 2))
+                        .metricValue(1)
+                        .type(GMetricType.BOGEY_PLUS)
+                        .build();
+                when(repo.findByUserIdAndTypeOrderByDateDesc("u2", GMetricType.BOGEY_PLUS)).thenReturn(List.of(entity));
 
-        assertThat(result).containsExactly(entity);
-        verify(repo).findByUserIdOrderByDateDesc("u1");
-    }
+                List<GMetricEntity> result = cut.findByUserIdAndType("u2", GMetricType.BOGEY_PLUS);
 
-    @Test
-    void findByUserIdAndType_delegatesToRepositoryWithType() {
-        GMetricEntity entity = GMetricEntity.builder()
-                .userId("u2").date(LocalDate.of(2026, 1, 2)).metricValue(1).type(GMetricType.BOGEY_PLUS).build();
-        when(repo.findByUserIdAndTypeOrderByDateDesc("u2", GMetricType.BOGEY_PLUS)).thenReturn(List.of(entity));
+                assertThat(result).containsExactly(entity);
+                verify(repo).findByUserIdAndTypeOrderByDateDesc("u2", GMetricType.BOGEY_PLUS);
+        }
 
-        List<GMetricEntity> result = cut.findByUserIdAndType("u2", GMetricType.BOGEY_PLUS);
+        @Test
+        void findLatestByUserIdAndType_delegatesToFirstByDateDesc() {
+                GMetricEntity entity = GMetricEntity
+                        .builder()
+                        .userId("u3")
+                        .date(LocalDate.of(2026, 3, 1))
+                        .metricValue(4)
+                        .type(GMetricType.DOUBLE_BOGEY_PLUS)
+                        .build();
+                when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY_PLUS)).thenReturn(Optional.of(
+                                entity
+                ));
 
-        assertThat(result).containsExactly(entity);
-        verify(repo).findByUserIdAndTypeOrderByDateDesc("u2", GMetricType.BOGEY_PLUS);
-    }
+                GMetricEntity result = cut.findLatestByUserIdAndType("u3", GMetricType.DOUBLE_BOGEY_PLUS);
 
-    @Test
-    void findLatestByUserIdAndType_delegatesToFirstByDateDesc() {
-        GMetricEntity entity = GMetricEntity.builder()
-                .userId("u3").date(LocalDate.of(2026, 3, 1)).metricValue(4).type(GMetricType.DOUBLE_BOGEY_PLUS).build();
-        when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY_PLUS))
-                .thenReturn(Optional.of(entity));
+                assertThat(result).isEqualTo(entity);
+                verify(repo).findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY_PLUS);
+        }
 
-        GMetricEntity result = cut.findLatestByUserIdAndType("u3", GMetricType.DOUBLE_BOGEY_PLUS);
+        @Test
+        void findLatestByUserIdAndType_returnsNullWhenNothingStored() {
+                when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.LOST_BALLS_PER_9HOLES))
+                        .thenReturn(Optional.empty());
 
-        assertThat(result).isEqualTo(entity);
-        verify(repo).findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.DOUBLE_BOGEY_PLUS);
-    }
+                GMetricEntity result = cut.findLatestByUserIdAndType("u3", GMetricType.LOST_BALLS_PER_9HOLES);
 
-    @Test
-    void findLatestByUserIdAndType_returnsNullWhenNothingStored() {
-        when(repo.findFirstByUserIdAndTypeOrderByDateDesc("u3", GMetricType.LOST_BALLS_PER_9HOLES))
-                .thenReturn(Optional.empty());
-
-        GMetricEntity result = cut.findLatestByUserIdAndType("u3", GMetricType.LOST_BALLS_PER_9HOLES);
-
-        assertThat(result).isNull();
-    }
+                assertThat(result).isNull();
+        }
 }

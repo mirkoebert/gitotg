@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 
 @Entity
@@ -16,13 +15,11 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GolfCheckEntity {
-
-    @Id
-    @GeneratedValue
-    private long id;
-    private LocalDate date;
-    private String userId;
-    private Long checkListItemId;
-    private boolean checked;
-
+        @Id
+        @GeneratedValue
+        private long id;
+        private LocalDate date;
+        private String userId;
+        private Long checkListItemId;
+        private boolean checked;
 }

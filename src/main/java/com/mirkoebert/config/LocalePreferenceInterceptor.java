@@ -16,7 +16,6 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 import org.springframework.web.servlet.support.RequestContextUtils;
-
 import java.util.Locale;
 
 /**
@@ -26,65 +25,68 @@ import java.util.Locale;
 @Component
 @RequiredArgsConstructor
 public class LocalePreferenceInterceptor implements HandlerInterceptor {
+        static final String LOCALE_SESSION_ATTRIBUTE_NAME = SessionLocaleResolver.class.getName() + ".LOCALE";
+        private final UserPreferenceService userPreferenceService;
+        private final CurrentUserService currentUserService;
 
-    static final String LOCALE_SESSION_ATTRIBUTE_NAME =
-            SessionLocaleResolver.class.getName() + ".LOCALE";
-
-    private final UserPreferenceService userPreferenceService;
-    private final CurrentUserService currentUserService;
-
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    private static boolean isOAuth2Authenticated() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null
-                && authentication.isAuthenticated()
-                && authentication.getPrincipal() instanceof OAuth2User;
-    }
-
-    @Override
-    public boolean preHandle(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull Object handler) {
-        String langParam = request.getParameter("lang");
-        if (langParam != null && userPreferenceService.isSupported(langParam)) {
-            persistIfAuthenticated(langParam);
-            return true;
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+        private static boolean isOAuth2Authenticated() {
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+                return authentication != null
+                                && authentication.isAuthenticated()
+                                && authentication.getPrincipal() instanceof OAuth2User;
         }
 
-        restoreFromPreferenceIfNeeded(request, response);
-        return true;
-    }
+        @Override
+        public boolean preHandle(
+                        HttpServletRequest request,
+                        @NonNull HttpServletResponse response,
+                        @NonNull Object handler
+        ) {
+                String langParam = request.getParameter("lang");
+                if (langParam != null && userPreferenceService.isSupported(langParam)) {
+                        persistIfAuthenticated(langParam);
+                        return true;
+                }
 
-    private void persistIfAuthenticated(String language) {
-        if (!isOAuth2Authenticated()) {
-            return;
+                restoreFromPreferenceIfNeeded(request, response);
+                return true;
         }
-        try {
-            CurrentUser user = currentUserService.getCurrentUser();
-            userPreferenceService.saveLanguage(user.id(), language);
-        } catch (IllegalStateException ignored) {
-            // not authenticated
-        }
-    }
 
-    private void restoreFromPreferenceIfNeeded(HttpServletRequest request, HttpServletResponse response) {
-        if (!isOAuth2Authenticated()) {
-            return;
+        private void persistIfAuthenticated(String language) {
+                if (!isOAuth2Authenticated()) {
+                        return;
+                }
+                try {
+                        CurrentUser user = currentUserService.getCurrentUser();
+                        userPreferenceService.saveLanguage(user.id(), language);
+                } catch (IllegalStateException ignored) {
+                        // not authenticated
+                }
         }
-        HttpSession session = request.getSession(false);
-        if (session != null && session.getAttribute(LOCALE_SESSION_ATTRIBUTE_NAME) != null) {
-            return;
-        }
-        try {
-            CurrentUser user = currentUserService.getCurrentUser();
-            userPreferenceService.findLocale(user.id()).ifPresent(locale -> setSessionLocale(request, response, locale));
-        } catch (IllegalStateException ignored) {
-            // not authenticated
-        }
-    }
 
-    private void setSessionLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
-        LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
-        if (localeResolver != null) {
-            localeResolver.setLocale(request, response, locale);
+        private void restoreFromPreferenceIfNeeded(HttpServletRequest request, HttpServletResponse response) {
+                if (!isOAuth2Authenticated()) {
+                        return;
+                }
+                HttpSession session = request.getSession(false);
+                if (session != null && session.getAttribute(LOCALE_SESSION_ATTRIBUTE_NAME) != null) {
+                        return;
+                }
+                try {
+                        CurrentUser user = currentUserService.getCurrentUser();
+                        userPreferenceService
+                                .findLocale(user.id())
+                                .ifPresent(locale -> setSessionLocale(request, response, locale));
+                } catch (IllegalStateException ignored) {
+                        // not authenticated
+                }
         }
-    }
+
+        private void setSessionLocale(HttpServletRequest request, HttpServletResponse response, Locale locale) {
+                LocaleResolver localeResolver = RequestContextUtils.getLocaleResolver(request);
+                if (localeResolver != null) {
+                        localeResolver.setLocale(request, response, locale);
+                }
+        }
 }

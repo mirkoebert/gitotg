@@ -30,91 +30,100 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.SecurityContextHolderFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(AnalyticsPagePlaywrightIT.PlaywrightUserSecurity.class)
 class AnalyticsPagePlaywrightIT {
+        static final String USER_ID = "analytics-page-user";
+        @LocalServerPort
+        private int port;
+        @Autowired
+        private HcpRepository hcpRepository;
+        private Playwright playwright;
+        private Browser browser;
+        private Page page;
 
-    static final String USER_ID = "analytics-page-user";
-
-    @LocalServerPort
-    private int port;
-
-    @Autowired
-    private HcpRepository hcpRepository;
-
-    private Playwright playwright;
-    private Browser browser;
-    private Page page;
-
-    @BeforeEach
-    void startBrowserAndSeedHandicap() {
-        hcpRepository.save(HcpScoreEntity.builder().userId(USER_ID).date(LocalDate.now()).hcp(25.0).build());
-        playwright = Playwright.create();
-        browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
-        page = browser.newPage();
-    }
-
-    @AfterEach
-    void stopBrowserAndClearHandicap() {
-        hcpRepository.findByUserId(USER_ID).forEach(hcpRepository::delete);
-        if (browser != null) {
-            browser.close();
+        @BeforeEach
+        void startBrowserAndSeedHandicap() {
+                hcpRepository.save(HcpScoreEntity.builder().userId(USER_ID).date(LocalDate.now()).hcp(25.0).build());
+                playwright = Playwright.create();
+                browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
+                page = browser.newPage();
         }
-        if (playwright != null) {
-            playwright.close();
+
+        @AfterEach
+        void stopBrowserAndClearHandicap() {
+                hcpRepository.findByUserId(USER_ID).forEach(hcpRepository::delete);
+                if (browser != null) {
+                        browser.close();
+                }
+                if (playwright != null) {
+                        playwright.close();
+                }
         }
-    }
 
-    @Test
-    void analyticsPage_listsWeaknessesAndLinksFromTheGoalMenu() {
-        page.navigate("http://localhost:" + port + "/about");
-        page.locator("ul.dropdown-menu a[href='/analytics']").evaluate("el => el.click()");
+        @Test
+        void analyticsPage_listsWeaknessesAndLinksFromTheGoalMenu() {
+                page.navigate("http://localhost:" + port + "/about");
+                page.locator("ul.dropdown-menu a[href='/analytics']").evaluate("el => el.click()");
 
-        assertThat(page).hasTitle("Gitotg: Analytics");
-        assertThat(page.locator("h1")).hasText("Analytics");
-        assertThat(page.locator("ul.dropdown-menu a[href='/analytics']")).hasCount(1);
-        assertThat(page.locator("#weaknesses")).containsText("course management");
-        assertThat(page.locator("#weaknesses")).containsText("mental game");
-        assertThat(page.locator("#weaknesses")).containsText("playing");
-        assertThat(page.locator("#weaknesses")).containsText("short game");
-    }
-
-    /**
-     * Opens /analytics for this test without the Google or GitHub login redirect.
-     * The signed-in user is the same id the test seeds.
-     */
-    @TestConfiguration
-    static class PlaywrightUserSecurity {
-
-        @Bean
-        @Order(0)
-        SecurityFilterChain analyticsPlaywrightChain(final HttpSecurity http) throws Exception {
-            http.securityMatcher("/analytics").authorizeHttpRequests((final var auth) -> auth.anyRequest().permitAll()).addFilterAfter(new SignedInUserFilter(), SecurityContextHolderFilter.class);
-            return http.build();
+                assertThat(page).hasTitle("Gitotg: Analytics");
+                assertThat(page.locator("h1")).hasText("Analytics");
+                assertThat(page.locator("ul.dropdown-menu a[href='/analytics']")).hasCount(1);
+                assertThat(page.locator("#weaknesses")).containsText("course management");
+                assertThat(page.locator("#weaknesses")).containsText("mental game");
+                assertThat(page.locator("#weaknesses")).containsText("playing");
+                assertThat(page.locator("#weaknesses")).containsText("short game");
         }
-    }
 
-    static final class SignedInUserFilter extends OncePerRequestFilter {
-
-        @Override
-        protected void doFilterInternal(final HttpServletRequest request, final HttpServletResponse response, final FilterChain filterChain) throws ServletException, IOException {
-            OAuth2User principal = new DefaultOAuth2User(List.of(new SimpleGrantedAuthority("ROLE_USER")), Map.of("sub", USER_ID, "name", "Analytics Tester"), "sub");
-            SecurityContext context = SecurityContextHolder.createEmptyContext();
-            context.setAuthentication(new OAuth2AuthenticationToken(principal, principal.getAuthorities(), "playwright"));
-            SecurityContextHolder.setContext(context);
-            try {
-                filterChain.doFilter(request, response);
-            } finally {
-                SecurityContextHolder.clearContext();
-            }
+        /**
+         * Opens /analytics for this test without the Google or GitHub login redirect.
+         * The signed-in user is the same id the test seeds.
+         */
+        @TestConfiguration
+        static class PlaywrightUserSecurity {
+                @Bean
+                @Order(0)
+                SecurityFilterChain analyticsPlaywrightChain(final HttpSecurity http) throws Exception {
+                        http
+                                .securityMatcher("/analytics")
+                                .authorizeHttpRequests((final var auth) -> auth.anyRequest().permitAll())
+                                .addFilterAfter(new SignedInUserFilter(), SecurityContextHolderFilter.class);
+                        return http.build();
+                }
         }
-    }
+
+        static final class SignedInUserFilter extends OncePerRequestFilter {
+                @Override
+                protected void doFilterInternal(
+                                final HttpServletRequest request,
+                                final HttpServletResponse response,
+                                final FilterChain filterChain
+                ) throws ServletException, IOException {
+                        OAuth2User principal = new DefaultOAuth2User(
+                                        List.of(new SimpleGrantedAuthority("ROLE_USER")),
+                                        Map.of("sub", USER_ID, "name", "Analytics Tester"),
+                                        "sub"
+                        );
+                        SecurityContext context = SecurityContextHolder.createEmptyContext();
+                        context.setAuthentication(
+                                        new OAuth2AuthenticationToken(
+                                                        principal,
+                                                        principal.getAuthorities(),
+                                                        "playwright"
+                                        )
+                        );
+                        SecurityContextHolder.setContext(context);
+                        try {
+                                filterChain.doFilter(request, response);
+                        } finally {
+                                SecurityContextHolder.clearContext();
+                        }
+                }
+        }
 }

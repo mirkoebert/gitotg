@@ -10,7 +10,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 
 @Entity
@@ -19,16 +18,15 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HcpScoreEntity {
-
-    @Id
-    @GeneratedValue
-    @CsvIgnore
-    private long id;
-    @CsvIgnore
-    private String userId;
-    @CsvBindByName(column = "date")
-    @CsvDate("yyyy-MM-dd")
-    private LocalDate date;
-    @CsvBindByName(column = "hcp")
-    private Double hcp;
+        @Id
+        @GeneratedValue
+        @CsvIgnore
+        private long id;
+        @CsvIgnore
+        private String userId;
+        @CsvBindByName(column = "date")
+        @CsvDate("yyyy-MM-dd")
+        private LocalDate date;
+        @CsvBindByName(column = "hcp")
+        private Double hcp;
 }

@@ -12,21 +12,24 @@ import org.springframework.web.multipart.MaxUploadSizeExceededException;
 @ControllerAdvice
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
+        private final MessageSource messageSource;
 
-    private final MessageSource messageSource;
+        @ExceptionHandler(MaxUploadSizeExceededException.class)
+        public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException exc) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(messageSource.getMessage("api.import.fileTooLarge", null, LocaleContextHolder.getLocale())
+                        );
+        }
 
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<String> handleMaxSizeException(MaxUploadSizeExceededException exc) {
-        return ResponseEntity.badRequest().body(
-                messageSource.getMessage("api.import.fileTooLarge", null, LocaleContextHolder.getLocale()));
-    }
-
-    @ExceptionHandler(CsvImportTooManyLinesException.class)
-    public ResponseEntity<String> handleTooManyLines(CsvImportTooManyLinesException exc) {
-        return ResponseEntity.badRequest().body(
-                messageSource.getMessage(
-                        "api.import.tooManyLines",
-                        new Object[]{exc.getMaxLines()},
-                        LocaleContextHolder.getLocale()));
-    }
+        @ExceptionHandler(CsvImportTooManyLinesException.class)
+        public ResponseEntity<String> handleTooManyLines(CsvImportTooManyLinesException exc) {
+                return ResponseEntity
+                        .badRequest()
+                        .body(messageSource.getMessage(
+                                        "api.import.tooManyLines",
+                                        new Object[] {exc.getMaxLines()},
+                                        LocaleContextHolder.getLocale()
+                        ));
+        }
 }

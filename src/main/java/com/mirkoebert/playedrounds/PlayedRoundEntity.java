@@ -14,7 +14,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
-
 import java.time.LocalDate;
 import java.util.List;
 
@@ -24,29 +23,24 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlayedRoundEntity {
+        @Id
+        @GeneratedValue
+        private long id;
+        private String userId;
+        private LocalDate date;
+        private String courseName;
+        private Integer lostBalls;
+        @ColumnDefault("0")
+        private int doubleBogeysPlus;
+        @ColumnDefault("0")
+        private int bogeysPlus;
+        @ElementCollection(fetch = FetchType.EAGER)
+        @CollectionTable(name = "round_hole_strokes", joinColumns = @JoinColumn(name = "round_id"))
+        @OrderColumn(name = "hole_number")
+        @Column(name = "strokes")
+        private List<Integer> holeStrokes;
 
-    @Id
-    @GeneratedValue
-    private long id;
-    private String userId;
-    private LocalDate date;
-    private String courseName;
-
-    private Integer lostBalls;
-
-    @ColumnDefault("0")
-    private int doubleBogeysPlus;
-
-    @ColumnDefault("0")
-    private int bogeysPlus;
-
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "round_hole_strokes", joinColumns = @JoinColumn(name = "round_id"))
-    @OrderColumn(name = "hole_number")
-    @Column(name = "strokes")
-    private List<Integer> holeStrokes;
-
-    public int getTotalStrokes() {
-        return holeStrokes == null ? 0 : holeStrokes.stream().mapToInt(Integer::intValue).sum();
-    }
+        public int getTotalStrokes() {
+                return holeStrokes == null ? 0 : holeStrokes.stream().mapToInt(Integer::intValue).sum();
+        }
 }

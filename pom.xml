@@ -47,6 +47,8 @@
         <surefire.version>3.6.0</surefire.version>
         <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
         <maven-cucumber-reporting.version>5.11.0</maven-cucumber-reporting.version>
+        <spotless.version>3.11.0</spotless.version>
+        <prince-of-space.version>2.3.1</prince-of-space.version>
         <!-- Filled in by jacoco:prepare-agent; empty default keeps surefire working without it -->
         <jacocoArgLine/>
     </properties>
@@ -395,6 +397,28 @@
                         <version>1.2.3</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <java>
+                        <princeOfSpace>
+                            <version>${prince-of-space.version}</version>
+                            <indentStyle>SPACES</indentStyle>
+                            <indentSize>8</indentSize>
+                            <javaLanguageLevel>${maven.compiler.release}</javaLanguageLevel>
+                        </princeOfSpace>
+                    </java>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

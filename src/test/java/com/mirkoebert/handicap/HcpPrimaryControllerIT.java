@@ -10,7 +10,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
@@ -20,39 +19,45 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 class HcpPrimaryControllerIT {
+        @Autowired
+        private WebApplicationContext webApplicationContext;
+        @MockitoBean
+        private CurrentUserService currentUserService;
+        private MockMvc mockMvc;
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-    @MockitoBean
-    private CurrentUserService currentUserService;
-    private MockMvc mockMvc;
+        @BeforeEach
+        void loggedIn() {
+                mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+                when(currentUserService.getCurrentUser())
+                        .thenReturn(new CurrentUser("hcp-page-user", "Tester", "tester@example.com", null));
+        }
 
-    @BeforeEach
-    void loggedIn() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        when(currentUserService.getCurrentUser())
-                .thenReturn(new CurrentUser("hcp-page-user", "Tester", "tester@example.com", null));
-    }
+        @Test
+        void inputPage_bindsImportMessagesInTheSameScript() throws Exception {
+                mockMvc
+                        .perform(get("/handicap/input").param("lang", "en"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("csv-import.js")))
+                        .andExpect(content().string(containsString("id=\"hcp-import-form\"")))
+                        .andExpect(content()
+                                .string(
+                                                containsString(
+                                                                "GitotgCsvImport.bindImportForm('hcp-import-form', 'hcp-import-status'"
+                                                )
+                                )
+                        )
+                        .andExpect(content().string(containsString("uploading: \"Uploading...\"")))
+                        .andExpect(content().string(not(containsString("i18nUploading"))));
+        }
 
-    @Test
-    void inputPage_bindsImportMessagesInTheSameScript() throws Exception {
-        mockMvc.perform(get("/handicap/input").param("lang", "en"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("csv-import.js")))
-                .andExpect(content().string(containsString("id=\"hcp-import-form\"")))
-                .andExpect(content().string(containsString(
-                        "GitotgCsvImport.bindImportForm('hcp-import-form', 'hcp-import-status'")))
-                .andExpect(content().string(containsString("uploading: \"Uploading...\"")))
-                .andExpect(content().string(not(containsString("i18nUploading"))));
-    }
-
-    @Test
-    void inputPage_scalesHandicapChartToDataCappedAt54() throws Exception {
-        mockMvc.perform(get("/handicap/input"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(containsString("const hcpChartMax = 54;")))
-                .andExpect(content().string(containsString("afterBuildTicks(scale)")))
-                .andExpect(content().string(containsString("scale.max = hcpChartMax;")))
-                .andExpect(content().string(not(containsString("max: 54"))));
-    }
+        @Test
+        void inputPage_scalesHandicapChartToDataCappedAt54() throws Exception {
+                mockMvc
+                        .perform(get("/handicap/input"))
+                        .andExpect(status().isOk())
+                        .andExpect(content().string(containsString("const hcpChartMax = 54;")))
+                        .andExpect(content().string(containsString("afterBuildTicks(scale)")))
+                        .andExpect(content().string(containsString("scale.max = hcpChartMax;")))
+                        .andExpect(content().string(not(containsString("max: 54"))));
+        }
 }

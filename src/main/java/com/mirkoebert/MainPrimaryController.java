@@ -15,51 +15,49 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 
-
 @SuppressWarnings("SameReturnValue")
 @Controller
 @RequiredArgsConstructor
 @Slf4j
 public class MainPrimaryController {
+        private final TimelineService timeService;
+        private final CurrentUserService currentUserService;
+        private final UserStatsService userStatsService;
+        @Value("${app.version:unknown}")
+        private String appVersion;
 
-    private final TimelineService timeService;
-    private final CurrentUserService currentUserService;
-    private final UserStatsService userStatsService;
+        @GetMapping("/timeline")
+        public String getTimeline(Model m, @RequestParam(defaultValue = "last30") String range) {
+                log.info("timeline page range={}", range);
+                val u = currentUserService.getCurrentUser();
+                TimelineRange timelineRange = TimelineRange.fromParam(range);
+                m.addAttribute("timeline", timeService.getLatestResults(u.id(), timelineRange));
+                m.addAttribute("range", timelineRange.getParam());
+                return "timeline";
+        }
 
-    @Value("${app.version:unknown}")
-    private String appVersion;
+        @PostMapping("/timeline/delete")
+        public String deleteTimelineEntry(
+                        @RequestParam GolfType type,
+                        @RequestParam Long id,
+                        @RequestParam(defaultValue = "last30") String range
+        ) {
+                log.info("Deleting timeline entry: type={}, id={}, range={}", type, id, range);
+                val u = currentUserService.getCurrentUser();
+                timeService.deleteEntry(type, id, u.id());
+                String redirect = UriComponentsBuilder
+                        .fromPath("/timeline")
+                        .queryParam("range", TimelineRange.fromParam(range).getParam())
+                        .build()
+                        .toUriString();
+                return "redirect:" + redirect;
+        }
 
-    @GetMapping("/timeline")
-    public String getTimeline(Model m,
-                              @RequestParam(defaultValue = "last30") String range) {
-        log.info("timeline page range={}", range);
-        val u = currentUserService.getCurrentUser();
-        TimelineRange timelineRange = TimelineRange.fromParam(range);
-        m.addAttribute("timeline", timeService.getLatestResults(u.id(), timelineRange));
-        m.addAttribute("range", timelineRange.getParam());
-        return "timeline";
-    }
-
-    @PostMapping("/timeline/delete")
-    public String deleteTimelineEntry(@RequestParam GolfType type,
-                                      @RequestParam Long id,
-                                      @RequestParam(defaultValue = "last30") String range) {
-        log.info("Deleting timeline entry: type={}, id={}, range={}", type, id, range);
-        val u = currentUserService.getCurrentUser();
-        timeService.deleteEntry(type, id, u.id());
-        String redirect = UriComponentsBuilder.fromPath("/timeline")
-                .queryParam("range", TimelineRange.fromParam(range).getParam())
-                .build()
-                .toUriString();
-        return "redirect:" + redirect;
-    }
-
-    @GetMapping("/about")
-    public String getAbout(final Model m) {
-        log.info("about page");
-        m.addAttribute("version", appVersion);
-        m.addAttribute("userCount", userStatsService.countUsers());
-        return "about";
-    }
-
+        @GetMapping("/about")
+        public String getAbout(final Model m) {
+                log.info("about page");
+                m.addAttribute("version", appVersion);
+                m.addAttribute("userCount", userStatsService.countUsers());
+                return "about";
+        }
 }

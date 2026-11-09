@@ -4,32 +4,31 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum GoalEnum {
+        BREAK100("break100"),
+        BREAK90("break90"),
+        BREAK80("break80"),
+        ALLTIME("alltime");
+        private final String slug;
 
-    BREAK100("break100"),
-    BREAK90("break90"),
-    BREAK80("break80"),
-    ALLTIME("alltime");
+        GoalEnum(String slug) {
+                this.slug = slug;
+        }
 
-    private final String slug;
+        public static Optional<GoalEnum> fromSlug(String slug) {
+                return Arrays
+                        .stream(values())
+                        .filter(g -> g.slug.equalsIgnoreCase(slug))
+                        .findFirst();
+        }
 
-    GoalEnum(String slug) {
-        this.slug = slug;
-    }
+        /**
+         * Key of the localized goal title in the message bundle.
+         */
+        public String getTitleKey() {
+                return "goal." + slug + ".title";
+        }
 
-    public static Optional<GoalEnum> fromSlug(String slug) {
-        return Arrays.stream(values())
-                .filter(g -> g.slug.equalsIgnoreCase(slug))
-                .findFirst();
-    }
-
-    /**
-     * Key of the localized goal title in the message bundle.
-     */
-    public String getTitleKey() {
-        return "goal." + slug + ".title";
-    }
-
-    public String getSlug() {
-        return slug;
-    }
+        public String getSlug() {
+                return slug;
+        }
 }

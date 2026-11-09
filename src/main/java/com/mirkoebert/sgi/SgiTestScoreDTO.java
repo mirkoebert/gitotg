@@ -15,18 +15,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SgiTestScoreDTO {
-
-
-    @Min(InputLimits.SGI_POINTS_MIN)
-    @Max(InputLimits.SGI_POINTS_MAX)
-    @NotNull
-    private Integer points;
-
-    @NotNull
-    private TestSuite type;
-
-    @Min(InputLimits.SGI_TEST_ID_MIN)
-    @Max(InputLimits.SGI_TEST_ID_MAX)
-    @NotNull
-    private Integer testId;
+        @Min(InputLimits.SGI_POINTS_MIN)
+        @Max(InputLimits.SGI_POINTS_MAX)
+        @NotNull
+        private Integer points;
+        @NotNull
+        private TestSuite type;
+        @Min(InputLimits.SGI_TEST_ID_MIN)
+        @Max(InputLimits.SGI_TEST_ID_MAX)
+        @NotNull
+        private Integer testId;
 }

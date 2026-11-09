@@ -11,7 +11,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -20,77 +19,83 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 class GolfCoursePrimaryControllerIT {
+        private static final String TEST_USER = "round-test-user";
+        @Autowired
+        private WebApplicationContext webApplicationContext;
+        @MockitoBean
+        private CurrentUserService currentUserService;
+        private MockMvc mockMvc;
 
-    private static final String TEST_USER = "round-test-user";
+        @BeforeEach
+        void seedOneRowPerExport() {
+                mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+                when(currentUserService.getCurrentUser())
+                        .thenReturn(new CurrentUser(TEST_USER, "T. Ester", "t.ester@ebert-p.com", null));
+        }
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-    @MockitoBean
-    private CurrentUserService currentUserService;
-    private MockMvc mockMvc;
+        @SneakyThrows
+        @Test
+        void index_rendersImportForm() {
+                String html = mockMvc
+                        .perform(get("/golfcourse").param("lang", "en"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
-    @BeforeEach
-    void seedOneRowPerExport() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        when(currentUserService.getCurrentUser()).thenReturn(new CurrentUser(TEST_USER, "T. Ester", "t.ester@ebert-p.com", null));
-    }
+                assertThat(html).contains("id=\"golfcourse-import-form\"");
+                assertThat(html).contains("/api/golfcourse/export");
+                assertThat(html).contains("/api/golfcourse/import");
+                assertThat(html).contains("name=\"file\"");
+                assertThat(html).contains("csv-import.js");
+                assertThat(html).contains("<title>Gitotg: Played Rounds</title>");
+                assertThat(html).contains(">Played Rounds</h1>");
+                assertThat(html).contains(">Golf Course</label>");
 
-    @SneakyThrows
-    @Test
-    void index_rendersImportForm() {
-        String html = mockMvc.perform(get("/golfcourse").param("lang", "en"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+                String german = mockMvc
+                        .perform(get("/golfcourse").param("lang", "de"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
-        assertThat(html).contains("id=\"golfcourse-import-form\"");
-        assertThat(html).contains("/api/golfcourse/export");
-        assertThat(html).contains("/api/golfcourse/import");
-        assertThat(html).contains("name=\"file\"");
-        assertThat(html).contains("csv-import.js");
-        assertThat(html).contains("<title>Gitotg: Played Rounds</title>");
-        assertThat(html).contains(">Played Rounds</h1>");
-        assertThat(html).contains(">Golf Course</label>");
+                assertThat(german).contains("<title>Gitotg: Gespielte Runden</title>");
+                assertThat(german).contains(">Gespielte Runden</h1>");
+                assertThat(german).contains(">Golfplatz</label>");
+        }
 
-        String german = mockMvc.perform(get("/golfcourse").param("lang", "de"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        @SneakyThrows
+        @Test
+        void index_describesPlayedRoundCsvWithCourseAndEighteenHoles() {
+                String html = mockMvc
+                        .perform(get("/golfcourse").param("lang", "en"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
-        assertThat(german).contains("<title>Gitotg: Gespielte Runden</title>");
-        assertThat(german).contains(">Gespielte Runden</h1>");
-        assertThat(german).contains(">Golfplatz</label>");
-    }
+                assertThat(html).contains("DATE, COURSE, HOLE_1…HOLE_18, LOST_BALLS");
+                assertThat(html).doesNotContain("HOLE_1…HOLE_9");
 
-    @SneakyThrows
-    @Test
-    void index_describesPlayedRoundCsvWithCourseAndEighteenHoles() {
-        String html = mockMvc.perform(get("/golfcourse").param("lang", "en"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+                String german = mockMvc
+                        .perform(get("/golfcourse").param("lang", "de"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
-        assertThat(html).contains("DATE, COURSE, HOLE_1…HOLE_18, LOST_BALLS");
-        assertThat(html).doesNotContain("HOLE_1…HOLE_9");
+                assertThat(german).contains("DATE, COURSE, HOLE_1…HOLE_18, LOST_BALLS");
+                assertThat(german).doesNotContain("HOLE_1…HOLE_9");
+        }
 
-        String german = mockMvc.perform(get("/golfcourse").param("lang", "de"))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        assertThat(german).contains("DATE, COURSE, HOLE_1…HOLE_18, LOST_BALLS");
-        assertThat(german).doesNotContain("HOLE_1…HOLE_9");
-    }
-
-    @SneakyThrows
-    @Test
-    void deleteRound() {
-        mockMvc.perform(post("/golfcourse/delete").param("roundId", "1"))
-                .andExpect(status().isFound()) // 302
-                .andExpect(redirectedUrl("/golfcourse"));
-    }
+        @SneakyThrows
+        @Test
+        void deleteRound() {
+                mockMvc
+                        .perform(post("/golfcourse/delete").param("roundId", "1"))
+                        .andExpect(status().isFound()
+                        // 302
+                        )
+                        .andExpect(redirectedUrl("/golfcourse"));
+        }
 }

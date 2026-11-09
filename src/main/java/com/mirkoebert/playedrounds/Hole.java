@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Hole {
-
-    private int number;
-    private int par;
+        private int number;
+        private int par;
 }

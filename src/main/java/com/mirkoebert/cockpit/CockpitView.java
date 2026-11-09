@@ -4,51 +4,49 @@ import com.mirkoebert.checklist.ChecklistProgress;
 import com.mirkoebert.playedrounds.PlayedRoundEntity;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.handicap.HcpScoreOutFormattedDTO;
-
 import java.time.LocalDate;
 
 public record CockpitView(
-        HcpScoreOutFormattedDTO handicap,
-        Integer sgiHcp,
-        MetricSnapshot lostBalls,
-        MetricSnapshot bogey,
-        MetricSnapshot doubleBogey,
-        ChecklistProgress break100,
-        ChecklistProgress break90,
-        ChecklistProgress break80,
-        ChecklistProgress alltime,
-        RoundSnapshot lastRound,
-        String advice,
-        Integer eclectic,
-        String homeCourse,
-        Integer coursePar,
-        int roundsThisYear
+                HcpScoreOutFormattedDTO handicap,
+                Integer sgiHcp,
+                MetricSnapshot lostBalls,
+                MetricSnapshot bogey,
+                MetricSnapshot doubleBogey,
+                ChecklistProgress break100,
+                ChecklistProgress break90,
+                ChecklistProgress break80,
+                ChecklistProgress alltime,
+                RoundSnapshot lastRound,
+                String advice,
+                Integer eclectic,
+                String homeCourse,
+                Integer coursePar,
+                int roundsThisYear
 ) {
+        public record MetricSnapshot(Float value, LocalDate date) {
+                static MetricSnapshot from(GMetricEntity entity) {
+                        if (entity == null) {
+                                return new MetricSnapshot(null, null);
+                        }
+                        return new MetricSnapshot(entity.getMetricValue(), entity.getDate());
+                }
 
-    public record MetricSnapshot(Float value, LocalDate date) {
-        static MetricSnapshot from(GMetricEntity entity) {
-            if (entity == null) {
-                return new MetricSnapshot(null, null);
-            }
-            return new MetricSnapshot(entity.getMetricValue(), entity.getDate());
+                public boolean present() {
+                        return value != null;
+                }
         }
 
-        public boolean present() {
-            return value != null;
+        public record RoundSnapshot(String courseName, LocalDate date, int totalStrokes, Integer lostBalls) {
+                static RoundSnapshot from(PlayedRoundEntity round) {
+                        if (round == null) {
+                                return null;
+                        }
+                        return new RoundSnapshot(
+                                        round.getCourseName(),
+                                        round.getDate(),
+                                        round.getTotalStrokes(),
+                                        round.getLostBalls()
+                        );
+                }
         }
-    }
-
-    public record RoundSnapshot(String courseName, LocalDate date, int totalStrokes, Integer lostBalls) {
-        static RoundSnapshot from(PlayedRoundEntity round) {
-            if (round == null) {
-                return null;
-            }
-            return new RoundSnapshot(
-                    round.getCourseName(),
-                    round.getDate(),
-                    round.getTotalStrokes(),
-                    round.getLostBalls()
-            );
-        }
-    }
 }

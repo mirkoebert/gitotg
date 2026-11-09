@@ -1,5 +1,7 @@
 package com.mirkoebert;
 
 public enum GolfType {
-    HCP, SGIHCP, COUNT
+        HCP,
+        SGIHCP,
+        COUNT
 }

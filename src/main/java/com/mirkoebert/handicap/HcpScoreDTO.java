@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.LocalDate;
 
 @Data
@@ -16,12 +15,10 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class HcpScoreDTO {
-
-    @NotNull
-    private LocalDate selectedDate;
-
-    @Min(InputLimits.HCP_MIN)
-    @Max(InputLimits.HCP_MAX)
-    @NotNull
-    private Double hcp;
+        @NotNull
+        private LocalDate selectedDate;
+        @Min(InputLimits.HCP_MIN)
+        @Max(InputLimits.HCP_MAX)
+        @NotNull
+        private Double hcp;
 }

@@ -8,10 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 @Slf4j
 public class GMetricPrimaryController {
-
-    @GetMapping({"/gmetric", "/golfmetric"})
-    public String getPage() {
-        log.info("Get gmetric page");
-        return "gmetric/index";
-    }
+        @GetMapping({"/gmetric", "/golfmetric"})
+        public String getPage() {
+                log.info("Get gmetric page");
+                return "gmetric/index";
+        }
 }
