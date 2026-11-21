@@ -21,7 +21,8 @@ public record CockpitView(
                 Integer eclectic,
                 String homeCourse,
                 Integer coursePar,
-                int roundsThisYear
+                int roundsThisYear,
+                Double consistency
 ) {
         public record MetricSnapshot(Float value, LocalDate date) {
                 static MetricSnapshot from(GMetricEntity entity) {

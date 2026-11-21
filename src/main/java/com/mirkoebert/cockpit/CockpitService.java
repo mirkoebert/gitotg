@@ -65,7 +65,8 @@ public class CockpitService {
                                 eclecticService.getEclecticHcpForLast10Rounds(userId),
                                 homeCourse,
                                 coursePar(homeCourse),
-                                courseService.countRoundsInYear(userId, Year.now().getValue())
+                                courseService.countRoundsInYear(userId, Year.now().getValue()),
+                                eclecticService.getConsistency(userId)
                 );
         }
 

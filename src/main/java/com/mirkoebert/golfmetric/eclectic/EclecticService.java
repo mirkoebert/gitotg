@@ -1,5 +1,6 @@
 package com.mirkoebert.golfmetric.eclectic;
 
+import com.mirkoebert.cockpit.ConsistencyCalculator;
 import com.mirkoebert.playedrounds.*;
 import com.mirkoebert.handicap.HcpScoreDTO;
 import lombok.RequiredArgsConstructor;
@@ -46,6 +47,23 @@ public class EclecticService {
                         return (double) eclecticSum;
                 } catch (Exception e) {
                         log.info("Can't calc eclectic hcp {}", e.getMessage());
+                        return null;
+                }
+        }
+
+        public Double getConsistency(final String userId) {
+                try {
+                        final String courseName = getHomeCourseName(userId);
+                        log.info("getConsistency {} {}", courseName, userId);
+                        final List<Integer> totals = loadAllRoundsSorted(userId)
+                                .stream()
+                                .filter(round -> courseName.equals(round.getCourseName()))
+                                .limit(ECLECTIC_ROUND_WINDOW)
+                                .map(PlayedRoundEntity::getTotalStrokes)
+                                .toList();
+                        return ConsistencyCalculator.ofStrokeTotals(totals);
+                } catch (Exception e) {
+                        log.info("Can't calc consistency {}", e.getMessage());
                         return null;
                 }
         }
