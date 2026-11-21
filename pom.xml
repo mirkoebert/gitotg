@@ -5,7 +5,7 @@
 
     <groupId>com.mirkoebert</groupId>
     <artifactId>gitotg</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>0.9.1-SNAPSHOT</version>
 
     <developers>
         <developer>
@@ -33,7 +33,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.1.2</version>
+        <version>4.2.0</version>
     </parent>
 
     <properties>
@@ -41,13 +41,12 @@
         <maven.compiler.target>25</maven.compiler.target>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit-jupiter.version>6.1.3</junit-jupiter.version>
-        <jacoco.version>0.8.15</jacoco.version>
+        <jacoco.version>0.8.16</jacoco.version>
         <dependency-check.version>13.0.0</dependency-check.version>
-        <surefire.version>3.6.0</surefire.version>
+        <surefire.version>3.6.1</surefire.version>
         <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
         <maven-cucumber-reporting.version>5.11.0</maven-cucumber-reporting.version>
-        <spotless.version>3.11.0</spotless.version>
+        <spotless.version>3.12.0</spotless.version>
         <prince-of-space.version>2.3.1</prince-of-space.version>
         <!-- Filled in by jacoco:prepare-agent; empty default keeps surefire working without it -->
         <jacocoArgLine/>
@@ -56,15 +55,9 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <!-- CVE-2025-48924: ahead of the 3.20.0 managed by Spring Boot 4.1.2 -->
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>3.21.0</version>
-            </dependency>
-            <dependency>
                 <groupId>io.cucumber</groupId>
                 <artifactId>cucumber-bom</artifactId>
-                <version>8.0.4</version>
+                <version>8.1.0</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -166,7 +159,7 @@
         <dependency>
             <groupId>com.microsoft.playwright</groupId>
             <artifactId>playwright</artifactId>
-            <version>1.64.0</version>
+            <version>1.65.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -181,7 +174,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.6.3</version>
+                <version>3.7.0</version>
                 <executions>
                     <execution>
                         <id>enforce-maven</id>
@@ -196,8 +189,7 @@
                                 <requireJavaVersion>
                                     <version>[25,)</version>
                                 </requireJavaVersion>
-                                <!-- A transitive dependency must not pull a version newer than the one
-                                     resolved - the CVE pins above make that skew easy to introduce. -->
+                                <!-- A transitive dependency must not pull a version newer than the one resolved. -->
                                 <requireUpperBoundDeps/>
                                 <banDuplicatePomDependencyVersions/>
                             </rules>
@@ -207,8 +199,7 @@
                 </executions>
             </plugin>
             <plugin>
-                <!-- Exposes ${org.mockito:mockito-core:jar} for the Surefire javaagent path.
-                     3.11.0 is the latest stable release; Boot 4.1.2 manages 3.10.0. -->
+                <!-- Exposes ${org.mockito:mockito-core:jar} for the Surefire javaagent path. -->
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <version>3.11.0</version>
@@ -347,7 +338,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.3.1</version>
+                <version>1.4.0</version>
                 <executions>
                     <execution>
                         <id>read-cucumber-report-skip</id>
@@ -389,7 +380,7 @@
             <plugin>
                 <groupId>org.pitest</groupId>
                 <artifactId>pitest-maven</artifactId>
-                <version>1.30.1</version>
+                <version>1.30.2</version>
                 <dependencies>
                     <dependency>
                         <groupId>org.pitest</groupId>
