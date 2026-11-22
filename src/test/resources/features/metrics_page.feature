@@ -13,4 +13,4 @@ Feature: Metrics page showing metrics
     And The chart is responsive and works on mobile and desktop
     And Each metric is displayed with a distinct color
     And The tooltip shows exact values when hovering over data points
-    And The chart contains all metric types: Lost Balls, Double Bogey+, Bogey+, Handicap, Eclectic
+    And The chart contains all metric types: Lost Balls, Double Bogey+, Bogey+, Handicap, Eclectic, Consistency

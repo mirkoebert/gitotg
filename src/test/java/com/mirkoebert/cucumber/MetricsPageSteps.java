@@ -150,7 +150,7 @@ public class MetricsPageSteps {
                 while (matcher.find()) {
                         colors.add(matcher.group(1) + "," + matcher.group(2) + "," + matcher.group(3));
                 }
-                assertThat(colors).hasSize(5).doesNotHaveDuplicates();
+                assertThat(colors).hasSize(6).doesNotHaveDuplicates();
                 assertThat(pageHtml).contains("data.handicap");
                 assertThat(pageHtml).contains("data.eclectic");
         }
@@ -163,7 +163,7 @@ public class MetricsPageSteps {
                 assertThat(pageHtml).doesNotContain("exactTooltipLabel");
         }
 
-        @Then("The chart contains all metric types: Lost Balls, Double Bogey+, Bogey+, Handicap, Eclectic")
+        @Then("The chart contains all metric types: Lost Balls, Double Bogey+, Bogey+, Handicap, Eclectic, Consistency")
         public void theChartContainsAllMetricTypes() throws Exception {
                 assertThat(pageHtml).contains("Lost Balls");
                 assertThat(pageHtml).contains("Double Bogey+");
@@ -172,10 +172,15 @@ public class MetricsPageSteps {
                 assertThat(pageHtml).contains("Eclectic");
                 assertThat(pageHtml).contains("labelEclectic");
                 assertThat(pageHtml).contains("data.eclectic");
+                assertThat(pageHtml).contains("Consistency");
+                assertThat(pageHtml).contains("labelConsistency");
+                assertThat(pageHtml).contains("data.consistency");
 
                 String chart = lastYearChart != null ? lastYearChart : chartJson("lastYear");
                 assertThat(chart).contains("\"eclectic\"");
                 assertThat(chart).containsPattern("\"eclectic\"\\s*:\\s*\\[[^\\]]*[0-9]");
+                assertThat(chart).contains("\"consistency\"");
+                assertThat(chart).containsPattern("\"consistency\"\\s*:\\s*\\[[^\\]]*[0-9]");
         }
 
         private String chartJson(String range) throws Exception {
@@ -188,6 +193,7 @@ public class MetricsPageSteps {
                         .andExpect(jsonPath("$.bogey").isArray())
                         .andExpect(jsonPath("$.handicap").isArray())
                         .andExpect(jsonPath("$.eclectic").isArray())
+                        .andExpect(jsonPath("$.consistency").isArray())
                         .andReturn();
                 return result.getResponse().getContentAsString();
         }

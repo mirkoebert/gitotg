@@ -113,6 +113,49 @@ public class EclecticService {
                 return result;
         }
 
+        public @NonNull Map<YearMonth, Double> getConsistencyByMonth(
+                        final String userId,
+                        final YearMonth start,
+                        final YearMonth end
+        ) {
+                final Map<YearMonth, Double> result = new HashMap<>();
+                try {
+                        log.info("getConsistencyByMonth {} {} {}", userId, start, end);
+                        final List<PlayedRoundEntity> allRounds = loadAllRoundsSorted(userId);
+                        YearMonth cursor = start;
+                        while (!cursor.isAfter(end)) {
+                                Double value = consistencyAsOf(allRounds, cursor.atEndOfMonth());
+                                if (value != null) {
+                                        result.put(cursor, value);
+                                }
+                                cursor = cursor.plusMonths(1);
+                        }
+                } catch (Exception e) {
+                        log.info("Can't calc monthly consistency for {}: {}", userId, e.getMessage());
+                }
+                return result;
+        }
+
+        public @NonNull Map<Year, Double> getConsistencyByYear(final String userId, final Year start, final Year end) {
+                final Map<Year, Double> result = new HashMap<>();
+                try {
+                        log.info("getConsistencyByYear {} {} {}", userId, start, end);
+                        final List<PlayedRoundEntity> allRounds = loadAllRoundsSorted(userId);
+                        final int years = (int) ChronoUnit.YEARS.between(start, end) + 1;
+                        Year cursor = start;
+                        for (int i = 0; i < years; i++) {
+                                Double value = consistencyAsOf(allRounds, cursor.atMonth(12).atEndOfMonth());
+                                if (value != null) {
+                                        result.put(cursor, value);
+                                }
+                                cursor = cursor.plusYears(1);
+                        }
+                } catch (Exception e) {
+                        log.info("Can't calc yearly consistency for {}: {}", userId, e.getMessage());
+                }
+                return result;
+        }
+
         /**
          * Yearly chart point: last {@value #ECLECTIC_ROUND_WINDOW} rounds on the as-of home course
          * not newer than 31 Dec of that year (same rule as monthly, at year end).
@@ -175,6 +218,34 @@ public class EclecticService {
                         return null;
                 }
                 return (double) eclecticSum(course, window);
+        }
+
+        /**
+         * Same home-course window as {@link #eclecticAsOf}. Fewer than
+         * {@value #ECLECTIC_ROUND_WINDOW} rounds → null; never call the calculator early.
+         */
+        private @Nullable Double consistencyAsOf(
+                        final List<PlayedRoundEntity> allRoundsSortedDesc,
+                        final LocalDate asOfInclusive
+        ) {
+                final String courseName = homeCourseNameAsOf(allRoundsSortedDesc, asOfInclusive);
+                if (courseName == null) {
+                        return null;
+                }
+                if (catalog.findByName(courseName).isEmpty()) {
+                        return null;
+                }
+                final List<Integer> totals = allRoundsSortedDesc
+                        .stream()
+                        .filter(r -> courseName.equals(r.getCourseName()))
+                        .filter(r -> !r.getDate().isAfter(asOfInclusive))
+                        .limit(ECLECTIC_ROUND_WINDOW)
+                        .map(PlayedRoundEntity::getTotalStrokes)
+                        .toList();
+                if (totals.size() < ECLECTIC_ROUND_WINDOW) {
+                        return null;
+                }
+                return ConsistencyCalculator.ofStrokeTotals(totals);
         }
 
         private @Nullable String homeCourseNameAsOf(
