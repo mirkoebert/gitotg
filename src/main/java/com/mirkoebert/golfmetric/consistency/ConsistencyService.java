@@ -23,6 +23,7 @@ public class ConsistencyService {
         private static final int ROUND_WINDOW = 10;
         private final GolfCourseCatalog catalog;
         private final PlayedRoundRepository playedRoundRepository;
+        private final ConsistencyCalculator consistencyCalculator;
 
         public Double getConsistency(final String userId) {
                 try {
@@ -34,7 +35,7 @@ public class ConsistencyService {
                                 .limit(ROUND_WINDOW)
                                 .map(PlayedRoundEntity::getTotalStrokes)
                                 .toList();
-                        final Double result = ConsistencyCalculator.ofStrokeTotals(totals);
+                        final Double result = consistencyCalculator.apply(totals);
                         log.info("getConsistency result {}", result);
                         return result;
                 } catch (Exception e) {
@@ -113,7 +114,7 @@ public class ConsistencyService {
                 if (totals.size() < ROUND_WINDOW) {
                         return null;
                 }
-                return ConsistencyCalculator.ofStrokeTotals(totals);
+                return consistencyCalculator.apply(totals);
         }
 
         private @NonNull List<PlayedRoundEntity> loadAllRoundsSorted(final String userId) {

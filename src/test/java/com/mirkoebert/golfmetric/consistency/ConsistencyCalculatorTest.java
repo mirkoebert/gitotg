@@ -5,21 +5,21 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ConsistencyCalculatorTest {
+        private final ConsistencyCalculator cut = new ConsistencyCalculator();
+
         @Test
-        void ofStrokeTotals_returnsNullWhenTotalsAreNull() {
-                assertThat(ConsistencyCalculator.ofStrokeTotals(null)).isNull();
+        void apply_returnsNullWhenTotalsAreNull() {
+                assertThat(cut.apply(null)).isNull();
         }
 
         @Test
-        void ofStrokeTotals_returnsNullWhenOnlyOneTotal() {
-                assertThat(ConsistencyCalculator.ofStrokeTotals(List.of(40))).isNull();
+        void apply_returnsNullWhenOnlyOneTotal() {
+                assertThat(cut.apply(List.of(40))).isNull();
         }
 
         @Test
-        void ofStrokeTotals_returnsPopulationStandardDeviationRoundedHalfUp() {
+        void apply_returnsPopulationStandardDeviationRoundedHalfUp() {
                 // Population standard deviation of 40..49 is ~2.872, half-up to one decimal.
-                assertThat(ConsistencyCalculator.ofStrokeTotals(List.of(40, 41, 42, 43, 44, 45, 46, 47, 48, 49))).isEqualTo(
-                                2.9
-                );
+                assertThat(cut.apply(List.of(40, 41, 42, 43, 44, 45, 46, 47, 48, 49))).isEqualTo(2.9);
         }
 }
