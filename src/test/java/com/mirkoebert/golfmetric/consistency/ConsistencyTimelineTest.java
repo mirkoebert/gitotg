@@ -1,4 +1,4 @@
-package com.mirkoebert.golfmetric.eclectic;
+package com.mirkoebert.golfmetric.consistency;
 
 import com.mirkoebert.playedrounds.CourseService;
 import com.mirkoebert.playedrounds.PlayedRoundRepository;
@@ -17,9 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ConsistencyTimelineTest {
         private static final String USER_ID = "consistency-timeline-user";
         private static final String COURSE = "Fischland";
-
         @Autowired
-        private EclecticService cut;
+        private ConsistencyService cut;
         @Autowired
         private CourseService courseService;
         @Autowired
@@ -36,11 +35,8 @@ class ConsistencyTimelineTest {
                         submit(LocalDate.of(2025, 1, day), 40);
                 }
 
-                Map<YearMonth, Double> byMonth = cut.getConsistencyByMonth(
-                                USER_ID,
-                                YearMonth.of(2025, 1),
-                                YearMonth.of(2025, 1)
-                );
+                Map<YearMonth, Double> byMonth =
+                                cut.getConsistencyByMonth(USER_ID, YearMonth.of(2025, 1), YearMonth.of(2025, 1));
 
                 assertThat(byMonth).doesNotContainKey(YearMonth.of(2025, 1));
                 assertThat(byMonth).doesNotContainValue(null);
@@ -50,11 +46,8 @@ class ConsistencyTimelineTest {
         void getConsistencyByMonth_returnsPopulationDeviation_forLast10Rounds() {
                 submitJanuaryWindow();
 
-                Map<YearMonth, Double> byMonth = cut.getConsistencyByMonth(
-                                USER_ID,
-                                YearMonth.of(2024, 12),
-                                YearMonth.of(2025, 1)
-                );
+                Map<YearMonth, Double> byMonth =
+                                cut.getConsistencyByMonth(USER_ID, YearMonth.of(2024, 12), YearMonth.of(2025, 1));
 
                 assertThat(byMonth).doesNotContainKey(YearMonth.of(2024, 12));
                 assertThat(byMonth).containsEntry(YearMonth.of(2025, 1), 2.9);
@@ -67,11 +60,8 @@ class ConsistencyTimelineTest {
                         submit(LocalDate.of(2025, 3, day), 50);
                 }
 
-                Map<YearMonth, Double> byMonth = cut.getConsistencyByMonth(
-                                USER_ID,
-                                YearMonth.of(2025, 1),
-                                YearMonth.of(2025, 3)
-                );
+                Map<YearMonth, Double> byMonth =
+                                cut.getConsistencyByMonth(USER_ID, YearMonth.of(2025, 1), YearMonth.of(2025, 3));
 
                 assertThat(byMonth).containsEntry(YearMonth.of(2025, 1), 2.9);
                 assertThat(byMonth).containsEntry(YearMonth.of(2025, 2), 2.9);

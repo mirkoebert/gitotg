@@ -1,5 +1,6 @@
 package com.mirkoebert.golfmetric;
 
+import com.mirkoebert.golfmetric.consistency.ConsistencyService;
 import com.mirkoebert.golfmetric.eclectic.EclecticService;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
@@ -23,6 +24,7 @@ class GMetricMonthAggregator {
         private final GMetricRepository repo;
         private final HcpRepository hcpRepository;
         private final EclecticService eclecticService;
+        private final ConsistencyService consistencyService;
         private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-yyyy");
         private final DateTimeFormatter fmtYear = DateTimeFormatter.ofPattern("yyyy");
 
@@ -88,7 +90,7 @@ class GMetricMonthAggregator {
                 final Map<YearMonth, Double> handicapByMonth = handicapByMonth(userId, start);
                 final Map<YearMonth, Double> eclecticByMonth = eclecticService.getEclecticByMonth(userId, start, end);
                 final Map<YearMonth, Double> consistencyByMonth =
-                                eclecticService.getConsistencyByMonth(userId, start, end);
+                                consistencyService.getConsistencyByMonth(userId, start, end);
 
                 final int months = (int) ChronoUnit.MONTHS.between(start, end) + 1;
                 final List<String> labels = new ArrayList<>(months);
@@ -122,7 +124,7 @@ class GMetricMonthAggregator {
                 }
                 final Map<Year, Double> handicapByYear = handicapByYear(userId, start);
                 final Map<Year, Double> eclecticByYear = eclecticService.getEclecticByYear(userId, start, end);
-                final Map<Year, Double> consistencyByYear = eclecticService.getConsistencyByYear(userId, start, end);
+                final Map<Year, Double> consistencyByYear = consistencyService.getConsistencyByYear(userId, start, end);
 
                 final int years = (int) ChronoUnit.YEARS.between(start, end) + 1;
                 final List<String> labels = new ArrayList<>(years);

@@ -9,6 +9,7 @@ import com.mirkoebert.playedrounds.PlayedRoundEntity;
 import com.mirkoebert.golfmetric.GMetricEntity;
 import com.mirkoebert.golfmetric.GMetricService;
 import com.mirkoebert.golfmetric.GMetricType;
+import com.mirkoebert.golfmetric.consistency.ConsistencyService;
 import com.mirkoebert.golfmetric.eclectic.EclecticService;
 import com.mirkoebert.handicap.HcpScoreOutFormattedDTO;
 import com.mirkoebert.handicap.HcpService;
@@ -47,6 +48,8 @@ class CockpitServiceTest {
         private AdvisorService advisorService;
         @MockitoBean
         private EclecticService eclecticService;
+        @MockitoBean
+        private ConsistencyService consistencyService;
 
         @Test
         void load_emptyUser_hasNoSgiHcpRoundOrMetrics() {
@@ -58,6 +61,7 @@ class CockpitServiceTest {
                 when(courseService.findRoundsForUser(USER)).thenReturn(List.of());
                 when(advisorService.getAdvise(USER)).thenReturn("Start a test.");
                 when(eclecticService.getEclecticHcpForLast10Rounds(USER)).thenReturn(null);
+                when(consistencyService.getConsistency(USER)).thenReturn(null);
 
                 CockpitView view = cut.load(USER);
 

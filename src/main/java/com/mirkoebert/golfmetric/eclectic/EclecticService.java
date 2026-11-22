@@ -1,6 +1,5 @@
 package com.mirkoebert.golfmetric.eclectic;
 
-import com.mirkoebert.cockpit.ConsistencyCalculator;
 import com.mirkoebert.playedrounds.*;
 import com.mirkoebert.handicap.HcpScoreDTO;
 import lombok.RequiredArgsConstructor;
@@ -51,23 +50,6 @@ public class EclecticService {
                 }
         }
 
-        public Double getConsistency(final String userId) {
-                try {
-                        final String courseName = getHomeCourseName(userId);
-                        log.info("getConsistency {} {}", courseName, userId);
-                        final List<Integer> totals = loadAllRoundsSorted(userId)
-                                .stream()
-                                .filter(round -> courseName.equals(round.getCourseName()))
-                                .limit(ECLECTIC_ROUND_WINDOW)
-                                .map(PlayedRoundEntity::getTotalStrokes)
-                                .toList();
-                        return ConsistencyCalculator.ofStrokeTotals(totals);
-                } catch (Exception e) {
-                        log.info("Can't calc consistency {}", e.getMessage());
-                        return null;
-                }
-        }
-
         public Integer getEclecticHcpForLast10Rounds(final String userId) {
                 try {
                         final String courseName = getHomeCourseName(userId);
@@ -109,49 +91,6 @@ public class EclecticService {
                         }
                 } catch (Exception e) {
                         log.info("Can't calc monthly eclectic for {}: {}", userId, e.getMessage());
-                }
-                return result;
-        }
-
-        public @NonNull Map<YearMonth, Double> getConsistencyByMonth(
-                        final String userId,
-                        final YearMonth start,
-                        final YearMonth end
-        ) {
-                final Map<YearMonth, Double> result = new HashMap<>();
-                try {
-                        log.info("getConsistencyByMonth {} {} {}", userId, start, end);
-                        final List<PlayedRoundEntity> allRounds = loadAllRoundsSorted(userId);
-                        YearMonth cursor = start;
-                        while (!cursor.isAfter(end)) {
-                                Double value = consistencyAsOf(allRounds, cursor.atEndOfMonth());
-                                if (value != null) {
-                                        result.put(cursor, value);
-                                }
-                                cursor = cursor.plusMonths(1);
-                        }
-                } catch (Exception e) {
-                        log.info("Can't calc monthly consistency for {}: {}", userId, e.getMessage());
-                }
-                return result;
-        }
-
-        public @NonNull Map<Year, Double> getConsistencyByYear(final String userId, final Year start, final Year end) {
-                final Map<Year, Double> result = new HashMap<>();
-                try {
-                        log.info("getConsistencyByYear {} {} {}", userId, start, end);
-                        final List<PlayedRoundEntity> allRounds = loadAllRoundsSorted(userId);
-                        final int years = (int) ChronoUnit.YEARS.between(start, end) + 1;
-                        Year cursor = start;
-                        for (int i = 0; i < years; i++) {
-                                Double value = consistencyAsOf(allRounds, cursor.atMonth(12).atEndOfMonth());
-                                if (value != null) {
-                                        result.put(cursor, value);
-                                }
-                                cursor = cursor.plusYears(1);
-                        }
-                } catch (Exception e) {
-                        log.info("Can't calc yearly consistency for {}: {}", userId, e.getMessage());
                 }
                 return result;
         }
@@ -218,34 +157,6 @@ public class EclecticService {
                         return null;
                 }
                 return (double) eclecticSum(course, window);
-        }
-
-        /**
-         * Same home-course window as {@link #eclecticAsOf}. Fewer than
-         * {@value #ECLECTIC_ROUND_WINDOW} rounds → null; never call the calculator early.
-         */
-        private @Nullable Double consistencyAsOf(
-                        final List<PlayedRoundEntity> allRoundsSortedDesc,
-                        final LocalDate asOfInclusive
-        ) {
-                final String courseName = homeCourseNameAsOf(allRoundsSortedDesc, asOfInclusive);
-                if (courseName == null) {
-                        return null;
-                }
-                if (catalog.findByName(courseName).isEmpty()) {
-                        return null;
-                }
-                final List<Integer> totals = allRoundsSortedDesc
-                        .stream()
-                        .filter(r -> courseName.equals(r.getCourseName()))
-                        .filter(r -> !r.getDate().isAfter(asOfInclusive))
-                        .limit(ECLECTIC_ROUND_WINDOW)
-                        .map(PlayedRoundEntity::getTotalStrokes)
-                        .toList();
-                if (totals.size() < ECLECTIC_ROUND_WINDOW) {
-                        return null;
-                }
-                return ConsistencyCalculator.ofStrokeTotals(totals);
         }
 
         private @Nullable String homeCourseNameAsOf(

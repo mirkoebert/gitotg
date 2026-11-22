@@ -1,4 +1,4 @@
-package com.mirkoebert.cockpit;
+package com.mirkoebert.golfmetric.consistency;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
