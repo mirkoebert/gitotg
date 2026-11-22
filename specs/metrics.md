@@ -58,9 +58,12 @@ Eclectic values calculation
 - based on the last 10 rounds not newer then the month
 - if there are less than 10 rounds then return no value
 
-Consistency values calculation
-- calc a consistency value for each month
+Consistency of month values calculation
 - based on the last 10 rounds not newer then the month
+- if there are less than 10 rounds then return no value
+
+Consistency of month values calculation
+- based on the all rounds not newer then the year
 - if there are less than 10 rounds then return no value
 
 ### Constraints

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 public class ConsistencyService {
+
         private static final int ROUND_WINDOW = 10;
         private final GolfCourseCatalog catalog;
         private final PlayedRoundRepository playedRoundRepository;

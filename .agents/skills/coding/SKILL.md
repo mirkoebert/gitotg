@@ -16,3 +16,4 @@ description: define some coding guidelines to improve code quality
 - use package by feature approach
 - use default access modifier for classes and methods if possible
 - at the end: format the code `mvnd spotless:apply`
+- null check clause should contain a log message

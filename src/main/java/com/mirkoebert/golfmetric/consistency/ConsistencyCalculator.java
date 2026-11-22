@@ -9,6 +9,7 @@ import java.util.function.Function;
 
 @Service
 class ConsistencyCalculator implements Function<List<Integer>, Double> {
+
         @Override
         public @Nullable Double apply(@Nullable final List<Integer> totals) {
                 if (totals == null || totals.size() < 2) {
