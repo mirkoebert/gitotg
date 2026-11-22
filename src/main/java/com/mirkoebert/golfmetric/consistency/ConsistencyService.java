@@ -76,8 +76,9 @@ public class ConsistencyService {
                         final List<PlayedRoundEntity> allRounds = loadAllRoundsSorted(userId);
                         final int years = (int) ChronoUnit.YEARS.between(start, end) + 1;
                         Year cursor = start;
+                        Double value;
                         for (int i = 0; i < years; i++) {
-                                Double value = consistencyAsOf(allRounds, cursor.atMonth(12).atEndOfMonth());
+                                value = consistencyAsOf(allRounds, cursor);
                                 if (value != null) {
                                         result.put(cursor, value);
                                 }
@@ -90,7 +91,42 @@ public class ConsistencyService {
                 return result;
         }
 
-        /**
+    private Double consistencyAsOf(List<PlayedRoundEntity> allRoundsSortedDesc, final Year year) {
+            final String courseName = homeCourseNameAsOf(allRoundsSortedDesc, year);
+            if (courseName == null) {
+                    return null;
+            }
+            if (catalog.findByName(courseName).isEmpty()) {
+                    return null;
+            }
+            final List<Integer> totals = allRoundsSortedDesc
+                    .stream()
+                    .filter(r -> courseName.equals(r.getCourseName()))
+                    .filter(r -> r.getDate().getYear() <= year.getValue())
+                    .map(PlayedRoundEntity::getTotalStrokes)
+                    .toList();
+            if (totals.size() < ROUND_WINDOW) {
+                    return null;
+            }
+            return consistencyCalculator.apply(totals);
+
+    }
+
+    private String homeCourseNameAsOf(final List<PlayedRoundEntity> allRoundsSortedDesc, Year year) {
+            final Map<String, Long> counts = allRoundsSortedDesc
+                    .stream()
+                    .filter(r -> r.getDate().getYear() == year.getValue())
+                    .map(PlayedRoundEntity::getCourseName)
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+            return counts
+                    .entrySet()
+                    .stream()
+                    .max(Map.Entry.comparingByValue())
+                    .map(Map.Entry::getKey)
+                    .orElse(null);
+    }
+
+    /**
          * Home course at {@code asOfInclusive} is the most-played course on or before that date.
          * Fewer than {@value #ROUND_WINDOW} rounds on that course → null.
          */

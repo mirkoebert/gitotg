@@ -15,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 class ConsistencyTimelineTest {
+
         private static final String USER_ID = "consistency-timeline-user";
         private static final String COURSE = "Fischland";
         @Autowired
@@ -69,9 +70,9 @@ class ConsistencyTimelineTest {
         }
 
         @Test
-        void getConsistencyByYear_usesDecember31_notTheMidYearWindow() {
+        void getConsistencyByYear_usesDecember31_YearWindow() {
                 for (int day = 1; day <= 10; day++) {
-                        submit(LocalDate.of(2025, 6, day), 39 + day);
+                        submit(LocalDate.of(2025, 1, day), 39 + day);
                 }
                 for (int day = 1; day <= 10; day++) {
                         submit(LocalDate.of(2025, 12, day), 60);
@@ -79,8 +80,22 @@ class ConsistencyTimelineTest {
 
                 Map<Year, Double> byYear = cut.getConsistencyByYear(USER_ID, Year.of(2025), Year.of(2025));
 
-                assertThat(byYear).containsEntry(Year.of(2025), 0.0);
-                assertThat(byYear.get(Year.of(2025))).isNotEqualTo(2.9);
+                assertThat(byYear).containsEntry(Year.of(2025), 8.0);
+        }
+
+
+        @Test
+        void getConsistencyByYear_usesDecember31_ExtendedWindow() {
+                for (int day = 1; day <= 10; day++) {
+                        submit(LocalDate.of(2024, 1, day), 39 + day);
+                }
+                for (int day = 1; day <= 10; day++) {
+                        submit(LocalDate.of(2025, 12, day), 60);
+                }
+
+                Map<Year, Double> byYear = cut.getConsistencyByYear(USER_ID, Year.of(2025), Year.of(2025));
+
+                assertThat(byYear).containsEntry(Year.of(2025), 8.0);
         }
 
         private void submitJanuaryWindow() {
