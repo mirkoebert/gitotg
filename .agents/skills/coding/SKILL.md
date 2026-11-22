@@ -15,3 +15,4 @@ description: define some coding guidelines to improve code quality
 - prefer Java records
 - use package by feature approach
 - use default access modifier for classes and methods if possible
+- at the end: format the code `mvnd spotless:apply`

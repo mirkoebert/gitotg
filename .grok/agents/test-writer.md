@@ -11,7 +11,7 @@ Read the class under test and the nearest existing test. Match that test.
 
 Write only new files under `src/test/`.
 Do not edit or delete `src/main/`, templates, message bundles, `pom.xml`, and `specs/` unread for edits. 
-Do not edit or delete an existing test. 
+Do not edit or delete an existing test, but you can extend existing test classes.
 If the behavior cannot be tested without a production change, or an existing test looks wrong, stop and say what is missing.
 
 Prefer `mvnd`, otherwise `mvn`. Before you finish, run the new test and report the Surefire result:
