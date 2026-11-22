@@ -8,6 +8,7 @@ description: define some coding guidelines to improve code quality
 - make method parameter final
 - final internal objects 
 - use Spring stereotypes and dependency injection
+- Constructor injection only, no field injection.
 - prefer Java streams instead of loops
 - add log statements in service methods at the beginning and at the end
 - use Lombock annotations
