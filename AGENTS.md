@@ -9,7 +9,6 @@ low-scale personal project (JVM heap, Tomcat threads, and the H2 cache are tuned
 - Package root: `com.mirkoebert`.
 
 
-
 ## Commands
 Prefer `mvnd` (Maven Daemon) over `mvn` 
 - Build and unit tests: `mvn -q test`
@@ -20,16 +19,8 @@ Prefer `mvnd` (Maven Daemon) over `mvn`
 ## Architecture
 - Layers: `web` -> `service` -> `repository`.
 
-## Code style
-- Constructor injection only, no field injection.
-- Prefer immutable types: records for DTOs and view models, `final` fields.
 
 ## Testing
-- Test-driven: write or update a failing test first, then implement.
-- Unit tests: JUnit 5 + AssertJ + Mockito. Naming: `shouldDoXWhenY`.
-- **Never modify or delete an existing test to make it pass.**
-  If a test seems wrong, stop and ask.
-- Every bug fix needs a regression test.
 - NVD_API_KEY is set, maven verify can be used
 
 ## Dependencies and configuration
@@ -50,4 +41,3 @@ Prefer `mvnd` (Maven Daemon) over `mvn`
 2. Ask when requirements are unclear or conflict. Do not guess.
 3. Run `mvn -q verify` before declaring a task done.
 4. At the end, report: what changed, what you verified, assumptions made, open questions.
-

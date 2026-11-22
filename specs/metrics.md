@@ -8,10 +8,11 @@ Metrics are:
 - Bogey+
 - Handicap
 - Eclectic
+- Consistency
 
 
 ## Current behavior
-Show the user a chart with golf metrics (gmetrics) over time. There is a switcher for the time range: All, Last year
+Show the user a chart with golf metrics (gmetrics, eclectic) over time. There is a switcher for the time range: All, Last year
 
 ## Desired behavior
 - There is a switcher for the time range: All, Last two years, Last year (default). If I switch the chart is updated
@@ -24,7 +25,6 @@ Show the user a chart with golf metrics (gmetrics) over time. There is a switche
   - 'All' (entire history)
  
 ### Context
-Spring Boot 4, Java 25, Thymeleaf.
 - Templates: `src/main/resources/templates/`, fragments in `fragments/`.
 - Metrics include: lost balls, bogeys+, double bogeys+.
 
@@ -58,6 +58,11 @@ Eclectic values calculation
 - based on the last 10 rounds not newer then the month
 - if there are less than 10 rounds then return no value
 
+Consistency values calculation
+- calc a consistency value for each month
+- based on the last 10 rounds not newer then the month
+- if there are less than 10 rounds then return no value
+
 ### Constraints
 - No new dependencies
 
@@ -70,9 +75,9 @@ And I have only twenty played rounds for the same course over three years
 When I open the metrics page
 Then My metrics chart is shown
 And The selected time range is 'last year'
-And I can switch the time range to 'last two years' and 'all'                                                                                                                                                                                                                                                                                    
-And The chart updates dynamically when the time range is changed                                                                                                                                                                                                                                                                                 
-And The chart is responsive and works on mobile and desktop                                                                                                                                                                                                                                                                                      
-And Each metric is displayed with a distinct color                                                                                                                                                                                                                                                                                               
+And I can switch the time range to 'last two years' and 'all'                                                                                
+And The chart updates dynamically when the time range is changed                                                                             
+And The chart is responsive and works on mobile and desktop                                                                                  
+And Each metric is displayed with a distinct color
 And The tooltip shows exact values when hovering over data points
-And The chart contains all metic types: Lost Balls, Double Bogey+,Bogey+ , Handicap, Eclectic
+And The chart contains all metic types: Lost Balls, Double Bogey+,Bogey+ , Handicap, Eclectic, Consistency

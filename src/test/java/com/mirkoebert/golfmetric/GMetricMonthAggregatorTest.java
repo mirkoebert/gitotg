@@ -1,5 +1,6 @@
 package com.mirkoebert.golfmetric;
 
+import com.mirkoebert.golfmetric.consistency.ConsistencyService;
 import com.mirkoebert.golfmetric.eclectic.EclecticService;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
@@ -30,11 +31,13 @@ class GMetricMonthAggregatorTest {
         private HcpRepository hcpRepository;
         @Mock
         private EclecticService eclecticService;
+        @Mock
+        private ConsistencyService consistencyService;
         private GMetricMonthAggregator cut;
 
         @BeforeEach
         void setUp() {
-                cut = new GMetricMonthAggregator(repo, hcpRepository, eclecticService);
+                cut = new GMetricMonthAggregator(repo, hcpRepository, eclecticService, consistencyService);
                 // default: no data for any type unless a test overrides it
                 for (GMetricType type : GMetricType.values()) {
                         lenient().when(repo.findByUserIdAndType("u", type)).thenReturn(List.of());
@@ -42,6 +45,8 @@ class GMetricMonthAggregatorTest {
                 lenient().when(hcpRepository.findByUserId("u")).thenReturn(List.of());
                 lenient().when(eclecticService.getEclecticByMonth(eq("u"), any(), any())).thenReturn(Map.of());
                 lenient().when(eclecticService.getEclecticByYear(eq("u"), any(), any())).thenReturn(Map.of());
+                lenient().when(consistencyService.getConsistencyByMonth(eq("u"), any(), any())).thenReturn(Map.of());
+                lenient().when(consistencyService.getConsistencyByYear(eq("u"), any(), any())).thenReturn(Map.of());
         }
 
         private static GMetricEntity metric(LocalDate date, GMetricType type, int value) {
@@ -58,6 +63,7 @@ class GMetricMonthAggregatorTest {
                 assertThat(result.bogey()).hasSize(12).containsOnlyNulls();
                 assertThat(result.handicap()).hasSize(12).containsOnlyNulls();
                 assertThat(result.eclectic()).hasSize(12).containsOnlyNulls();
+                assertThat(result.consistency()).hasSize(12).containsOnlyNulls();
                 assertThat(result.labels().getLast()).isEqualTo(FMT.format(YearMonth.now()));
                 assertThat(result.labels().getFirst()).isEqualTo(FMT.format(YearMonth.now().minusMonths(11)));
         }
@@ -98,6 +104,7 @@ class GMetricMonthAggregatorTest {
                 assertThat(result.doubleBogey()).hasSize(24);
                 assertThat(result.handicap()).hasSize(24).containsOnlyNulls();
                 assertThat(result.eclectic()).hasSize(24).containsOnlyNulls();
+                assertThat(result.consistency()).hasSize(24).containsOnlyNulls();
         }
 
         @Test
@@ -169,6 +176,7 @@ class GMetricMonthAggregatorTest {
                 assertThat(result.bogey()).isEmpty();
                 assertThat(result.handicap()).isEmpty();
                 assertThat(result.eclectic()).isEmpty();
+                assertThat(result.consistency()).isEmpty();
         }
 
         @Test
@@ -202,6 +210,8 @@ class GMetricMonthAggregatorTest {
                         ));
                 when(eclecticService.getEclecticByYear(eq("u"), eq(Year.from(handicapStart)), eq(Year.now())))
                         .thenReturn(Map.of(Year.now(), 36.0));
+                when(consistencyService.getConsistencyByYear(eq("u"), eq(Year.from(handicapStart)), eq(Year.now())))
+                        .thenReturn(Map.of(Year.now(), 2.9));
 
                 GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.ALL, "u");
 
@@ -213,6 +223,8 @@ class GMetricMonthAggregatorTest {
                 assertThat(result.bogey().getLast()).isEqualTo(3.0);
                 assertThat(result.eclectic().getLast()).isEqualTo(36.0);
                 assertThat(result.eclectic().getFirst()).isNull();
+                assertThat(result.consistency().getLast()).isEqualTo(2.9);
+                assertThat(result.consistency().getFirst()).isNull();
         }
 
         private static HcpScoreEntity handicap(LocalDate date, double hcp) {

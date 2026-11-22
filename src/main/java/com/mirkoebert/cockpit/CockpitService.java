@@ -6,6 +6,7 @@ import com.mirkoebert.goal.GoalEnum;
 import com.mirkoebert.playedrounds.CourseService;
 import com.mirkoebert.golfmetric.GMetricService;
 import com.mirkoebert.golfmetric.GMetricType;
+import com.mirkoebert.golfmetric.consistency.ConsistencyService;
 import com.mirkoebert.golfmetric.eclectic.EclecticService;
 import com.mirkoebert.handicap.HcpService;
 import com.mirkoebert.sgi.SgiHcpAggregatedService;
@@ -27,6 +28,7 @@ public class CockpitService {
         private final CourseService courseService;
         private final AdvisorService advisorService;
         private final EclecticService eclecticService;
+        private final ConsistencyService consistencyService;
 
         public @NonNull CockpitView load(@NonNull final String userId) {
                 Integer sgiHcp = singleTestResultRepository.countByUserId(userId) > 0
@@ -65,7 +67,8 @@ public class CockpitService {
                                 eclecticService.getEclecticHcpForLast10Rounds(userId),
                                 homeCourse,
                                 coursePar(homeCourse),
-                                courseService.countRoundsInYear(userId, Year.now().getValue())
+                                courseService.countRoundsInYear(userId, Year.now().getValue()),
+                                consistencyService.getConsistency(userId)
                 );
         }
 

@@ -44,6 +44,7 @@
     const labelBogey = /*[[#{gmetric.type.bogey}]]*/ 'Bogey+';
     const labelHandicap = /*[[#{gmetric.type.handicap}]]*/ 'Handicap';
     const labelEclectic = /*[[#{gmetric.type.eclectic}]]*/ 'Eclectic';
+    const labelConsistency = /*[[#{gmetric.type.consistency}]]*/ 'Consistency';
     const chartDataUrl = /*[[@{/api/gmetric/chart-data}]]*/ '/api/gmetric/chart-data';
 
     let metricsChart = null;
@@ -68,7 +69,8 @@
             lineDataset(labelDoubleBogey, 'rgba(255, 193, 7, 1)', 'rgba(255, 193, 7, 0.15)'),
             lineDataset(labelBogey, 'rgba(13, 110, 253, 1)', 'rgba(13, 110, 253, 0.15)'),
             lineDataset(labelHandicap, 'rgba(25, 135, 84, 1)', 'rgba(25, 135, 84, 0.15)'),
-            lineDataset(labelEclectic, 'rgba(111, 66, 193, 1)', 'rgba(111, 66, 193, 0.15)')
+            lineDataset(labelEclectic, 'rgba(111, 66, 193, 1)', 'rgba(111, 66, 193, 0.15)'),
+            lineDataset(labelConsistency, 'rgba(13, 202, 240, 1)', 'rgba(13, 202, 240, 0.15)')
         ];
     }
 
@@ -115,6 +117,7 @@
         chart.data.datasets[2].data = data.bogey || [];
         chart.data.datasets[3].data = data.handicap || [];
         chart.data.datasets[4].data = data.eclectic || [];
+        chart.data.datasets[5].data = data.consistency || [];
         chart.update();
     }
 
