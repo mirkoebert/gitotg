@@ -9,6 +9,7 @@ Metrics are:
 - Handicap
 - Eclectic
 - Consistency
+- Played Rounds
 
 
 ## Current behavior
@@ -65,6 +66,12 @@ Consistency of month values calculation
 Consistency of year values calculation
 - based on the all rounds not newer then the year
 - if there are less than 10 rounds then return no value
+
+'Played Rounds' of month values calculation
+- count all played rounds of the user of the given month
+
+'Played Round' of year values calculation
+- count all played rounds of the user of the given year
 
 ### Constraints
 - No new dependencies
