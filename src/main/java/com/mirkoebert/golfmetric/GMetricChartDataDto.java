@@ -9,5 +9,6 @@ public record GMetricChartDataDto(
                 List<Double> bogey,
                 List<Double> handicap,
                 List<Double> eclectic,
-                List<Double> consistency
+                List<Double> consistency,
+                List<Double> playedRounds
 ) {}

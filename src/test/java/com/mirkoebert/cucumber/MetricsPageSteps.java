@@ -150,9 +150,11 @@ public class MetricsPageSteps {
                 while (matcher.find()) {
                         colors.add(matcher.group(1) + "," + matcher.group(2) + "," + matcher.group(3));
                 }
-                assertThat(colors).hasSize(6).doesNotHaveDuplicates();
+                assertThat(colors).hasSize(7).doesNotHaveDuplicates();
+                assertThat(pageHtml).contains("'rgba(253, 126, 20, 1)'");
                 assertThat(pageHtml).contains("data.handicap");
                 assertThat(pageHtml).contains("data.eclectic");
+                assertThat(pageHtml).contains("data.playedRounds");
         }
 
         @Then("The tooltip shows exact values when hovering over data points")
@@ -163,7 +165,10 @@ public class MetricsPageSteps {
                 assertThat(pageHtml).doesNotContain("exactTooltipLabel");
         }
 
-        @Then("The chart contains all metric types: Lost Balls, Double Bogey+, Bogey+, Handicap, Eclectic, Consistency")
+        @Then(
+                        "The chart contains all metric types: Lost Balls, Double Bogey+, "
+                        + "Bogey+, Handicap, Eclectic, Consistency, Played Rounds"
+        )
         public void theChartContainsAllMetricTypes() throws Exception {
                 assertThat(pageHtml).contains("Lost Balls");
                 assertThat(pageHtml).contains("Double Bogey+");
@@ -175,12 +180,17 @@ public class MetricsPageSteps {
                 assertThat(pageHtml).contains("Consistency");
                 assertThat(pageHtml).contains("labelConsistency");
                 assertThat(pageHtml).contains("data.consistency");
+                assertThat(pageHtml).contains("Played Rounds");
+                assertThat(pageHtml).contains("labelPlayedRounds");
+                assertThat(pageHtml).contains("data.playedRounds");
 
                 String chart = lastYearChart != null ? lastYearChart : chartJson("lastYear");
                 assertThat(chart).contains("\"eclectic\"");
                 assertThat(chart).containsPattern("\"eclectic\"\\s*:\\s*\\[[^\\]]*[0-9]");
                 assertThat(chart).contains("\"consistency\"");
                 assertThat(chart).containsPattern("\"consistency\"\\s*:\\s*\\[[^\\]]*[0-9]");
+                assertThat(chart).contains("\"playedRounds\"");
+                assertThat(chart).containsPattern("\"playedRounds\"\\s*:\\s*\\[[^\\]]*[1-9]");
         }
 
         private String chartJson(String range) throws Exception {
@@ -194,6 +204,7 @@ public class MetricsPageSteps {
                         .andExpect(jsonPath("$.handicap").isArray())
                         .andExpect(jsonPath("$.eclectic").isArray())
                         .andExpect(jsonPath("$.consistency").isArray())
+                        .andExpect(jsonPath("$.playedRounds").isArray())
                         .andReturn();
                 return result.getResponse().getContentAsString();
         }
