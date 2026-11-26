@@ -73,17 +73,17 @@ public class EclecticService {
                 }
         }
 
-        public @NonNull Map<YearMonth, Double> getEclecticByMonth(
+        public @NonNull Map<YearMonth, Integer> getEclecticByMonth(
                         final String userId,
                         final YearMonth start,
                         final YearMonth end
         ) {
-                final Map<YearMonth, Double> result = new HashMap<>();
+                final Map<YearMonth, Integer> result = new HashMap<>();
                 try {
                         final List<PlayedRoundEntity> allRounds = loadAllRoundsSorted(userId);
                         YearMonth cursor = start;
                         while (!cursor.isAfter(end)) {
-                                Double value = eclecticAsOf(allRounds, cursor.atEndOfMonth());
+                                Integer value = eclecticAsOf(allRounds, cursor.atEndOfMonth());
                                 if (value != null) {
                                         result.put(cursor, value);
                                 }
@@ -99,14 +99,14 @@ public class EclecticService {
          * Yearly chart point: last {@value #ECLECTIC_ROUND_WINDOW} rounds on the as-of home course
          * not newer than 31 Dec of that year (same rule as monthly, at year end).
          */
-        public @NonNull Map<Year, Double> getEclecticByYear(final String userId, final Year start, final Year end) {
-                final Map<Year, Double> result = new HashMap<>();
+        public @NonNull Map<Year, Integer> getEclecticByYear(final String userId, final Year start, final Year end) {
+                final Map<Year, Integer> result = new HashMap<>();
                 try {
                         final List<PlayedRoundEntity> allRounds = loadAllRoundsSorted(userId);
                         final int years = (int) ChronoUnit.YEARS.between(start, end) + 1;
                         Year cursor = start;
                         for (int i = 0; i < years; i++) {
-                                Double value = eclecticAsOf(allRounds, cursor.atMonth(12).atEndOfMonth());
+                                Integer value = eclecticAsOf(allRounds, cursor.atMonth(12).atEndOfMonth());
                                 if (value != null) {
                                         result.put(cursor, value);
                                 }
@@ -135,7 +135,7 @@ public class EclecticService {
          * on or before that date. Eclectic uses the last {@value #ECLECTIC_ROUND_WINDOW}
          * rounds on that course in the same window; fewer than 10 → null.
          */
-        private @Nullable Double eclecticAsOf(
+        private @Nullable Integer eclecticAsOf(
                         final List<PlayedRoundEntity> allRoundsSortedDesc,
                         final LocalDate asOfInclusive
         ) {
@@ -156,7 +156,7 @@ public class EclecticService {
                 if (window.size() < ECLECTIC_ROUND_WINDOW) {
                         return null;
                 }
-                return (double) eclecticSum(course, window);
+                return eclecticSum(course, window);
         }
 
         private @Nullable String homeCourseNameAsOf(

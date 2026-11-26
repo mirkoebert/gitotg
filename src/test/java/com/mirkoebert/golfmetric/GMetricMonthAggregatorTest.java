@@ -89,13 +89,13 @@ class GMetricMonthAggregatorTest {
         void getMetricsForRange_lastYear_includesMonthlyEclecticSeries() {
                 YearMonth now = YearMonth.now();
                 when(eclecticService.getEclecticByMonth(eq("u"), eq(now.minusMonths(11)), eq(now)))
-                        .thenReturn(Map.of(now, 36.0, now.minusMonths(2), 40.0));
+                        .thenReturn(Map.of(now, 36, now.minusMonths(2), 40));
 
                 GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.LAST_YEAR, "u");
 
                 assertThat(result.eclectic()).hasSize(12);
-                assertThat(result.eclectic().getLast()).isEqualTo(36.0);
-                assertThat(result.eclectic().get(9)).isEqualTo(40.0);
+                assertThat(result.eclectic().getLast()).isEqualTo(36);
+                assertThat(result.eclectic().get(9)).isEqualTo(40);
                 assertThat(result.eclectic().getFirst()).isNull();
         }
 
@@ -229,7 +229,7 @@ class GMetricMonthAggregatorTest {
                                         handicap(metricDate.plusDays(10), 21.0)
                         ));
                 when(eclecticService.getEclecticByYear(eq("u"), eq(Year.from(handicapStart)), eq(Year.now())))
-                        .thenReturn(Map.of(Year.now(), 36.0));
+                        .thenReturn(Map.of(Year.now(), 36));
                 when(consistencyService.getConsistencyByYear(eq("u"), eq(Year.from(handicapStart)), eq(Year.now())))
                         .thenReturn(Map.of(Year.now(), 2.9));
 
@@ -241,7 +241,7 @@ class GMetricMonthAggregatorTest {
                 assertThat(result.handicap().getLast()).isEqualTo(20.5);
                 assertThat(result.lostBalls().getFirst()).isNull();
                 assertThat(result.bogey().getLast()).isEqualTo(3.0);
-                assertThat(result.eclectic().getLast()).isEqualTo(36.0);
+                assertThat(result.eclectic().getLast()).isEqualTo(36);
                 assertThat(result.eclectic().getFirst()).isNull();
                 assertThat(result.consistency().getLast()).isEqualTo(2.9);
                 assertThat(result.consistency().getFirst()).isNull();
