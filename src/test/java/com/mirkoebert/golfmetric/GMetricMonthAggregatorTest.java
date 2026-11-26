@@ -17,6 +17,8 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -27,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GMetricMonthAggregatorTest {
+
         private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("MM-yyyy");
         private static final DateTimeFormatter FMT_YEAR = DateTimeFormatter.ofPattern("yyyy");
         @Mock
@@ -77,7 +80,7 @@ class GMetricMonthAggregatorTest {
                 assertThat(result.handicap()).hasSize(12).containsOnlyNulls();
                 assertThat(result.eclectic()).hasSize(12).containsOnlyNulls();
                 assertThat(result.consistency()).hasSize(12).containsOnlyNulls();
-                assertThat(result.playedRounds()).hasSize(12).containsOnly(0.0);
+                assertThat(result.playedRounds()).hasSize(12).containsOnlyNulls();
                 assertThat(result.labels().getLast()).isEqualTo(FMT.format(YearMonth.now()));
                 assertThat(result.labels().getFirst()).isEqualTo(FMT.format(YearMonth.now().minusMonths(11)));
         }
@@ -119,7 +122,7 @@ class GMetricMonthAggregatorTest {
                 assertThat(result.handicap()).hasSize(24).containsOnlyNulls();
                 assertThat(result.eclectic()).hasSize(24).containsOnlyNulls();
                 assertThat(result.consistency()).hasSize(24).containsOnlyNulls();
-                assertThat(result.playedRounds()).hasSize(24).containsOnly(0.0);
+                assertThat(result.playedRounds()).hasSize(24).containsOnlyNulls();
         }
 
         @Test
@@ -257,9 +260,9 @@ class GMetricMonthAggregatorTest {
                 GMetricChartDataDto result = cut.getMetricsForRange(GMetricRange.LAST_YEAR, "u");
 
                 assertThat(result.playedRounds()).hasSize(12);
-                assertThat(result.playedRounds().getLast()).isEqualTo(2.0);
-                assertThat(result.playedRounds().subList(0, 11)).containsOnly(0.0);
-                assertThat(result.playedRounds().stream().mapToDouble(Double::doubleValue).sum()).isEqualTo(2.0);
+                assertThat(result.playedRounds().getLast()).isEqualTo(2);
+                assertThat(result.playedRounds().subList(0, 11)).containsOnlyNulls();
+                assertThat(result.playedRounds().stream().filter(Objects::nonNull).mapToInt(Integer::intValue).sum()).isEqualTo(2);
                 assertThat(result.labels()).doesNotContain(FMT.format(currentMonth.minusMonths(13)));
                 verify(playedRoundRepository).findByUserId("u");
                 verify(playedRoundRepository, never()).findAll();
@@ -281,10 +284,10 @@ class GMetricMonthAggregatorTest {
                 assertThat(result.labels()).hasSize(24);
                 assertThat(result.labels().getFirst()).isEqualTo(FMT.format(now.minusMonths(23)));
                 assertThat(result.playedRounds()).hasSize(24);
-                assertThat(result.playedRounds().getFirst()).isEqualTo(1.0);
-                assertThat(result.playedRounds().getLast()).isEqualTo(2.0);
-                assertThat(result.playedRounds().subList(1, 23)).containsOnly(0.0);
-                assertThat(result.playedRounds().stream().mapToDouble(Double::doubleValue).sum()).isEqualTo(3.0);
+                assertThat(result.playedRounds().getFirst()).isEqualTo(1);
+                assertThat(result.playedRounds().getLast()).isEqualTo(2);
+                assertThat(result.playedRounds().subList(1, 23)).containsOnlyNulls();
+                assertThat(result.playedRounds().stream().filter(Objects::nonNull).mapToInt(Integer::intValue).sum()).isEqualTo(3);
                 assertThat(result.labels()).doesNotContain(FMT.format(now.minusMonths(30)));
                 verify(playedRoundRepository).findByUserId("u");
                 verify(playedRoundRepository, never()).findAll();
@@ -312,7 +315,7 @@ class GMetricMonthAggregatorTest {
                                         FMT_YEAR.format(start.plusYears(1)),
                                         FMT_YEAR.format(Year.now())
                         );
-                assertThat(result.playedRounds()).containsExactly(1.0, 0.0, 3.0);
+                assertThat(result.playedRounds()).containsExactly(1, null, 3);
                 verify(playedRoundRepository).findByUserId("u");
                 verify(playedRoundRepository, never()).findAll();
         }

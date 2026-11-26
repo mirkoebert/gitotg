@@ -107,9 +107,8 @@ class GMetricMonthAggregator {
                 }
                 final Map<YearMonth, Double> handicapByMonth = handicapByMonth(userId, start);
                 final Map<YearMonth, Double> eclecticByMonth = eclecticService.getEclecticByMonth(userId, start, end);
-                final Map<YearMonth, Double> consistencyByMonth =
-                                consistencyService.getConsistencyByMonth(userId, start, end);
-                final Map<YearMonth, Double> roundsByMonth = playedRoundsByMonth(rounds, start, end);
+                final Map<YearMonth, Double> consistencyByMonth = consistencyService.getConsistencyByMonth(userId, start, end);
+                final Map<YearMonth, Integer> roundsByMonth = playedRoundsByMonth(rounds, start, end);
 
                 final int months = (int) ChronoUnit.MONTHS.between(start, end) + 1;
                 final List<String> labels = new ArrayList<>(months);
@@ -119,7 +118,7 @@ class GMetricMonthAggregator {
                 final List<Double> handicap = new ArrayList<>(months);
                 final List<Double> eclectic = new ArrayList<>(months);
                 final List<Double> consistency = new ArrayList<>(months);
-                final List<Double> playedRounds = new ArrayList<>(months);
+                final List<Integer> playedRounds = new ArrayList<>(months);
 
                 YearMonth cursor = start;
                 for (int i = 0; i < months; i++) {
@@ -130,7 +129,7 @@ class GMetricMonthAggregator {
                         handicap.add(oneDecimal(handicapByMonth.get(cursor)));
                         eclectic.add(oneDecimal(eclecticByMonth.get(cursor)));
                         consistency.add(oneDecimal(consistencyByMonth.get(cursor)));
-                        playedRounds.add(oneDecimal(roundsByMonth.getOrDefault(cursor, 0.0)));
+                        playedRounds.add(roundsByMonth.get(cursor));
                         cursor = cursor.plusMonths(1);
                 }
 
@@ -160,7 +159,7 @@ class GMetricMonthAggregator {
                 final Map<Year, Double> handicapByYear = handicapByYear(userId, start);
                 final Map<Year, Double> eclecticByYear = eclecticService.getEclecticByYear(userId, start, end);
                 final Map<Year, Double> consistencyByYear = consistencyService.getConsistencyByYear(userId, start, end);
-                final Map<Year, Double> roundsByYear = playedRoundsByYear(rounds, start, end);
+                final Map<Year, Integer> roundsByYear = playedRoundsByYear(rounds, start, end);
 
                 final int years = (int) ChronoUnit.YEARS.between(start, end) + 1;
                 final List<String> labels = new ArrayList<>(years);
@@ -170,7 +169,7 @@ class GMetricMonthAggregator {
                 final List<Double> handicap = new ArrayList<>(years);
                 final List<Double> eclectic = new ArrayList<>(years);
                 final List<Double> consistency = new ArrayList<>(years);
-                final List<Double> playedRounds = new ArrayList<>(years);
+                final List<Integer> playedRounds = new ArrayList<>(years);
 
                 Year cursor = start;
                 for (int i = 0; i < years; i++) {
@@ -181,7 +180,7 @@ class GMetricMonthAggregator {
                         handicap.add(oneDecimal(handicapByYear.get(cursor)));
                         eclectic.add(oneDecimal(eclecticByYear.get(cursor)));
                         consistency.add(oneDecimal(consistencyByYear.get(cursor)));
-                        playedRounds.add(oneDecimal(roundsByYear.getOrDefault(cursor, 0.0)));
+                        playedRounds.add(roundsByYear.get(cursor));
                         cursor = cursor.plusYears(1);
                 }
 
@@ -209,7 +208,7 @@ class GMetricMonthAggregator {
                 );
         }
 
-        private Map<YearMonth, Double> playedRoundsByMonth(
+        private Map<YearMonth, Integer> playedRoundsByMonth(
                         final List<PlayedRoundEntity> rounds,
                         final YearMonth start,
                         final YearMonth end
@@ -220,10 +219,10 @@ class GMetricMonthAggregator {
                         .filter(Objects::nonNull)
                         .map(YearMonth::from)
                         .filter(month -> !month.isBefore(start) && !month.isAfter(end))
-                        .collect(Collectors.groupingBy(month -> month, Collectors.summingDouble(month -> 1.0)));
+                        .collect(Collectors.groupingBy(month -> month, Collectors.summingInt(month -> 1)));
         }
 
-        private Map<Year, Double> playedRoundsByYear(
+        private Map<Year, Integer> playedRoundsByYear(
                         final List<PlayedRoundEntity> rounds,
                         final Year start,
                         final Year end
@@ -234,7 +233,7 @@ class GMetricMonthAggregator {
                         .filter(Objects::nonNull)
                         .map(Year::from)
                         .filter(year -> !year.isBefore(start) && !year.isAfter(end))
-                        .collect(Collectors.groupingBy(year -> year, Collectors.summingDouble(year -> 1.0)));
+                        .collect(Collectors.groupingBy(year -> year, Collectors.summingInt(year -> 1)));
         }
 
         private Map<YearMonth, Double> monthlyAveragesFrom(
@@ -304,7 +303,7 @@ class GMetricMonthAggregator {
                         List<Double> handicap,
                         List<Double> eclectic,
                         List<Double> consistency,
-                        List<Double> playedRounds
+                        List<Integer> playedRounds
         ) {
                 while (!labels.isEmpty()
                                 && lostBalls.getFirst() == null
