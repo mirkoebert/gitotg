@@ -286,8 +286,9 @@ class GMetricMonthAggregatorTest {
                 assertThat(result.playedRounds()).hasSize(24);
                 assertThat(result.playedRounds().getFirst()).isEqualTo(1);
                 assertThat(result.playedRounds().getLast()).isEqualTo(2);
-                assertThat(result.playedRounds().subList(1, 23)).containsOnlyNulls();
-                assertThat(result.playedRounds().stream().filter(Objects::nonNull).mapToInt(Integer::intValue).sum()).isEqualTo(3);
+                assertThat(result.playedRounds().subList(1, 23)).containsOnly(0);
+                assertThat(result.playedRounds().stream().mapToInt(Integer::intValue).sum()).isEqualTo(3);
+                assertThat(result.playedRounds().stream().mapToInt(Integer::intValue).sum()).isEqualTo(3);
                 assertThat(result.labels()).doesNotContain(FMT.format(now.minusMonths(30)));
                 verify(playedRoundRepository).findByUserId("u");
                 verify(playedRoundRepository, never()).findAll();
@@ -315,7 +316,7 @@ class GMetricMonthAggregatorTest {
                                         FMT_YEAR.format(start.plusYears(1)),
                                         FMT_YEAR.format(Year.now())
                         );
-                assertThat(result.playedRounds()).containsExactly(1, null, 3);
+                assertThat(result.playedRounds()).containsExactly(1, 0, 3);
                 verify(playedRoundRepository).findByUserId("u");
                 verify(playedRoundRepository, never()).findAll();
         }

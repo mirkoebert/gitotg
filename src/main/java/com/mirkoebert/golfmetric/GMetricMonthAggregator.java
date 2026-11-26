@@ -132,6 +132,7 @@ class GMetricMonthAggregator {
                         playedRounds.add(roundsByMonth.get(cursor));
                         cursor = cursor.plusMonths(1);
                 }
+                fillNullValuesBetweenWith0(playedRounds);
 
                 log.debug("Chart for user {} months={} labels={}", userId, labels.size(), labels);
                 return new GMetricChartDataDto(
@@ -146,7 +147,19 @@ class GMetricMonthAggregator {
                 );
         }
 
-        private @NonNull GMetricChartDataDto buildYearlyChartData(
+    private void fillNullValuesBetweenWith0(List<Integer> playedRounds) {
+                boolean afterFirstNonNullValue = false;
+                for(int i = 0; i < playedRounds.size(); i++){
+                        if (playedRounds.get(i) != null){
+                                afterFirstNonNullValue = true;
+                        }
+                        if (afterFirstNonNullValue && (playedRounds.get(i) == null)){
+                                playedRounds.set(i, 0);
+                        }
+                }
+    }
+
+    private @NonNull GMetricChartDataDto buildYearlyChartData(
                         final String userId,
                         final Year start,
                         final Year end,
@@ -184,6 +197,7 @@ class GMetricMonthAggregator {
                         cursor = cursor.plusYears(1);
                 }
 
+                fillNullValuesBetweenWith0(playedRounds);
                 trimLeadingEmptyTimeBuckets(
                                 labels,
                                 lostBalls,
