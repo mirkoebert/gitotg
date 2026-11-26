@@ -141,13 +141,12 @@ class EclecticServiceTest {
                         ));
                 }
 
-                Map<YearMonth, Double> byMonth =
-                                cut.getEclecticByMonth(testUser, YearMonth.of(2024, 12), YearMonth.of(2025, 3));
+                Map<YearMonth, Integer> byMonth = cut.getEclecticByMonth(testUser, YearMonth.of(2024, 12), YearMonth.of(2025, 3));
 
                 assertThat(byMonth).doesNotContainKey(YearMonth.of(2024, 12));
                 assertThat(byMonth).doesNotContainKey(YearMonth.of(2025, 1));
-                assertThat(byMonth).containsEntry(YearMonth.of(2025, 2), 81.0);
-                assertThat(byMonth).containsEntry(YearMonth.of(2025, 3), 36.0);
+                assertThat(byMonth).containsEntry(YearMonth.of(2025, 2), 81);
+                assertThat(byMonth).containsEntry(YearMonth.of(2025, 3), 36);
         }
 
         @Test
@@ -173,15 +172,13 @@ class EclecticServiceTest {
                         ));
                 }
 
-                Map<Year, Double> byYear = cut.getEclecticByYear(testUser, Year.of(2025), Year.of(2025));
-                Map<YearMonth, Double> june =
-                                cut.getEclecticByMonth(testUser, YearMonth.of(2025, 6), YearMonth.of(2025, 6));
-                Map<YearMonth, Double> december =
-                                cut.getEclecticByMonth(testUser, YearMonth.of(2025, 12), YearMonth.of(2025, 12));
+                Map<Year, Integer> byYear = cut.getEclecticByYear(testUser, Year.of(2025), Year.of(2025));
+                Map<YearMonth, Integer> june = cut.getEclecticByMonth(testUser, YearMonth.of(2025, 6), YearMonth.of(2025, 6));
+                Map<YearMonth, Integer> december = cut.getEclecticByMonth(testUser, YearMonth.of(2025, 12), YearMonth.of(2025, 12));
 
-                assertThat(june).containsEntry(YearMonth.of(2025, 6), 81.0);
-                assertThat(december).containsEntry(YearMonth.of(2025, 12), 36.0);
-                assertThat(byYear).containsEntry(Year.of(2025), 36.0);
+                assertThat(june).containsEntry(YearMonth.of(2025, 6), 81);
+                assertThat(december).containsEntry(YearMonth.of(2025, 12), 36);
+                assertThat(byYear).containsEntry(Year.of(2025), 36);
                 assertThat(byYear.get(Year.of(2025))).isEqualTo(december.get(YearMonth.of(2025, 12)));
                 assertThat(byYear.get(Year.of(2025))).isNotEqualTo(june.get(YearMonth.of(2025, 6)));
         }
@@ -213,10 +210,9 @@ class EclecticServiceTest {
 
                 assertThat(cut.getHomeCourseName(testUser)).isEqualTo(otherTestCourseName);
 
-                Map<YearMonth, Double> byMonth =
-                                cut.getEclecticByMonth(testUser, YearMonth.of(2025, 1), YearMonth.of(2025, 4));
+                Map<YearMonth, Integer> byMonth = cut.getEclecticByMonth(testUser, YearMonth.of(2025, 1), YearMonth.of(2025, 4));
                 // January must still use course A (then-home), not overall home B (which had 0 rounds then)
-                assertThat(byMonth).containsEntry(YearMonth.of(2025, 1), 81.0);
-                assertThat(byMonth).containsEntry(YearMonth.of(2025, 4), 36.0);
+                assertThat(byMonth).containsEntry(YearMonth.of(2025, 1), 81);
+                assertThat(byMonth).containsEntry(YearMonth.of(2025, 4), 36);
         }
 }

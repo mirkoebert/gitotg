@@ -45,6 +45,7 @@
     const labelHandicap = /*[[#{gmetric.type.handicap}]]*/ 'Handicap';
     const labelEclectic = /*[[#{gmetric.type.eclectic}]]*/ 'Eclectic';
     const labelConsistency = /*[[#{gmetric.type.consistency}]]*/ 'Consistency';
+    const labelPlayedRounds = /*[[#{gmetric.type.playedRounds}]]*/ 'Played Rounds';
     const chartDataUrl = /*[[@{/api/gmetric/chart-data}]]*/ '/api/gmetric/chart-data';
 
     let metricsChart = null;
@@ -70,7 +71,8 @@
             lineDataset(labelBogey, 'rgba(13, 110, 253, 1)', 'rgba(13, 110, 253, 0.15)'),
             lineDataset(labelHandicap, 'rgba(25, 135, 84, 1)', 'rgba(25, 135, 84, 0.15)'),
             lineDataset(labelEclectic, 'rgba(111, 66, 193, 1)', 'rgba(111, 66, 193, 0.15)'),
-            lineDataset(labelConsistency, 'rgba(13, 202, 240, 1)', 'rgba(13, 202, 240, 0.15)')
+            lineDataset(labelConsistency, 'rgba(13, 202, 240, 1)', 'rgba(13, 202, 240, 0.15)'),
+            lineDataset(labelPlayedRounds, 'rgba(253, 126, 20, 1)', 'rgba(253, 126, 20, 0.15)')
         ];
     }
 
@@ -118,6 +120,7 @@
         chart.data.datasets[3].data = data.handicap || [];
         chart.data.datasets[4].data = data.eclectic || [];
         chart.data.datasets[5].data = data.consistency || [];
+        chart.data.datasets[6].data = data.playedRounds || [];
         chart.update();
     }
 

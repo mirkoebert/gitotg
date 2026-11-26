@@ -4,6 +4,8 @@ import com.mirkoebert.golfmetric.consistency.ConsistencyService;
 import com.mirkoebert.golfmetric.eclectic.EclecticService;
 import com.mirkoebert.handicap.HcpRepository;
 import com.mirkoebert.handicap.HcpScoreEntity;
+import com.mirkoebert.playedrounds.PlayedRoundEntity;
+import com.mirkoebert.playedrounds.PlayedRoundRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
@@ -27,32 +29,40 @@ class GMetricMonthAggregator {
         private final ConsistencyService consistencyService;
         private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("MM-yyyy");
         private final DateTimeFormatter fmtYear = DateTimeFormatter.ofPattern("yyyy");
+        private final PlayedRoundRepository playedRoundRepository;
 
         /**
          * Builds chart series for the given timeframe. {@link GMetricRange#LAST_YEAR} and
          * {@link GMetricRange#LAST_TWO_YEARS} are monthly. {@link GMetricRange#ALL} is yearly.
          */
         public @NonNull GMetricChartDataDto getMetricsForRange(@NonNull final GMetricRange range, final String userId) {
+                log.info("getMetricsForRange range={} user={}", range, userId);
+                final List<PlayedRoundEntity> rounds = playedRoundRepository.findByUserId(userId);
                 return switch (range) {
-                        case ALL -> chartForAll(userId);
-                        case LAST_YEAR, LAST_TWO_YEARS -> chartForLastMonths(userId, range.months());
+                        case ALL -> chartForAll(userId, rounds);
+                        case LAST_YEAR, LAST_TWO_YEARS -> chartForLastMonths(userId, range.months(), rounds);
                 };
         }
 
-        private @NonNull GMetricChartDataDto chartForLastMonths(@NonNull final String userId, final int months) {
+        private @NonNull GMetricChartDataDto chartForLastMonths(
+                        @NonNull final String userId,
+                        final int months,
+                        final List<PlayedRoundEntity> rounds
+        ) {
                 final YearMonth end = YearMonth.now();
                 final YearMonth start = end.minusMonths(months - 1L);
                 // Keep a fixed month window so switching ranges is visible.
-                return buildMonthlyChartData(userId, start, end);
+                return buildMonthlyChartData(userId, start, end, rounds);
         }
 
-        private GMetricChartDataDto chartForAll(@NonNull final String userId) {
+        private GMetricChartDataDto chartForAll(@NonNull final String userId, final List<PlayedRoundEntity> rounds) {
                 final List<GMetricEntity> all = repo.findByUserId(userId);
                 final List<HcpScoreEntity> handicaps = hcpRepository.findByUserId(userId);
-                final LocalDate earliest = earliestDate(all, handicaps);
+                final LocalDate earliest = earliestDate(all, handicaps, rounds);
                 if (earliest == null) {
                         log.info("No metrics found for user {}", userId);
                         return new GMetricChartDataDto(
+                                        List.of(),
                                         List.of(),
                                         List.of(),
                                         List.of(),
@@ -64,14 +74,21 @@ class GMetricMonthAggregator {
                 }
                 final Year start = Year.from(earliest);
                 final Year end = Year.now();
-                return buildYearlyChartData(userId, start, end);
+                return buildYearlyChartData(userId, start, end, rounds);
         }
 
-        private LocalDate earliestDate(final List<GMetricEntity> metrics, final List<HcpScoreEntity> handicaps) {
+        private LocalDate earliestDate(
+                        final List<GMetricEntity> metrics,
+                        final List<HcpScoreEntity> handicaps,
+                        final List<PlayedRoundEntity> rounds
+        ) {
                 return Stream
                         .concat(
-                                        metrics.stream().map(GMetricEntity::getDate),
-                                        handicaps.stream().map(HcpScoreEntity::getDate)
+                                        Stream.concat(
+                                                        metrics.stream().map(GMetricEntity::getDate),
+                                                        handicaps.stream().map(HcpScoreEntity::getDate)
+                                        ),
+                                        rounds.stream().map(PlayedRoundEntity::getDate)
                         )
                         .filter(Objects::nonNull)
                         .min(LocalDate::compareTo)
@@ -81,16 +98,17 @@ class GMetricMonthAggregator {
         private @NonNull GMetricChartDataDto buildMonthlyChartData(
                         final String userId,
                         final YearMonth start,
-                        final YearMonth end
+                        final YearMonth end,
+                        final List<PlayedRoundEntity> rounds
         ) {
                 final Map<GMetricType, Map<YearMonth, Double>> byType = new EnumMap<>(GMetricType.class);
                 for (GMetricType type : GMetricType.values()) {
                         byType.put(type, monthlyAveragesFrom(userId, type, start));
                 }
                 final Map<YearMonth, Double> handicapByMonth = handicapByMonth(userId, start);
-                final Map<YearMonth, Double> eclecticByMonth = eclecticService.getEclecticByMonth(userId, start, end);
-                final Map<YearMonth, Double> consistencyByMonth =
-                                consistencyService.getConsistencyByMonth(userId, start, end);
+                final Map<YearMonth, Integer> eclecticByMonth = eclecticService.getEclecticByMonth(userId, start, end);
+                final Map<YearMonth, Double> consistencyByMonth = consistencyService.getConsistencyByMonth(userId, start, end);
+                final Map<YearMonth, Integer> roundsByMonth = playedRoundsByMonth(rounds, start, end);
 
                 final int months = (int) ChronoUnit.MONTHS.between(start, end) + 1;
                 final List<String> labels = new ArrayList<>(months);
@@ -98,8 +116,9 @@ class GMetricMonthAggregator {
                 final List<Double> doubleBogey = new ArrayList<>(months);
                 final List<Double> bogey = new ArrayList<>(months);
                 final List<Double> handicap = new ArrayList<>(months);
-                final List<Double> eclectic = new ArrayList<>(months);
+                final List<Integer> eclectic = new ArrayList<>(months);
                 final List<Double> consistency = new ArrayList<>(months);
+                final List<Integer> playedRounds = new ArrayList<>(months);
 
                 YearMonth cursor = start;
                 for (int i = 0; i < months; i++) {
@@ -108,23 +127,52 @@ class GMetricMonthAggregator {
                         doubleBogey.add(oneDecimal(byType.get(GMetricType.DOUBLE_BOGEY_PLUS).get(cursor)));
                         bogey.add(oneDecimal(byType.get(GMetricType.BOGEY_PLUS).get(cursor)));
                         handicap.add(oneDecimal(handicapByMonth.get(cursor)));
-                        eclectic.add(oneDecimal(eclecticByMonth.get(cursor)));
+                        eclectic.add(eclecticByMonth.get(cursor));
                         consistency.add(oneDecimal(consistencyByMonth.get(cursor)));
+                        playedRounds.add(roundsByMonth.get(cursor));
                         cursor = cursor.plusMonths(1);
                 }
+                fillNullValuesBetweenWith0(playedRounds);
 
                 log.debug("Chart for user {} months={} labels={}", userId, labels.size(), labels);
-                return new GMetricChartDataDto(labels, lostBalls, doubleBogey, bogey, handicap, eclectic, consistency);
+                return new GMetricChartDataDto(
+                                labels,
+                                lostBalls,
+                                doubleBogey,
+                                bogey,
+                                handicap,
+                                eclectic,
+                                consistency,
+                                playedRounds
+                );
         }
 
-        private @NonNull GMetricChartDataDto buildYearlyChartData(final String userId, final Year start, final Year end) {
+    private void fillNullValuesBetweenWith0(List<Integer> playedRounds) {
+                boolean afterFirstNonNullValue = false;
+                for(int i = 0; i < playedRounds.size(); i++){
+                        if (playedRounds.get(i) != null){
+                                afterFirstNonNullValue = true;
+                        }
+                        if (afterFirstNonNullValue && (playedRounds.get(i) == null)){
+                                playedRounds.set(i, 0);
+                        }
+                }
+    }
+
+    private @NonNull GMetricChartDataDto buildYearlyChartData(
+                        final String userId,
+                        final Year start,
+                        final Year end,
+                        final List<PlayedRoundEntity> rounds
+        ) {
                 final Map<GMetricType, Map<Year, Double>> byType = new EnumMap<>(GMetricType.class);
                 for (GMetricType type : GMetricType.values()) {
                         byType.put(type, yearlyAveragesFrom(userId, type, start));
                 }
                 final Map<Year, Double> handicapByYear = handicapByYear(userId, start);
-                final Map<Year, Double> eclecticByYear = eclecticService.getEclecticByYear(userId, start, end);
+                final Map<Year, Integer> eclecticByYear = eclecticService.getEclecticByYear(userId, start, end);
                 final Map<Year, Double> consistencyByYear = consistencyService.getConsistencyByYear(userId, start, end);
+                final Map<Year, Integer> roundsByYear = playedRoundsByYear(rounds, start, end);
 
                 final int years = (int) ChronoUnit.YEARS.between(start, end) + 1;
                 final List<String> labels = new ArrayList<>(years);
@@ -132,8 +180,9 @@ class GMetricMonthAggregator {
                 final List<Double> doubleBogey = new ArrayList<>(years);
                 final List<Double> bogey = new ArrayList<>(years);
                 final List<Double> handicap = new ArrayList<>(years);
-                final List<Double> eclectic = new ArrayList<>(years);
+                final List<Integer> eclectic = new ArrayList<>(years);
                 final List<Double> consistency = new ArrayList<>(years);
+                final List<Integer> playedRounds = new ArrayList<>(years);
 
                 Year cursor = start;
                 for (int i = 0; i < years; i++) {
@@ -142,15 +191,63 @@ class GMetricMonthAggregator {
                         doubleBogey.add(oneDecimal(byType.get(GMetricType.DOUBLE_BOGEY_PLUS).get(cursor)));
                         bogey.add(oneDecimal(byType.get(GMetricType.BOGEY_PLUS).get(cursor)));
                         handicap.add(oneDecimal(handicapByYear.get(cursor)));
-                        eclectic.add(oneDecimal(eclecticByYear.get(cursor)));
+                        eclectic.add(eclecticByYear.get(cursor));
                         consistency.add(oneDecimal(consistencyByYear.get(cursor)));
+                        playedRounds.add(roundsByYear.get(cursor));
                         cursor = cursor.plusYears(1);
                 }
 
-                trimLeadingEmptyTimeBuckets(labels, lostBalls, doubleBogey, bogey, handicap, eclectic, consistency);
+                fillNullValuesBetweenWith0(playedRounds);
+                trimLeadingEmptyTimeBuckets(
+                                labels,
+                                lostBalls,
+                                doubleBogey,
+                                bogey,
+                                handicap,
+                                eclectic,
+                                consistency,
+                                playedRounds
+                );
 
                 log.debug("Chart for user {} years={} labels={}", userId, labels.size(), labels);
-                return new GMetricChartDataDto(labels, lostBalls, doubleBogey, bogey, handicap, eclectic, consistency);
+                return new GMetricChartDataDto(
+                                labels,
+                                lostBalls,
+                                doubleBogey,
+                                bogey,
+                                handicap,
+                                eclectic,
+                                consistency,
+                                playedRounds
+                );
+        }
+
+        private Map<YearMonth, Integer> playedRoundsByMonth(
+                        final List<PlayedRoundEntity> rounds,
+                        final YearMonth start,
+                        final YearMonth end
+        ) {
+                return rounds
+                        .stream()
+                        .map(PlayedRoundEntity::getDate)
+                        .filter(Objects::nonNull)
+                        .map(YearMonth::from)
+                        .filter(month -> !month.isBefore(start) && !month.isAfter(end))
+                        .collect(Collectors.groupingBy(month -> month, Collectors.summingInt(_ -> 1)));
+        }
+
+        private Map<Year, Integer> playedRoundsByYear(
+                        final List<PlayedRoundEntity> rounds,
+                        final Year start,
+                        final Year end
+        ) {
+                return rounds
+                        .stream()
+                        .map(PlayedRoundEntity::getDate)
+                        .filter(Objects::nonNull)
+                        .map(Year::from)
+                        .filter(year -> !year.isBefore(start) && !year.isAfter(end))
+                        .collect(Collectors.groupingBy(year -> year, Collectors.summingInt(_ -> 1)));
         }
 
         private Map<YearMonth, Double> monthlyAveragesFrom(
@@ -218,8 +315,9 @@ class GMetricMonthAggregator {
                         List<Double> doubleBogey,
                         List<Double> bogey,
                         List<Double> handicap,
-                        List<Double> eclectic,
-                        List<Double> consistency
+                        List<Integer> eclectic,
+                        List<Double> consistency,
+                        List<Integer> playedRounds
         ) {
                 while (!labels.isEmpty()
                                 && lostBalls.getFirst() == null
@@ -227,7 +325,8 @@ class GMetricMonthAggregator {
                                 && bogey.getFirst() == null
                                 && handicap.getFirst() == null
                                 && eclectic.getFirst() == null
-                                && consistency.getFirst() == null) {
+                                && consistency.getFirst() == null
+                                && playedRounds.getFirst() == null) {
                         log.debug("Remove empty time bucket: {}", labels);
                         labels.removeFirst();
                         lostBalls.removeFirst();
@@ -236,6 +335,7 @@ class GMetricMonthAggregator {
                         handicap.removeFirst();
                         eclectic.removeFirst();
                         consistency.removeFirst();
+                        playedRounds.removeFirst();
                 }
         }
 }
